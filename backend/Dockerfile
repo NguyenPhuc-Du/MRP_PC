@@ -4,11 +4,9 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY package.json package-lock.json* ./
-RUN npm install
-
-COPY prisma ./prisma
-RUN npx prisma generate
+RUN npm install --ignore-scripts
 
 COPY . .
+RUN npx prisma generate
 EXPOSE 3000
 CMD ["npm", "run", "dev"]

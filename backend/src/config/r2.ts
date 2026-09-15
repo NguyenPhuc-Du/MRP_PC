@@ -69,5 +69,5 @@ export async function listComponentObjects(categoryFolder?: string) {
 
   return (result.Contents ?? [])
     .map((item) => item.Key)
-    .filter((key): key is string => Boolean(key) && !key.endsWith("/"));
+    .filter((key): key is string => typeof key === "string" && !key.endsWith("/"));
 }
