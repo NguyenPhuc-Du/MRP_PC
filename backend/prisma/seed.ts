@@ -45,11 +45,13 @@ async function main() {
   const categoryNames = [
     { name: "CPU", description: "Bộ vi xử lý" },
     { name: "Mainboard", description: "Bo mạch chủ" },
-    { name: "RAM", description: "Bộ nhớ trong" },
-    { name: "VGA", description: "Card đồ họa" },
+    { name: "Ram", description: "Bộ nhớ trong" },
+    { name: "GPU", description: "Card đồ họa" },
     { name: "PSU", description: "Nguồn máy tính" },
-    { name: "Storage", description: "Ổ cứng HDD/SSD" },
+    { name: "SSD", description: "Ổ cứng SSD" },
+    { name: "HDD", description: "Ổ cứng HDD" },
     { name: "Case", description: "Vỏ case" },
+    { name: "Fan", description: "Quạt tản nhiệt" },
   ];
 
   const categories = new Map<string, number>();
@@ -63,7 +65,7 @@ async function main() {
   }
 
   const cpuId = categories.get("CPU")!;
-  const ramId = categories.get("RAM")!;
+  const ramId = categories.get("Ram")!;
   const psuId = categories.get("PSU")!;
 
   const socketAttr = await prisma.attributeDefinition.upsert({

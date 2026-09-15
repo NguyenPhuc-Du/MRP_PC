@@ -104,6 +104,7 @@ model Component {
   unit               String?         @db.VarChar(20)
   unitPrice          Decimal         @map("unit_price") @db.Decimal(12, 2)
   minStockThreshold  Int             @default(5) @map("min_stock_threshold")
+  imageUrl           String?         @map("image_url") @db.VarChar(500)
   status             ComponentStatus @default(active)
   createdAt          DateTime        @default(now()) @map("created_at")
 
