@@ -1,0 +1,29 @@
+header.topbar
+    .topbar-left
+        .brand
+            .brand-logo N
+            div
+                .brand-name Northline PC
+                .brand-sub ERP · Kho · Sản xuất
+
+        .topbar-breadcrumb.d-none.d-lg-block
+            | Northline PC /
+            strong  #{pageTitle || 'Dashboard'}
+
+    .topbar-center
+        .input-group.topbar-search-wrap
+            span.input-group-text
+                i.bi.bi-search
+            input.form-control.topbar-search(type="text" placeholder="Tìm linh kiện, phiếu, BOM...")
+
+    .topbar-right
+        button.topbar-icon-btn(type="button")
+            i.bi.bi-bell
+            span.dot
+
+        .topbar-user
+            .topbar-user-avatar LH
+            div.d-none.d-md-block
+                .topbar-user-name Lê Hoàng
+                .topbar-user-role Quản trị viên
+            i.bi.bi-chevron-down.text-muted.small
