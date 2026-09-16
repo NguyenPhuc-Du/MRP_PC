@@ -4,7 +4,7 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY package.json package-lock.json* ./
-RUN npm install --ignore-scripts
+RUN npm install --ignore-scripts && npm rebuild esbuild
 
 COPY . .
 RUN npx prisma generate
