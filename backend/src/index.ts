@@ -6,6 +6,8 @@ import methodOverride from "method-override";
 import adminRoutes from "./routes/index.route";
 import { systemConfig } from "./config/system";
 
+import apiRoutes from "./api/api.routes";
+
 const startServer = async () => {
   const app: Express = express();
   const port: number = Number(process.env.PORT) || 3000;
@@ -17,6 +19,9 @@ const startServer = async () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(methodOverride("_method"));
+
+  // API routes for app
+  app.use("/api", apiRoutes);
 
   app.locals.prefixAdmin = systemConfig.prefixAdmin;
 
