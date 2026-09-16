@@ -1,4 +1,118 @@
 extends ../../layouts/admin-layout.pug
 
 block main
-    h1 HIHI
+    .page-wrapper
+    //- Tiêu đề trang
+    .d-flex.justify-content-between.align-items-start.mb-4
+      div
+        .text-primary-custom.font-weight-bold.small.mb-1.text-uppercase DANH MỤC
+        h4.fw-bold.mb-1 Quản lý linh kiện
+        .text-secondary.small 1264 linh kiện thuộc kho cơ sở
+      .d-flex.gap-3
+        button.btn.btn-light-custom.d-flex.align-items-center.gap-2.button
+          i.bi.bi-box-arrow-in-down
+          | Import
+
+    //- Khung chứa bảng và bộ lọc
+    .card-custom
+      //- Thanh tìm kiếm và công cụ
+      .d-flex.gap-3.mb-4
+        .input-group.flex-grow-1.search-wrapper
+          span.input-group-text.border-0.bg-transparent.text-muted
+            i.bi.bi-search
+          input.form-control.border-0.bg-transparent(type="text", placeholder="Tìm kiếm theo mã hoặc tên...")
+        
+        button.btn.btn-light-custom.d-flex.align-items-center.gap-2
+          i.bi.bi-funnel
+          | Bộ lọc
+        button.btn.btn-light-custom
+          i.bi.bi-layout-sidebar
+        button.btn.btn-light-custom.d-flex.align-items-center.gap-2
+          i.bi.bi-download
+          | Xuất
+        button.btn.bg-primary-custom.d-flex.align-items-center.gap-2
+          i.bi.bi-plus-lg
+          | Thêm linh kiện
+
+      //- Bảng dữ liệu
+      .table-responsive
+        table.table.table-borderless.mb-0
+          thead
+            tr
+              th MÃ LINH KIỆN
+              th TÊN LINH KIỆN
+              th LOẠI
+              th THƯƠNG HIỆU
+              th NHÀ CUNG CẤP
+              th ĐVT
+              th TỒN KHO
+              th TỐI THIỂU
+              th GIÁ NHẬP
+              th TRẠNG THÁI
+              th CẬP NHẬT
+          tbody
+            tr
+              td.text-primary-custom CPU-12-12700K
+              td.fw-bold Intel Core i7-12700K
+              td CPU
+              td Intel
+              td Digiworld
+              td Cái
+              td.fw-bold 125
+              td 50
+              td 12,490,000 đ
+              td
+                span.status-badge.status-available
+                  span.status-dot.dot-available
+                  | Còn hàng
+              td 15/05/2024
+            
+            tr
+              td.text-primary-custom GPU-RTX4070-S
+              td.fw-bold ASUS Dual RTX 4070 Super
+              td GPU
+              td ASUS
+              td Yến Sào 24
+              td Cái
+              td.fw-bold 14
+              td 20
+              td 16,490,000 đ
+              td
+                span.status-badge.status-low
+                  span.status-dot.dot-low
+                  | Sắp hết
+              td 15/05/2024
+              
+            tr
+              td.text-primary-custom RAM-DDR5-32G
+              td.fw-bold Kingston Fury DDR5 32GB
+              td RAM
+              td Kingston
+              td Synnex FPT
+              td Bộ
+              td.fw-bold 250
+              td 50
+              td 2,450,000 đ
+              td
+                span.status-badge.status-available
+                  span.status-dot.dot-available
+                  | Còn hàng
+              td 15/05/2024
+
+      //- Phân trang
+      .d-flex.justify-content-between.align-items-center.mt-4
+        .text-secondary.small Hiển thị 1-6 trong 1,264
+        nav
+          ul.pagination.pagination-custom.mb-0
+            li.page-item
+              a.page-link(href="#")
+                i.bi.bi-chevron-left
+            li.page-item.active
+              a.page-link(href="#") 1
+            li.page-item
+              a.page-link(href="#") 2
+            li.page-item
+              a.page-link(href="#") 3
+            li.page-item
+              a.page-link(href="#")
+                i.bi.bi-chevron-right
