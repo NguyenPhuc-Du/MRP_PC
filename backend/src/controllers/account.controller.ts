@@ -43,3 +43,26 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
         res.redirect(`${systemConfig.prefixAdmin}/accounts/create`);
     }
 }
+
+export const edit = async (req: Request, res: Response): Promise<void> => {
+    const accountId: number = Number(req.params.accountId);
+
+    try {
+        const account = await accountService.getAccountById(accountId);
+
+        if(!account){
+            req.flash("error", "ID không hợp lệ");
+            res.redirect(`${systemConfig.prefixAdmin}/accounts/`);
+            return;
+        }
+
+        res.render("pages/accounts/edit", {
+            pageTitle: "Chỉnh sửa tài khoản",
+            account
+        })
+    } catch (error) {
+        console.error(error);
+        req.flash("error", "Không tải được tài khoản");
+        res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+    }
+}

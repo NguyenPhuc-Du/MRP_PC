@@ -1,6 +1,7 @@
 import { prisma } from "../config/database";
 import bcrypt from "bcrypt";
 import { CreateAccountDto } from "../dtos/account.dto";
+import { Account } from "../generated/prisma";
 
 
 export const createAccount = async (createAccountDto: CreateAccountDto): Promise<void> => {
@@ -27,4 +28,14 @@ export const createAccount = async (createAccountDto: CreateAccountDto): Promise
             status
         }
     });
+}
+
+export const getAccountById = async (accountId: number): Promise<Account | null> => {
+    const account = await prisma.account.findUnique({
+        where: { 
+            id: accountId 
+        }
+    });
+
+    return account;
 }

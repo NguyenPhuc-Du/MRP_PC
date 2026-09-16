@@ -8,4 +8,6 @@ router.get("/create", accountController.create);
 
 router.post("/create", accountValidate.validateCreateAccount, accountController.createPost);
 
+router.get("/edit/:accountId", accountController.edit);
+
 export const accountRoutes = router;

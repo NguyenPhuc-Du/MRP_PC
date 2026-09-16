@@ -10,14 +10,14 @@ block main
     .page-head
         div
             .page-eyebrow Tài khoản
-            h2.page-title Tạo tài khoản mới
-            p.page-desc Thêm người dùng vào hệ thống và phân quyền truy cập.
+            h2.page-title Chỉnh sửa tài khoản
+            p.page-desc Cập nhật thông tin và phân quyền của người dùng.
         .page-actions
             a.btn-soft(href="/admin/accounts")
                 i.bi.bi-arrow-left
                 span Quay lại
 
-    form#form-create-account(action="/admin/accounts/create" method="POST")
+    form#form-edit-account(action=`/admin/accounts/edit/${account.id}?_method=PATCH` method="POST")
         .row.g-4
             .col-lg-8
                 //- --- Thông tin đăng nhập ---
@@ -39,7 +39,7 @@ block main
                                 name="username"
                                 maxlength="50"
                                 placeholder="vd: lehoang"
-                                value=oldInput.username
+                                value=account.username
                                 required
                             )
                             .form-hint Tối đa 50 ký tự, không trùng với tài khoản khác.
@@ -51,36 +51,31 @@ block main
                                 name="email"
                                 maxlength="100"
                                 placeholder="vd: lehoang@northline.vn"
-                                value=oldInput.email
+                                value=account.email
                             )
                             .form-hint Dùng để khôi phục mật khẩu và nhận thông báo.
 
                         .col-md-6
-                            label.form-label-custom(for="password")
-                                | Mật khẩu
-                                span.required *
+                            label.form-label-custom(for="password") Mật khẩu
                             .password-wrap
                                 input#password.form-control.input-custom(
                                     type="password"
                                     name="password"
                                     minlength="6"
-                                    placeholder="Ít nhất 6 ký tự"
-                                    required
+                                    placeholder="Để trống nếu không đổi"
                                 )
                                 button.password-toggle(type="button" data-target="#password")
                                     i.bi.bi-eye
+                            .form-hint Chỉ nhập nếu muốn đặt mật khẩu mới.
 
                         .col-md-6
-                            label.form-label-custom(for="confirmPassword")
-                                | Xác nhận mật khẩu
-                                span.required *
+                            label.form-label-custom(for="confirmPassword") Xác nhận mật khẩu
                             .password-wrap
                                 input#confirmPassword.form-control.input-custom(
                                     type="password"
                                     name="confirmPassword"
                                     minlength="6"
-                                    placeholder="Nhập lại mật khẩu"
-                                    required
+                                    placeholder="Nhập lại mật khẩu mới"
                                 )
                                 button.password-toggle(type="button" data-target="#confirmPassword")
                                     i.bi.bi-eye
@@ -102,7 +97,7 @@ block main
                                 name="fullName"
                                 maxlength="100"
                                 placeholder="vd: Lê Hoàng"
-                                value=oldInput.fullName
+                                value=account.fullName
                             )
 
                         .col-md-6
@@ -112,7 +107,7 @@ block main
                                 name="phone"
                                 maxlength="20"
                                 placeholder="vd: 0901 234 567"
-                                value=oldInput.phone
+                                value=account.phone
                             )
 
             //- ===== Cột phải: phân quyền =====
@@ -128,21 +123,21 @@ block main
 
                     .role-list
                         label.role-option
-                            input(type="radio" name="role" value="admin" checked=(oldInput.role === "admin") required)
+                            input(type="radio" name="role" value="admin" checked=(account.role === "admin") required)
                             span.role-body
                                 span.role-name Quản trị viên
                                 span.role-desc Toàn quyền trên hệ thống.
                             i.bi.bi-check-circle-fill.role-check
 
                         label.role-option
-                            input(type="radio" name="role" value="warehouse_manager" checked=(oldInput.role ? oldInput.role === "warehouse_manager" : true))
+                            input(type="radio" name="role" value="warehouse_manager" checked=(account.role === "warehouse_manager"))
                             span.role-body
                                 span.role-name Quản lý kho
                                 span.role-desc Duyệt phiếu nhập, xuất và tồn kho.
                             i.bi.bi-check-circle-fill.role-check
 
                         label.role-option
-                            input(type="radio" name="role" value="staff" checked=(oldInput.role === "staff"))
+                            input(type="radio" name="role" value="staff" checked=(account.role === "staff"))
                             span.role-body
                                 span.role-name Nhân viên
                                 span.role-desc Tạo phiếu và xem dữ liệu được giao.
@@ -158,33 +153,21 @@ block main
                             .form-card-sub Tài khoản bị khoá không thể đăng nhập.
 
                     select#status.form-select.input-custom(name="status")
-                        option(value="active" selected=(oldInput.status !== "locked")) Đang hoạt động
-                        option(value="locked" selected=(oldInput.status === "locked")) Đã khoá
+                        option(value="active" selected=(account.status === "active")) Đang hoạt động
+                        option(value="locked" selected=(account.status === "locked")) Đã khoá
 
                     .status-note
                         i.bi.bi-info-circle
-                        span Mặc định tài khoản mới ở trạng thái hoạt động.
+                        span Khoá tài khoản sẽ chặn đăng nhập ngay lập tức.
 
                 //- --- Nút hành động ---
                 .form-actions
                     button.btn-gradient(type="submit")
                         i.bi.bi-check-lg
-                        span Tạo tài khoản
-                    button.btn-soft.w-100(type="reset")
-                        i.bi.bi-arrow-counterclockwise
-                        span Nhập lại
-
-block script
-    script.
-        document.querySelectorAll('.password-toggle').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var input = document.querySelector(btn.dataset.target);
-                var icon = btn.querySelector('i');
-                var isHidden = input.type === 'password';
-                input.type = isHidden ? 'text' : 'password';
-                icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
-            });
-        });
+                        span Lưu thay đổi
+                    a.btn-soft.w-100(href="/admin/accounts")
+                        i.bi.bi-x-lg
+                        span Huỷ
 
 block script
     script(src="/js/account.js")
