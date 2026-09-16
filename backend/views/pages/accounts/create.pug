@@ -1,0 +1,188 @@
+extends ../../layouts/admin-layout.pug
+
+block main
+    link(rel="stylesheet" href="/css/account.css")
+
+    .page-head
+        div
+            .page-eyebrow Tài khoản
+            h2.page-title Tạo tài khoản mới
+            p.page-desc Thêm người dùng vào hệ thống và phân quyền truy cập.
+        .page-actions
+            a.btn-soft(href="/admin/accounts")
+                i.bi.bi-arrow-left
+                span Quay lại
+
+    form#form-create-account(action="/admin/accounts/create" method="POST")
+        .row.g-4
+            .col-lg-8
+                //- --- Thông tin đăng nhập ---
+                .form-card
+                    .form-card-head
+                        .form-card-icon
+                            i.bi.bi-person-badge
+                        div
+                            .form-card-title Thông tin đăng nhập
+                            .form-card-sub Tên đăng nhập và mật khẩu truy cập hệ thống.
+
+                    .row.g-3
+                        .col-md-6
+                            label.form-label-custom(for="username")
+                                | Tên đăng nhập
+                                span.required *
+                            input#username.form-control.input-custom(
+                                type="text"
+                                name="username"
+                                maxlength="50"
+                                placeholder="vd: lehoang"
+                                required
+                            )
+                            .form-hint Tối đa 50 ký tự, không trùng với tài khoản khác.
+
+                        .col-md-6
+                            label.form-label-custom(for="email") Email
+                            input#email.form-control.input-custom(
+                                type="email"
+                                name="email"
+                                maxlength="100"
+                                placeholder="vd: lehoang@northline.vn"
+                            )
+                            .form-hint Dùng để khôi phục mật khẩu và nhận thông báo.
+
+                        .col-md-6
+                            label.form-label-custom(for="password")
+                                | Mật khẩu
+                                span.required *
+                            .password-wrap
+                                input#password.form-control.input-custom(
+                                    type="password"
+                                    name="password"
+                                    minlength="6"
+                                    placeholder="Ít nhất 6 ký tự"
+                                    required
+                                )
+                                button.password-toggle(type="button" data-target="#password")
+                                    i.bi.bi-eye
+
+                        .col-md-6
+                            label.form-label-custom(for="confirmPassword")
+                                | Xác nhận mật khẩu
+                                span.required *
+                            .password-wrap
+                                input#confirmPassword.form-control.input-custom(
+                                    type="password"
+                                    name="confirmPassword"
+                                    minlength="6"
+                                    placeholder="Nhập lại mật khẩu"
+                                    required
+                                )
+                                button.password-toggle(type="button" data-target="#confirmPassword")
+                                    i.bi.bi-eye
+
+                //- --- Thông tin cá nhân ---
+                .form-card
+                    .form-card-head
+                        .form-card-icon
+                            i.bi.bi-person-lines-fill
+                        div
+                            .form-card-title Thông tin cá nhân
+                            .form-card-sub Dùng để hiển thị trong hệ thống và liên hệ.
+
+                    .row.g-3
+                        .col-md-6
+                            label.form-label-custom(for="fullName") Họ và tên
+                            input#fullName.form-control.input-custom(
+                                type="text"
+                                name="fullName"
+                                maxlength="100"
+                                placeholder="vd: Lê Hoàng"
+                            )
+
+                        .col-md-6
+                            label.form-label-custom(for="phone") Số điện thoại
+                            input#phone.form-control.input-custom(
+                                type="tel"
+                                name="phone"
+                                maxlength="20"
+                                placeholder="vd: 0901 234 567"
+                            )
+
+            //- ===== Cột phải: phân quyền =====
+            .col-lg-4
+                //- --- Vai trò ---
+                .form-card
+                    .form-card-head
+                        .form-card-icon
+                            i.bi.bi-shield-lock
+                        div
+                            .form-card-title Vai trò
+                            .form-card-sub Quyết định phạm vi thao tác.
+
+                    .role-list
+                        label.role-option
+                            input(type="radio" name="role" value="admin" required)
+                            span.role-body
+                                span.role-name Quản trị viên
+                                span.role-desc Toàn quyền trên hệ thống.
+                            i.bi.bi-check-circle-fill.role-check
+
+                        label.role-option
+                            input(type="radio" name="role" value="warehouse_manager" checked)
+                            span.role-body
+                                span.role-name Quản lý kho
+                                span.role-desc Duyệt phiếu nhập, xuất và tồn kho.
+                            i.bi.bi-check-circle-fill.role-check
+
+                        label.role-option
+                            input(type="radio" name="role" value="staff")
+                            span.role-body
+                                span.role-name Nhân viên
+                                span.role-desc Tạo phiếu và xem dữ liệu được giao.
+                            i.bi.bi-check-circle-fill.role-check
+
+                //- --- Trạng thái ---
+                .form-card
+                    .form-card-head
+                        .form-card-icon
+                            i.bi.bi-toggle-on
+                        div
+                            .form-card-title Trạng thái
+                            .form-card-sub Tài khoản bị khoá không thể đăng nhập.
+
+                    select#status.form-select.input-custom(name="status")
+                        option(value="active" selected) Đang hoạt động
+                        option(value="locked") Đã khoá
+
+                    .status-note
+                        i.bi.bi-info-circle
+                        span Mặc định tài khoản mới ở trạng thái hoạt động.
+
+                //- --- Nút hành động ---
+                .form-actions
+                    button.btn-gradient(type="submit")
+                        i.bi.bi-check-lg
+                        span Tạo tài khoản
+                    button.btn-soft.w-100(type="reset")
+                        i.bi.bi-arrow-counterclockwise
+                        span Nhập lại
+
+block script
+    script.
+        document.querySelectorAll('.password-toggle').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.querySelector(btn.dataset.target);
+                var icon = btn.querySelector('i');
+                var isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+            });
+        });
+
+        document.getElementById('form-create-account').addEventListener('submit', function (e) {
+            var pass = document.getElementById('password').value;
+            var confirm = document.getElementById('confirmPassword').value;
+            if (pass !== confirm) {
+                e.preventDefault();
+                alert('Mật khẩu xác nhận không khớp!');
+            }
+        });

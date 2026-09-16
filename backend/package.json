@@ -19,6 +19,7 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
     "method-override": "^3.0.0",
     "nodemon": "^3.1.14",
     "pug": "^3.0.4"
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/method-override": "^3.0.0",
     "@types/node": "^20.19.13",
     "prisma": "^6.16.1",
