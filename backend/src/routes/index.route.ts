@@ -2,6 +2,8 @@ import { Express } from "express";
 import { systemConfig } from "../config/system";
 import { componentRoutes } from "./components.route";
 import { accountRoutes } from "./account.route";
+import { importOrderRoutes } from "./import_orders.route";
+import { exportOrderRoutes } from "./export_orders.route";
 
 const adminRoutes = (app: Express): void =>{
     const PATH_ADMIN = `${systemConfig.prefixAdmin}`;
@@ -9,6 +11,10 @@ const adminRoutes = (app: Express): void =>{
     app.use(`${PATH_ADMIN}/components`, componentRoutes);
 
     app.use(`${PATH_ADMIN}/accounts`, accountRoutes);
+
+    app.use(`${PATH_ADMIN}/phieu-nhap`, importOrderRoutes);
+
+    app.use(`${PATH_ADMIN}/phieu-xuat`, exportOrderRoutes);
 
 }
 export default adminRoutes;

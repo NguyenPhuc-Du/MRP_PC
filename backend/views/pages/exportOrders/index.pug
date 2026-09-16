@@ -1,0 +1,78 @@
+extends ../../layouts/admin-layout.pug
+
+block main
+    link(rel="stylesheet" href="/css/orders.css")
+
+    .orders-page
+        .orders-head
+            div
+                .orders-eyebrow CHỨNG TỪ KHO
+                h1.orders-title Phiếu xuất
+                p.orders-desc Theo dõi xuất linh kiện và thành phẩm.
+            .orders-head-actions
+                button.btn-export(type="button")
+                    i.bi.bi-download
+                    span Export
+                button.btn-create(type="button")
+                    i.bi.bi-plus-lg
+                    span Tạo phiếu
+
+        .orders-card
+            .orders-toolbar
+                .orders-search
+                    i.bi.bi-search
+                    input(type="text" placeholder="Tìm kiếm theo mã hoặc tên...")
+                .orders-toolbar-actions
+                    button.btn-tool(type="button")
+                        i.bi.bi-funnel
+                        span Bộ lọc
+                    button.btn-icon(type="button")
+                        i.bi.bi-layout-three-columns
+                    button.btn-tool(type="button")
+                        i.bi.bi-download
+                        span Xuất
+
+            .table-responsive
+                table.orders-table
+                    thead
+                        tr
+                            th MÃ PHIẾU
+                            th MỤC ĐÍCH
+                            th NGÀY
+                            th NGƯỜI TẠO
+                            th MẶT HÀNG
+                            th TỔNG GIÁ TRỊ
+                            th TRẠNG THÁI
+                            th
+                    tbody
+                        each order in orders
+                            tr
+                                td
+                                    a.order-code(href="#")= order.code
+                                td= order.partner
+                                td= order.date
+                                td= order.creator
+                                td= order.itemCount
+                                td= order.total
+                                td
+                                    span.status-pill(class=order.statusClass)
+                                        span.status-dot
+                                        | #{order.status}
+                                td
+                                    button.btn-more(type="button")
+                                        i.bi.bi-three-dots
+
+        .process-card
+            .process-title Quy trình xử lý
+            p.process-flow Tạo phiếu — Chờ duyệt — Đã duyệt — Đã xuất — Hoàn tất
+            .process-steps
+                each step, index in processSteps
+                    if index > 0
+                        .process-line(class=step.state === "done" ? "is-done" : "")
+                    .process-step(class=step.state)
+                        if step.state === "done"
+                            .process-dot
+                                i.bi.bi-check-lg
+                        else
+                            .process-dot= step.number
+                        span.process-label= step.label
