@@ -5,3 +5,4 @@ export const index = async (req: Request, res: Response): Promise<void> => {
         pageTitle: "Danh sách linh kiện",
     });
 };
+
