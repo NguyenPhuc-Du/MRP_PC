@@ -333,30 +333,232 @@ a {
   justify-content: center;
   color: var(--brand-from);
 }
-/*component*/
+/* ============ PAGE: QUẢN LÝ LINH KIỆN ============ */
+.comp-page {
+  min-width: 0;
+}
 
-.btn {
-  border-radius: 10px 1% bac;
-  border: 1px solid #bac; /* Màu viền */
-  padding: 8px 16px;
-  white-space: nowrap; /* Ép chữ luôn nằm trên 1 dòng */
-  height: fit-content; /* Giữ chiều cao nút ôm sát nội dung, không bị phình to */
+.comp-eyebrow {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand-from);
+  margin-bottom: 6px;
+}
+
+.comp-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 22px 22px 18px;
+}
+
+.comp-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* background-color: #6d5ce8; */
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
 }
-.search-wrapper {
-  /* Các thuộc tính cũ giữ nguyên */
-  min-width: 250px; /* Đảm bảo thanh tìm kiếm không bị ép quá nhỏ */
+
+.comp-btn-light {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
 }
-.btn-light-custom:hover {
-  background-color: #534be8 !important; /* Đổi sang màu xanh đậm hơn một chút khi hover */
-  border: none !important;
-  color: white !important;
+
+.comp-btn-light:hover {
+  background: var(--hover-bg);
+  border-color: var(--border-color);
+  color: var(--text-main);
 }
-.bg-primary-custom:hover {
-  background-color: #534be8 !important; /* Đổi sang màu xanh đậm hơn một chút khi hover */
-  border: none !important;
-  color: white !important;
+
+.comp-btn-icon {
+  width: 40px;
+  padding: 0;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+.comp-btn-icon:hover {
+  background: var(--hover-bg);
+  color: var(--text-main);
+}
+
+.comp-btn-primary {
+  border: none;
+  background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(109, 92, 232, 0.28);
+}
+
+.comp-btn-primary:hover {
+  filter: brightness(1.05);
+  color: #fff;
+}
+
+.comp-search {
+  min-width: 240px;
+  max-width: 520px;
+  background: var(--hover-bg);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.comp-search .input-group-text,
+.comp-search .form-control {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text-muted);
+}
+
+.comp-search .form-control {
+  color: var(--text-main);
+  font-size: 13.5px;
+}
+
+.comp-search .form-control::placeholder {
+  color: #afb2be;
+}
+
+.comp-table-wrap {
+  overflow-x: auto;
+}
+
+.comp-table {
+  min-width: 1280px;
+  --bs-table-bg: transparent;
+}
+
+.comp-table thead th {
+  padding: 6px 28px 12px 0;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b4b7c4;
+  white-space: nowrap;
+  background: transparent;
+}
+
+.comp-table tbody td {
+  padding: 18px 28px 18px 0;
+  border: none;
+  vertical-align: middle;
+  font-size: 13.5px;
+  background: transparent;
+}
+
+.comp-table tbody tr + tr td {
+  box-shadow: inset 0 1px 0 #f1f2f6;
+}
+
+.comp-code {
+  display: inline-block;
+  max-width: 78px;
+  color: #7c74f0;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.comp-name {
+  display: inline-block;
+  max-width: 168px;
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.comp-muted {
+  color: #6f7383;
+  white-space: nowrap;
+}
+
+.comp-stock {
+  color: var(--text-main);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.comp-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.comp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.comp-status-ok {
+  background: #eefbf3;
+  color: #1f9d57;
+}
+
+.comp-status-ok .comp-dot {
+  background: #22c55e;
+}
+
+.comp-status-low {
+  background: #fff6e8;
+  color: #c47b16;
+}
+
+.comp-status-low .comp-dot {
+  background: #f5a524;
+}
+
+.comp-status-out {
+  background: #feeeee;
+  color: #d64545;
+}
+
+.comp-status-out .comp-dot {
+  background: #ef4444;
+}
+
+.comp-pagination .page-link {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-muted);
+  background: var(--hover-bg);
+  font-size: 13px;
+}
+
+.comp-pagination .page-item.active .page-link {
+  background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+  color: #fff;
+}
+
+.comp-pagination .page-link:hover {
+  background: #ececf6;
+  color: var(--text-main);
 }

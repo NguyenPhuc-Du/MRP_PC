@@ -1,42 +1,37 @@
 extends ../../layouts/admin-layout.pug
 
 block main
-    .page-wrapper
-    //- Tiêu đề trang
+  .comp-page
     .d-flex.justify-content-between.align-items-start.mb-4
       div
-        .text-primary-custom.font-weight-bold.small.mb-1.text-uppercase DANH MỤC
+        .comp-eyebrow DANH MỤC
         h4.fw-bold.mb-1 Quản lý linh kiện
         .text-secondary.small 1264 linh kiện thuộc kho cơ sở
-      .d-flex.gap-3
-        button.btn.btn-light-custom.d-flex.align-items-center.gap-2.button
-          i.bi.bi-box-arrow-in-down
-          | Import
+      button.btn.comp-btn.comp-btn-light
+        i.bi.bi-box-arrow-in-down
+        | Import
 
-    //- Khung chứa bảng và bộ lọc
-    .card-custom
-      //- Thanh tìm kiếm và công cụ
-      .d-flex.gap-3.mb-4
-        .input-group.flex-grow-1.search-wrapper
-          span.input-group-text.border-0.bg-transparent.text-muted
+    .comp-card
+      .d-flex.flex-wrap.align-items-center.gap-2.mb-4
+        .input-group.comp-search.flex-grow-1
+          span.input-group-text
             i.bi.bi-search
-          input.form-control.border-0.bg-transparent(type="text", placeholder="Tìm kiếm theo mã hoặc tên...")
-        
-        button.btn.btn-light-custom.d-flex.align-items-center.gap-2
+          input.form-control(type="text" placeholder="Tìm kiếm theo mã hoặc tên...")
+
+        button.btn.comp-btn.comp-btn-light
           i.bi.bi-funnel
           | Bộ lọc
-        button.btn.btn-light-custom
+        button.btn.comp-btn.comp-btn-icon
           i.bi.bi-layout-sidebar
-        button.btn.btn-light-custom.d-flex.align-items-center.gap-2
+        button.btn.comp-btn.comp-btn-light
           i.bi.bi-download
           | Xuất
-        button.btn.bg-primary-custom.d-flex.align-items-center.gap-2
+        button.btn.comp-btn.comp-btn-primary
           i.bi.bi-plus-lg
           | Thêm linh kiện
 
-      //- Bảng dữ liệu
-      .table-responsive
-        table.table.table-borderless.mb-0
+      .table-responsive.comp-table-wrap
+        table.table.table-borderless.align-middle.mb-0.comp-table
           thead
             tr
               th MÃ LINH KIỆN
@@ -52,58 +47,117 @@ block main
               th CẬP NHẬT
           tbody
             tr
-              td.text-primary-custom CPU-12-12700K
-              td.fw-bold Intel Core i7-12700K
-              td CPU
-              td Intel
-              td Digiworld
-              td Cái
-              td.fw-bold 125
-              td 50
-              td 12,490,000 đ
               td
-                span.status-badge.status-available
-                  span.status-dot.dot-available
+                span.comp-code CPU-I7-14700K
+              td
+                span.comp-name Intel Core i7-14700K
+              td.comp-muted CPU
+              td.comp-muted Intel
+              td.comp-muted Digiworld
+              td.comp-muted Cái
+              td.comp-stock 128
+              td.comp-muted 40
+              td.comp-muted 10,490,000 đ
+              td
+                span.comp-status.comp-status-ok
+                  span.comp-dot
                   | Còn hàng
-              td 15/05/2024
-            
-            tr
-              td.text-primary-custom GPU-RTX4070-S
-              td.fw-bold ASUS Dual RTX 4070 Super
-              td GPU
-              td ASUS
-              td Yến Sào 24
-              td Cái
-              td.fw-bold 14
-              td 20
-              td 16,490,000 đ
-              td
-                span.status-badge.status-low
-                  span.status-dot.dot-low
-                  | Sắp hết
-              td 15/05/2024
-              
-            tr
-              td.text-primary-custom RAM-DDR5-32G
-              td.fw-bold Kingston Fury DDR5 32GB
-              td RAM
-              td Kingston
-              td Synnex FPT
-              td Bộ
-              td.fw-bold 250
-              td 50
-              td 2,450,000 đ
-              td
-                span.status-badge.status-available
-                  span.status-dot.dot-available
-                  | Còn hàng
-              td 15/05/2024
+              td.comp-muted 15/05/2024
 
-      //- Phân trang
+            tr
+              td
+                span.comp-code GPU-RTX4070-S
+              td
+                span.comp-name ASUS Dual RTX 4070 Super
+              td.comp-muted GPU
+              td.comp-muted ASUS
+              td.comp-muted Vĩnh Xuân
+              td.comp-muted Cái
+              td.comp-stock 14
+              td.comp-muted 20
+              td.comp-muted 18,490,000 đ
+              td
+                span.comp-status.comp-status-low
+                  span.comp-dot
+                  | Sắp hết
+              td.comp-muted 15/05/2024
+
+            tr
+              td
+                span.comp-code RAM-DDR5-32G
+              td
+                span.comp-name Kingston Fury DDR5 32GB
+              td.comp-muted RAM
+              td.comp-muted Kingston
+              td.comp-muted Synnex FPT
+              td.comp-muted Bộ
+              td.comp-stock 210
+              td.comp-muted 60
+              td.comp-muted 2,450,000 đ
+              td
+                span.comp-status.comp-status-ok
+                  span.comp-dot
+                  | Còn hàng
+              td.comp-muted 15/05/2024
+
+            tr
+              td
+                span.comp-code SSD-SN770-1TB
+              td
+                span.comp-name WD Black SN770 NVMe 1TB
+              td.comp-muted SSD
+              td.comp-muted Western Digital
+              td.comp-muted Digiworld
+              td.comp-muted Cái
+              td.comp-stock 12
+              td.comp-muted 40
+              td.comp-muted 2,190,000 đ
+              td
+                span.comp-status.comp-status-low
+                  span.comp-dot
+                  | Sắp hết
+              td.comp-muted 15/05/2024
+
+            tr
+              td
+                span.comp-code PSU-RM850X
+              td
+                span.comp-name Corsair RM850x 80+ Gold
+              td.comp-muted PSU
+              td.comp-muted Corsair
+              td.comp-muted KTC
+              td.comp-muted Cái
+              td.comp-stock 0
+              td.comp-muted 25
+              td.comp-muted 3,290,000 đ
+              td
+                span.comp-status.comp-status-out
+                  span.comp-dot
+                  | Hết hàng
+              td.comp-muted 15/05/2024
+
+            tr
+              td
+                span.comp-code MB-Z790-PRO
+              td
+                span.comp-name MSI PRO Z790-P WiFi
+              td.comp-muted Mainboard
+              td.comp-muted MSI
+              td.comp-muted Vĩnh Xuân
+              td.comp-muted Cái
+              td.comp-stock 86
+              td.comp-muted 30
+              td.comp-muted 5,490,000 đ
+              td
+                span.comp-status.comp-status-ok
+                  span.comp-dot
+                  | Còn hàng
+              td.comp-muted 15/05/2024
+
       .d-flex.justify-content-between.align-items-center.mt-4
         .text-secondary.small Hiển thị 1-6 trong 1,264
         nav
-          ul.pagination.pagination-custom.mb-0
+          ul.pagination.comp-pagination.mb-0
             li.page-item
               a.page-link(href="#")
                 i.bi.bi-chevron-left
