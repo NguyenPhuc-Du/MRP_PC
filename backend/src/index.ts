@@ -11,6 +11,7 @@ import session from "express-session";
 import { RedisStore } from "connect-redis";
 import cookieParser from "cookie-parser";
 import { systemConfig } from "./config/system";
+import { formatDate } from "./utils/date.util";
 
 import apiRoutes from "./api/api.routes";
 
@@ -59,6 +60,7 @@ const startServer = async () => {
   app.use("/api", apiRoutes);
 
   app.locals.prefixAdmin = systemConfig.prefixAdmin;
+  app.locals.formatDate = formatDate;
 
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "mrp-pc-backend" });

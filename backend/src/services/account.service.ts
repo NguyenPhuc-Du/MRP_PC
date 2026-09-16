@@ -109,3 +109,7 @@ export const updateAccountById = async (updateAccountDto: UpdateAccountDto, acco
         throw error;
     }
 }
+
+export const getAllAccounts = async (): Promise<Account[]> => {
+    return await prisma.account.findMany();
+};

@@ -17,7 +17,7 @@ block main
                 i.bi.bi-arrow-left
                 span Quay lại
 
-    form#form-edit-account(action=`/admin/accounts/edit/${account.id}?_method=PATCH` method="POST")
+    form#form-edit-account(action=`${prefixAdmin}/accounts/edit/${account.id}?_method=PATCH` method="POST")
         .row.g-4
             .col-lg-8
                 //- --- Thông tin đăng nhập ---

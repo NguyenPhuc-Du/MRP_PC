@@ -1,0 +1,103 @@
+extends ../../layouts/admin-layout.pug
+
+mixin roleBadge(role)
+  case role
+    when 'admin'
+      span.role-badge.role-admin
+        i.bi.bi-shield-fill-check
+        | Admin
+    when 'warehouse_manager'
+      span.role-badge.role-warehouse
+        i.bi.bi-box-seam-fill
+        | Quản lý kho
+    when 'staff'
+      span.role-badge.role-staff
+        i.bi.bi-person-fill
+        | Nhân viên
+
+mixin statusBadge(status)
+  if status === 'active'
+    span.status-badge.status-active
+      span.status-dot
+      | Hoạt động
+  else
+    span.status-badge.status-locked
+      span.status-dot
+      | Đã khóa
+
+block main
+  link(rel="stylesheet" href="/css/account.css")
+  .page-head
+    div
+      .page-eyebrow HỆ THỐNG
+      h1.page-title Quản lý người dùng
+      p.page-desc #{totalAccounts} tài khoản trong hệ thống.
+    .page-actions
+      a.btn-gradient(href="/accounts/create")
+        i.bi.bi-plus-lg
+        | Thêm người dùng
+
+  .form-card.toolbar-card
+    .toolbar-row
+      .search-input-wrap
+        i.bi.bi-search
+        input.input-custom.toolbar-search(type="text" placeholder="Tìm kiếm theo mã hoặc tên...")
+      .toolbar-actions
+        button.btn-soft(type="button")
+          i.bi.bi-funnel
+          | Bộ lọc
+        button.btn-soft.icon-only(type="button" title="Đổi chế độ xem")
+          i.bi.bi-layout-three-columns
+        button.btn-soft(type="button")
+          i.bi.bi-download
+          | Xuất
+
+  .form-card.table-card
+    .table-scroll
+      table.account-table
+        thead
+          tr
+            th NGƯỜI DÙNG
+            th EMAIL
+            th VAI TRÒ
+            th TRẠNG THÁI
+            th ĐĂNG NHẬP CUỐI
+            th.text-end THAO TÁC
+        tbody
+          if accounts && accounts.length
+            each account in accounts
+              tr
+                td
+                  .user-cell
+                    .user-avatar(class=`avatar-${account.role}`)= (account.fullName || account.username).slice(0, 2).toUpperCase()
+                    .user-info
+                      .user-name= account.fullName || account.username
+                      .user-username @#{account.username}
+                td
+                  span.cell-email
+                    i.bi.bi-envelope
+                    | #{account.email || '—'}
+                td
+                  +roleBadge(account.role)
+                td
+                  +statusBadge(account.status)
+                td
+                  span.cell-muted= formatDate(account.updatedAt || account.createdAt)
+                td.text-end
+                  .row-actions
+                    a.row-action-btn.action-view(href=`/accounts/${account.id}` title="Chi tiết")
+                      i.bi.bi-eye
+                    a.row-action-btn.action-edit(href=`/accounts/${account.id}/edit` title="Sửa")
+                      i.bi.bi-pencil
+                    button.row-action-btn.action-delete(
+                      type="button"
+                      title="Xóa"
+                      data-id=account.id
+                      onclick=`confirmDeleteAccount(${account.id})`
+                    )
+                      i.bi.bi-trash
+          else
+            tr
+              td.empty-state(colspan="6")
+                i.bi.bi-inbox
+                p Chưa có tài khoản nào.

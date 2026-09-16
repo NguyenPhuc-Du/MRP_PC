@@ -4,6 +4,8 @@ import * as accountValidate from "../validates/account.validate"
 
 const router = Router();
 
+router.get("/", accountController.index);
+
 router.get("/create", accountController.create);
 
 router.post("/create", accountValidate.validateCreateAccount, accountController.createPost);

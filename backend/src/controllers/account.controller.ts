@@ -30,6 +30,16 @@ const storeOldInput = (req: Request): void => {
     req.session.oldInput = oldInput;
 };
 
+export const index = async (req: Request, res: Response): Promise<void> => {
+    const accounts = await accountService.getAllAccounts();
+
+    res.render("pages/accounts/index", {
+        pageTitle: "Danh sách tài khoản",
+        accounts,
+        totalAccounts: accounts.length,
+    })
+}
+
 export const create = async (req: Request, res: Response): Promise<void> => {
     const oldInput = req.session.oldInput ?? {};
     delete req.session.oldInput;
