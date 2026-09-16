@@ -5,6 +5,9 @@ import * as database from "./config/database";
 import express, { Express } from "express";
 import methodOverride from "method-override";
 import adminRoutes from "./routes/index.route";
+import flash from "express-flash";
+import session from "express-session";
+import cookieParser from "cookie-parser";
 import { systemConfig } from "./config/system";
 
 import apiRoutes from "./api/api.routes";
@@ -22,6 +25,13 @@ const startServer = async () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(methodOverride("_method"));
+
+    // Flash
+  app.use(cookieParser());
+  app.use(session({ secret: "GEIWGEPQINGEQP", resave: false, saveUninitialized: false, cookie: { maxAge: 60000 } }));
+  app.use(flash());
+  // End Flash
+
 
   // API routes for app
   app.use("/api", apiRoutes);

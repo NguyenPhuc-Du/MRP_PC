@@ -360,3 +360,139 @@ a {
   border: none !important;
   color: white !important;
 }
+
+.message.info{
+  position:fixed;
+  top:calc(var(--header-height) + 16px);
+  right:24px;
+  z-index:1080;
+}
+/* Alert thứ 2, thứ 3 tụt xuống dưới */
+.message.info:nth-of-type(2){
+  top:calc(var(--header-height) + 16px + (var(--alert-height) + var(--alert-gap)));
+}
+.message.info:nth-of-type(3){
+  top:calc(var(--header-height) + 16px + (var(--alert-height) + var(--alert-gap)) * 2);
+}
+ 
+.message.info .alert{
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:360px;
+  height:var(--alert-height);
+  margin:0;
+  padding:0 16px;
+  border:1px solid var(--border-color);
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 12px 32px rgba(30,31,38,.12);
+  animation:alert-in .28s cubic-bezier(.2,.9,.3,1.2);
+}
+ 
+@keyframes alert-in{
+  from{ opacity:0; transform:translateX(24px) scale(.97); }
+  to{ opacity:1; transform:translateX(0) scale(1); }
+}
+ 
+/* ---- Icon ---- */
+.message.info .alert-icon{
+  width:34px;
+  height:34px;
+  flex-shrink:0;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  color:#fff;
+}
+ 
+/* ---- Nội dung ---- */
+.message.info .alert-body{ flex:1 1 auto; min-width:0; }
+.message.info .alert-title{
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--text-main);
+  line-height:1.3;
+}
+.message.info .alert-text{
+  font-size:13px;
+  color:var(--text-muted);
+  margin-top:2px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+ 
+/* ---- Nút đóng ---- */
+.message.info .alert-close{
+  flex-shrink:0;
+  width:26px;
+  height:26px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  color:var(--text-muted);
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.message.info .alert-close:hover{
+  background:var(--hover-bg);
+  color:var(--text-main);
+}
+ 
+/* ---- Thanh đếm ngược ---- */
+.message.info .alert-progress{
+  position:absolute;
+  left:0;
+  bottom:0;
+  height:3px;
+  width:100%;
+  transform-origin:left center;
+  animation-name:alert-progress;
+  animation-timing-function:linear;
+  animation-fill-mode:forwards;
+}
+@keyframes alert-progress{
+  from{ transform:scaleX(1); }
+  to{ transform:scaleX(0); }
+}
+ 
+/* ---- Màu theo loại ---- */
+.message.info .alert-success .alert-icon{
+  background:linear-gradient(135deg,#16A34A,#4ADE80);
+}
+.message.info .alert-success .alert-progress{ background:#16A34A; }
+ 
+.message.info .alert-danger .alert-icon{
+  background:linear-gradient(135deg,#DC2626,#F87171);
+}
+.message.info .alert-danger .alert-progress{ background:#DC2626; }
+ 
+.message.info .alert-warning .alert-icon{
+  background:linear-gradient(135deg,#D97706,#FBBF24);
+}
+.message.info .alert-warning .alert-progress{ background:#D97706; }
+ 
+/* ---- Hiệu ứng ẩn (JS thêm class .alert-hide) ---- */
+.message.info .alert.alert-hide{
+  opacity:0;
+  transform:translateX(24px);
+  transition:opacity .25s ease, transform .25s ease;
+}
+ 
+@media (max-width:576px){
+  .message.info{ left:16px; right:16px; top:16px; }
+  .message.info:nth-of-type(2){
+    top:calc(16px + (var(--alert-height) + var(--alert-gap)));
+  }
+  .message.info:nth-of-type(3){
+    top:calc(16px + (var(--alert-height) + var(--alert-gap)) * 2);
+  }
+  .message.info .alert{ width:100%; }
+}
