@@ -1,5 +1,6 @@
 import path from "path";
 import "dotenv/config";
+import * as database from "./config/database";
 
 import express, { Express } from "express";
 import methodOverride from "method-override";
@@ -9,6 +10,8 @@ import { systemConfig } from "./config/system";
 const startServer = async () => {
   const app: Express = express();
   const port: number = Number(process.env.PORT) || 3000;
+
+  database.connectDatabase();
 
   app.use(express.static(path.join(__dirname, "../public")));
   app.set("views", path.join(__dirname, "../views"));
