@@ -1,7 +1,11 @@
 extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
 
 block main
     link(rel="stylesheet" href="/css/account.css")
+
+    +alert-success(4000)
+    +alert-error(6000)
 
     .page-head
         div
@@ -35,6 +39,7 @@ block main
                                 name="username"
                                 maxlength="50"
                                 placeholder="vd: lehoang"
+                                value=oldInput.username
                                 required
                             )
                             .form-hint Tối đa 50 ký tự, không trùng với tài khoản khác.
@@ -46,6 +51,7 @@ block main
                                 name="email"
                                 maxlength="100"
                                 placeholder="vd: lehoang@northline.vn"
+                                value=oldInput.email
                             )
                             .form-hint Dùng để khôi phục mật khẩu và nhận thông báo.
 
@@ -96,6 +102,7 @@ block main
                                 name="fullName"
                                 maxlength="100"
                                 placeholder="vd: Lê Hoàng"
+                                value=oldInput.fullName
                             )
 
                         .col-md-6
@@ -105,6 +112,7 @@ block main
                                 name="phone"
                                 maxlength="20"
                                 placeholder="vd: 0901 234 567"
+                                value=oldInput.phone
                             )
 
             //- ===== Cột phải: phân quyền =====
@@ -120,21 +128,21 @@ block main
 
                     .role-list
                         label.role-option
-                            input(type="radio" name="role" value="admin" required)
+                            input(type="radio" name="role" value="admin" checked=(oldInput.role === "admin") required)
                             span.role-body
                                 span.role-name Quản trị viên
                                 span.role-desc Toàn quyền trên hệ thống.
                             i.bi.bi-check-circle-fill.role-check
 
                         label.role-option
-                            input(type="radio" name="role" value="warehouse_manager" checked)
+                            input(type="radio" name="role" value="warehouse_manager" checked=(oldInput.role ? oldInput.role === "warehouse_manager" : true))
                             span.role-body
                                 span.role-name Quản lý kho
                                 span.role-desc Duyệt phiếu nhập, xuất và tồn kho.
                             i.bi.bi-check-circle-fill.role-check
 
                         label.role-option
-                            input(type="radio" name="role" value="staff")
+                            input(type="radio" name="role" value="staff" checked=(oldInput.role === "staff"))
                             span.role-body
                                 span.role-name Nhân viên
                                 span.role-desc Tạo phiếu và xem dữ liệu được giao.
@@ -150,8 +158,8 @@ block main
                             .form-card-sub Tài khoản bị khoá không thể đăng nhập.
 
                     select#status.form-select.input-custom(name="status")
-                        option(value="active" selected) Đang hoạt động
-                        option(value="locked") Đã khoá
+                        option(value="active" selected=(oldInput.status !== "locked")) Đang hoạt động
+                        option(value="locked" selected=(oldInput.status === "locked")) Đã khoá
 
                     .status-note
                         i.bi.bi-info-circle

@@ -1,0 +1,50 @@
+mixin alert-success(time)
+    - if(messages.success)
+        .message.info
+            div(
+                class="alert alert-success"
+                show-alert
+                data-time = time
+            )
+                .alert-icon
+                    i.bi.bi-check-lg
+                .alert-body
+                    .alert-title Thành công
+                    .alert-text #{messages.success}
+                span.alert-close(close-alert)
+                    i.bi.bi-x-lg
+                .alert-progress(style=`animation-duration:${time}ms`)
+
+mixin alert-error(time)
+    - if(messages.error)
+        .message.info
+            div(
+                class="alert alert-danger"
+                show-alert
+                data-time = time
+            )
+                .alert-icon
+                    i.bi.bi-exclamation-lg
+                .alert-body
+                    .alert-title Có lỗi xảy ra
+                    .alert-text #{messages.error}
+                span.alert-close(close-alert)
+                    i.bi.bi-x-lg
+                .alert-progress(style=`animation-duration:${time}ms`)
+
+mixin alert-warning(time)
+    - if(messages.warning)
+        .message.info
+            div(
+                class="alert alert-warning"
+                show-alert
+                data-time = time
+            )
+                .alert-icon
+                    i.bi.bi-exclamation-triangle-fill
+                .alert-body
+                    .alert-title Cảnh báo
+                    .alert-text #{messages.warning}
+                span.alert-close(close-alert)
+                    i.bi.bi-x-lg
+                .alert-progress(style=`animation-duration:${time}ms`)
