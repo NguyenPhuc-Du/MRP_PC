@@ -174,17 +174,4 @@ block main
                         i.bi.bi-arrow-counterclockwise
                         span Nhập lại
 
-block script
-    script.
-        document.querySelectorAll('.password-toggle').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var input = document.querySelector(btn.dataset.target);
-                var icon = btn.querySelector('i');
-                var isHidden = input.type === 'password';
-                input.type = isHidden ? 'text' : 'password';
-                icon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
-            });
-        });
-
-block script
     script(src="/js/account.js")

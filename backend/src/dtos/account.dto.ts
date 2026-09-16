@@ -9,3 +9,13 @@ export interface CreateAccountDto {
     phone?: string;
     status?: AccountStatus;
 }
+
+export interface UpdateAccountDto {
+    username?: string;
+    password?: string;
+    role?: AccountRole;
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    status?: AccountStatus;
+}

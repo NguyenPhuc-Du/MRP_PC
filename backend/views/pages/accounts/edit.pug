@@ -39,7 +39,7 @@ block main
                                 name="username"
                                 maxlength="50"
                                 placeholder="vd: lehoang"
-                                value=account.username
+                                value=(oldInput.username || account.username)
                                 required
                             )
                             .form-hint Tối đa 50 ký tự, không trùng với tài khoản khác.
@@ -51,7 +51,7 @@ block main
                                 name="email"
                                 maxlength="100"
                                 placeholder="vd: lehoang@northline.vn"
-                                value=account.email
+                                value=(oldInput.email || account.email)
                             )
                             .form-hint Dùng để khôi phục mật khẩu và nhận thông báo.
 
@@ -97,7 +97,7 @@ block main
                                 name="fullName"
                                 maxlength="100"
                                 placeholder="vd: Lê Hoàng"
-                                value=account.fullName
+                                value=(oldInput.fullName || account.fullName)
                             )
 
                         .col-md-6
@@ -107,7 +107,7 @@ block main
                                 name="phone"
                                 maxlength="20"
                                 placeholder="vd: 0901 234 567"
-                                value=account.phone
+                                value=(oldInput.phone || account.phone)
                             )
 
             //- ===== Cột phải: phân quyền =====
@@ -123,21 +123,21 @@ block main
 
                     .role-list
                         label.role-option
-                            input(type="radio" name="role" value="admin" checked=(account.role === "admin") required)
+                            input(type="radio" name="role" value="admin" checked=((oldInput.role || account.role) === "admin") required)
                             span.role-body
                                 span.role-name Quản trị viên
                                 span.role-desc Toàn quyền trên hệ thống.
                             i.bi.bi-check-circle-fill.role-check
 
                         label.role-option
-                            input(type="radio" name="role" value="warehouse_manager" checked=(account.role === "warehouse_manager"))
+                            input(type="radio" name="role" value="warehouse_manager" checked=((oldInput.role || account.role) === "warehouse_manager"))
                             span.role-body
                                 span.role-name Quản lý kho
                                 span.role-desc Duyệt phiếu nhập, xuất và tồn kho.
                             i.bi.bi-check-circle-fill.role-check
 
                         label.role-option
-                            input(type="radio" name="role" value="staff" checked=(account.role === "staff"))
+                            input(type="radio" name="role" value="staff" checked=((oldInput.role || account.role) === "staff"))
                             span.role-body
                                 span.role-name Nhân viên
                                 span.role-desc Tạo phiếu và xem dữ liệu được giao.
@@ -153,8 +153,8 @@ block main
                             .form-card-sub Tài khoản bị khoá không thể đăng nhập.
 
                     select#status.form-select.input-custom(name="status")
-                        option(value="active" selected=(account.status === "active")) Đang hoạt động
-                        option(value="locked" selected=(account.status === "locked")) Đã khoá
+                        option(value="active" selected=((oldInput.status || account.status) === "active")) Đang hoạt động
+                        option(value="locked" selected=((oldInput.status || account.status) === "locked")) Đã khoá
 
                     .status-note
                         i.bi.bi-info-circle
@@ -169,5 +169,4 @@ block main
                         i.bi.bi-x-lg
                         span Huỷ
 
-block script
     script(src="/js/account.js")

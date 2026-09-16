@@ -10,4 +10,6 @@ router.post("/create", accountValidate.validateCreateAccount, accountController.
 
 router.get("/edit/:accountId", accountController.edit);
 
+router.patch("/edit/:accountId", accountValidate.validateUpdateAccount, accountController.editPatch);
+
 export const accountRoutes = router;

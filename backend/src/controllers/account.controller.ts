@@ -2,8 +2,33 @@ import { Request, Response } from "express";
 import { matchedData } from "express-validator";
 import { systemConfig } from "../config/system";
 import * as accountService from "../services/account.service";
-import { CreateAccountDto } from "../dtos/account.dto";
+import { CreateAccountDto, UpdateAccountDto } from "../dtos/account.dto";
 
+const parseAccountId = (value: string | string[] | undefined): number => {
+    const raw = Array.isArray(value) ? value[0] : value;
+    return Number(raw);
+};
+
+const uniqueErrorMessage = (error: unknown): string | null => {
+    if (!(error instanceof Error)) {
+        return null;
+    }
+    if (error.message === "USERNAME_TAKEN") {
+        return "Tên đăng nhập đã tồn tại";
+    }
+    if (error.message === "EMAIL_TAKEN") {
+        return "Email đã được sử dụng";
+    }
+    if (error.message === "ACCOUNT_NOT_FOUND") {
+        return "ID không hợp lệ";
+    }
+    return null;
+};
+
+const storeOldInput = (req: Request): void => {
+    const { password, confirmPassword, ...oldInput } = req.body;
+    req.session.oldInput = oldInput;
+};
 
 export const create = async (req: Request, res: Response): Promise<void> => {
     const oldInput = req.session.oldInput ?? {};
@@ -35,34 +60,68 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
         res.redirect(`${systemConfig.prefixAdmin}/accounts/create`);
     } catch (error) {
         console.error(error);
-
-        const { password, confirmPassword, ...oldInput } = req.body;
-
-        req.session.oldInput = oldInput;
-        req.flash("error", "Tạo mới tài khoản thất bại!");
+        storeOldInput(req);
+        req.flash("error", uniqueErrorMessage(error) ?? "Tạo mới tài khoản thất bại!");
         res.redirect(`${systemConfig.prefixAdmin}/accounts/create`);
     }
 }
 
 export const edit = async (req: Request, res: Response): Promise<void> => {
-    const accountId: number = Number(req.params.accountId);
+    const accountId = parseAccountId(req.params.accountId);
+    const oldInput = req.session.oldInput ?? {};
+    delete req.session.oldInput;
 
     try {
         const account = await accountService.getAccountById(accountId);
 
         if(!account){
             req.flash("error", "ID không hợp lệ");
-            res.redirect(`${systemConfig.prefixAdmin}/accounts/`);
+            res.redirect(`${systemConfig.prefixAdmin}/accounts`);
             return;
         }
 
         res.render("pages/accounts/edit", {
             pageTitle: "Chỉnh sửa tài khoản",
-            account
+            account,
+            oldInput,
         })
     } catch (error) {
         console.error(error);
         req.flash("error", "Không tải được tài khoản");
         res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+    }
+}
+
+export const editPatch = async (req: Request, res: Response): Promise<void> => {
+    const accountId = parseAccountId(req.params.accountId);
+
+    if (!Number.isInteger(accountId) || accountId <= 0) {
+        req.flash("error", "ID không hợp lệ");
+        res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+        return;
+    }
+
+    const data = matchedData(req);
+
+    const updateAccountDto: UpdateAccountDto = {
+        username: data.username,
+        password: data.password || undefined,
+        role: data.role,
+        fullName: data.fullName || undefined,
+        email: data.email || undefined,
+        phone: data.phone || undefined,
+        status: data.status || undefined,
+    };
+
+    try {
+        await accountService.updateAccountById(updateAccountDto, accountId);
+
+        req.flash("success", "Cập nhật tài khoản thành công");
+        res.redirect(`${systemConfig.prefixAdmin}/accounts/edit/${accountId}`);
+    } catch (error) {
+        console.error(error);
+        storeOldInput(req);
+        req.flash("error", uniqueErrorMessage(error) ?? "Cập nhật tài khoản thất bại!");
+        res.redirect(`${systemConfig.prefixAdmin}/accounts/edit/${accountId}`);
     }
 }
