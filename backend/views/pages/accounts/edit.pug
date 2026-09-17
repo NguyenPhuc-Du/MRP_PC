@@ -122,26 +122,36 @@ block main
                             .form-card-sub Quyết định phạm vi thao tác.
 
                     .role-list
-                        label.role-option
-                            input(type="radio" name="role" value="admin" checked=((oldInput.role || account.role) === "admin") required)
-                            span.role-body
-                                span.role-name Quản trị viên
-                                span.role-desc Toàn quyền trên hệ thống.
-                            i.bi.bi-check-circle-fill.role-check
+                        if account.role === "admin"
+                            input(type="hidden" name="role" value="admin")
+                            label.role-option
+                                input(type="radio" name="role" value="admin" checked disabled)
+                                span.role-body
+                                    span.role-name Quản trị viên
+                                    span.role-desc Không thể đổi vai trò của quản trị viên duy nhất.
+                                i.bi.bi-check-circle-fill.role-check
+                        else
+                            if !adminExists
+                                label.role-option
+                                    input(type="radio" name="role" value="admin" checked=((oldInput.role || account.role) === "admin") required)
+                                    span.role-body
+                                        span.role-name Quản trị viên
+                                        span.role-desc Toàn quyền trên hệ thống.
+                                    i.bi.bi-check-circle-fill.role-check
 
-                        label.role-option
-                            input(type="radio" name="role" value="warehouse_manager" checked=((oldInput.role || account.role) === "warehouse_manager"))
-                            span.role-body
-                                span.role-name Quản lý kho
-                                span.role-desc Duyệt phiếu nhập, xuất và tồn kho.
-                            i.bi.bi-check-circle-fill.role-check
+                            label.role-option
+                                input(type="radio" name="role" value="warehouse_manager" checked=((oldInput.role || account.role) === "warehouse_manager") required)
+                                span.role-body
+                                    span.role-name Quản lý kho
+                                    span.role-desc Duyệt phiếu nhập, xuất và tồn kho.
+                                i.bi.bi-check-circle-fill.role-check
 
-                        label.role-option
-                            input(type="radio" name="role" value="staff" checked=((oldInput.role || account.role) === "staff"))
-                            span.role-body
-                                span.role-name Nhân viên
-                                span.role-desc Tạo phiếu và xem dữ liệu được giao.
-                            i.bi.bi-check-circle-fill.role-check
+                            label.role-option
+                                input(type="radio" name="role" value="staff" checked=((oldInput.role || account.role) === "staff"))
+                                span.role-body
+                                    span.role-name Nhân viên
+                                    span.role-desc Tạo phiếu và xem dữ liệu được giao.
+                                i.bi.bi-check-circle-fill.role-check
 
                 //- --- Trạng thái ---
                 .form-card
@@ -152,13 +162,21 @@ block main
                             .form-card-title Trạng thái
                             .form-card-sub Tài khoản bị khoá không thể đăng nhập.
 
-                    select#status.form-select.input-custom(name="status")
-                        option(value="active" selected=((oldInput.status || account.status) === "active")) Đang hoạt động
-                        option(value="locked" selected=((oldInput.status || account.status) === "locked")) Đã khoá
+                    if account.role === "admin"
+                        input(type="hidden" name="status" value="active")
+                        select#status.form-select.input-custom(disabled)
+                            option(value="active" selected) Đang hoạt động
+                        .status-note
+                            i.bi.bi-info-circle
+                            span Không thể khóa tài khoản admin.
+                    else
+                        select#status.form-select.input-custom(name="status")
+                            option(value="active" selected=((oldInput.status || account.status) === "active")) Đang hoạt động
+                            option(value="locked" selected=((oldInput.status || account.status) === "locked")) Đã khoá
 
-                    .status-note
-                        i.bi.bi-info-circle
-                        span Khoá tài khoản sẽ chặn đăng nhập ngay lập tức.
+                        .status-note
+                            i.bi.bi-info-circle
+                            span Khoá tài khoản sẽ chặn đăng nhập ngay lập tức.
 
                 //- --- Nút hành động ---
                 .form-actions

@@ -127,15 +127,16 @@ block main
                             .form-card-sub Quyết định phạm vi thao tác.
 
                     .role-list
-                        label.role-option
-                            input(type="radio" name="role" value="admin" checked=(oldInput.role === "admin") required)
-                            span.role-body
-                                span.role-name Quản trị viên
-                                span.role-desc Toàn quyền trên hệ thống.
-                            i.bi.bi-check-circle-fill.role-check
+                        if !adminExists
+                            label.role-option
+                                input(type="radio" name="role" value="admin" checked=(oldInput.role === "admin") required)
+                                span.role-body
+                                    span.role-name Quản trị viên
+                                    span.role-desc Toàn quyền trên hệ thống.
+                                i.bi.bi-check-circle-fill.role-check
 
                         label.role-option
-                            input(type="radio" name="role" value="warehouse_manager" checked=(oldInput.role ? oldInput.role === "warehouse_manager" : true))
+                            input(type="radio" name="role" value="warehouse_manager" checked=(oldInput.role ? oldInput.role === "warehouse_manager" : true) required)
                             span.role-body
                                 span.role-name Quản lý kho
                                 span.role-desc Duyệt phiếu nhập, xuất và tồn kho.
