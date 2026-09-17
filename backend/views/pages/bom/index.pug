@@ -1,0 +1,59 @@
+extends ../../layouts/admin-layout.pug
+
+block main
+    link(rel="stylesheet" href="/css/bom.css")
+
+    .bom-page
+        .bom-head
+            div
+                .bom-eyebrow CÔNG THỨC SẢN PHẨM
+                h1.bom-title BOM / Cấu hình PC
+                p.bom-desc Định nghĩa linh kiện và số lượng để lắp từng cấu hình máy.
+            a.bom-btn-primary(href=`${prefixAdmin}/bom/detail/1`)
+                i.bi.bi-plus-lg
+                span Thêm cấu hình
+
+        .bom-card
+            .bom-toolbar
+                .bom-search
+                    i.bi.bi-search
+                    input(type="text" placeholder="Tìm theo tên cấu hình hoặc mã BOM...")
+                .bom-toolbar-actions
+                    button.bom-btn-ghost(type="button")
+                        i.bi.bi-funnel
+                        span Bộ lọc
+                    button.bom-btn-icon(type="button")
+                        i.bi.bi-download
+
+            .table-responsive
+                table.bom-table
+                    thead
+                        tr
+                            th TÊN CẤU HÌNH
+                            th MÃ BOM
+                            th VERSION
+                            th LINH KIỆN
+                            th GIÁ BOM
+                            th TRẠNG THÁI
+                            th
+                    tbody
+                        each config in configs
+                            tr
+                                td
+                                    a.bom-name(href=`${prefixAdmin}/bom/detail/${config.id}`)= config.name
+                                td
+                                    span.bom-code= config.code
+                                td= config.version
+                                td #{config.itemCount} linh kiện · #{config.groupCount} nhóm
+                                td.bom-money= config.totalCostText
+                                td
+                                    span.bom-status(class=`is-${config.status}`)
+                                        span.bom-status-dot
+                                        | #{config.statusLabel}
+                                td
+                                    a.bom-more(href=`${prefixAdmin}/bom/detail/${config.id}` title="Xem BOM")
+                                        i.bi.bi-arrow-right
+
+block script
+    script(src="/js/script.js")
+    script(src="/js/bom.js")
