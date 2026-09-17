@@ -4,10 +4,6 @@ import { systemConfig } from "../config/system";
 import * as accountService from "../services/account.service";
 import { CreateAccountDto, UpdateAccountDto } from "../dtos/account.dto";
 
-const parseAccountId = (value: string | string[] | undefined): number => {
-    const raw = Array.isArray(value) ? value[0] : value;
-    return Number(raw);
-};
 
 const uniqueErrorMessage = (error: unknown): string | null => {
     if (!(error instanceof Error)) {
@@ -21,6 +17,18 @@ const uniqueErrorMessage = (error: unknown): string | null => {
     }
     if (error.message === "ACCOUNT_NOT_FOUND") {
         return "ID không hợp lệ";
+    }
+    if (error.message === "ACCOUNT_ALREADY_LOCKED") {
+        return "Tài khoản này đã bị khóa";
+    }
+    if (error.message === "CANNOT_LOCK_ADMIN") {
+        return "Không thể khóa tài khoản admin";
+    }
+    if (error.message === "ADMIN_EXISTS") {
+        return "Hệ thống chỉ được có một quản trị viên";
+    }
+    if (error.message === "CANNOT_DEMOTE_ADMIN") {
+        return "Không thể đổi vai trò của quản trị viên";
     }
     return null;
 };
@@ -47,6 +55,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     res.render("pages/accounts/create", {
         pageTitle: "Tạo mới tài khoản",
         oldInput,
+        adminExists: await accountService.hasAdminAccount(),
     });
 };
 
@@ -77,7 +86,7 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
 }
 
 export const edit = async (req: Request, res: Response): Promise<void> => {
-    const accountId = parseAccountId(req.params.accountId);
+    const accountId: number = Number(req.params.accountId);
     const oldInput = req.session.oldInput ?? {};
     delete req.session.oldInput;
 
@@ -94,6 +103,7 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
             pageTitle: "Chỉnh sửa tài khoản",
             account,
             oldInput,
+            adminExists: await accountService.hasAdminAccount(),
         })
     } catch (error) {
         console.error(error);
@@ -103,13 +113,7 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
 }
 
 export const editPatch = async (req: Request, res: Response): Promise<void> => {
-    const accountId = parseAccountId(req.params.accountId);
-
-    if (!Number.isInteger(accountId) || accountId <= 0) {
-        req.flash("error", "ID không hợp lệ");
-        res.redirect(`${systemConfig.prefixAdmin}/accounts`);
-        return;
-    }
+    const accountId: number = Number(req.params.accountId);
 
     const data = matchedData(req);
 
@@ -133,5 +137,20 @@ export const editPatch = async (req: Request, res: Response): Promise<void> => {
         storeOldInput(req);
         req.flash("error", uniqueErrorMessage(error) ?? "Cập nhật tài khoản thất bại!");
         res.redirect(`${systemConfig.prefixAdmin}/accounts/edit/${accountId}`);
+    }
+}
+
+export const lock = async (req: Request, res: Response): Promise<void> => {
+    const accountId: number = Number(req.params.accountId);
+
+    try {
+        await accountService.lockAccountById(accountId);
+
+        req.flash("success", "Đã khóa tài khoản");
+        res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+    } catch (error) {
+        console.error(error);
+        req.flash("error", uniqueErrorMessage(error) ?? "Khóa tài khoản thất bại!");
+        res.redirect(`${systemConfig.prefixAdmin}/accounts`);
     }
 }

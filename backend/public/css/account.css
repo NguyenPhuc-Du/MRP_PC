@@ -764,6 +764,10 @@ a{ text-decoration:none; }
   align-items:center;
   gap:6px;
 }
+.row-lock-form{
+  display:inline-flex;
+  margin:0;
+}
 .row-action-btn{
   width:32px;
   height:32px;

@@ -1,4 +1,5 @@
 extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
 
 mixin roleBadge(role)
   case role
@@ -27,13 +28,17 @@ mixin statusBadge(status)
 
 block main
   link(rel="stylesheet" href="/css/account.css")
+
+  +alert-success(4000)
+  +alert-error(6000)
+
   .page-head
     div
       .page-eyebrow HỆ THỐNG
       h1.page-title Quản lý người dùng
       p.page-desc #{totalAccounts} tài khoản trong hệ thống.
     .page-actions
-      a.btn-gradient(href="/accounts/create")
+      a.btn-gradient(href=`${prefixAdmin}/accounts/create`)
         i.bi.bi-plus-lg
         | Thêm người dùng
 
@@ -85,17 +90,18 @@ block main
                   span.cell-muted= formatDate(account.updatedAt || account.createdAt)
                 td.text-end
                   .row-actions
-                    a.row-action-btn.action-view(href=`/accounts/${account.id}` title="Chi tiết")
+                    a.row-action-btn.action-view(href=`${prefixAdmin}/accounts/${account.id}` title="Chi tiết")
                       i.bi.bi-eye
-                    a.row-action-btn.action-edit(href=`/accounts/${account.id}/edit` title="Sửa")
+                    a.row-action-btn.action-edit(href=`${prefixAdmin}/accounts/edit/${account.id}` title="Sửa")
                       i.bi.bi-pencil
-                    button.row-action-btn.action-delete(
-                      type="button"
-                      title="Xóa"
-                      data-id=account.id
-                      onclick=`confirmDeleteAccount(${account.id})`
-                    )
-                      i.bi.bi-trash
+                    if account.status === "active" && account.role !== "admin"
+                      form.row-lock-form(
+                        action=`${prefixAdmin}/accounts/lock/${account.id}?_method=PATCH`
+                        method="POST"
+                        onsubmit="return confirm('Khóa tài khoản này? Người dùng sẽ không đăng nhập được.')"
+                      )
+                        button.row-action-btn.action-delete(type="submit" title="Khóa tài khoản")
+                          i.bi.bi-lock
           else
             tr
               td.empty-state(colspan="6")
