@@ -1,78 +1,179 @@
 extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
 
 block main
-    link(rel="stylesheet" href="/css/orders.css")
+  link(rel="stylesheet" href="/css/import-orders.css")
+  +alert-success(4000)
+  +alert-error(6000)
 
-    .orders-page
-        .orders-head
-            div
-                .orders-eyebrow CHỨNG TỪ KHO
-                h1.orders-title Phiếu nhập
-                p.orders-desc Quản lý các đợt nhập linh kiện từ nhà cung cấp.
-            .orders-head-actions
-                button.btn-export(type="button")
-                    i.bi.bi-download
-                    span Export
-                button.btn-create(type="button")
-                    i.bi.bi-plus-lg
-                    span Tạo phiếu
+  .io-page(data-prefix=prefixAdmin)
+    .io-head
+      div
+        h1.io-title Phiếu nhập kho
+        p.io-desc Quản lý các giao dịch nhập linh kiện vào hệ thống tồn kho
+      a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`)
+        i.bi.bi-plus-lg
+        | Tạo phiếu nhập
 
-        .orders-card
-            .orders-toolbar
-                .orders-search
-                    i.bi.bi-search
-                    input(type="text" placeholder="Tìm kiếm theo mã hoặc tên...")
-                .orders-toolbar-actions
-                    button.btn-tool(type="button")
-                        i.bi.bi-funnel
-                        span Bộ lọc
-                    button.btn-icon(type="button")
-                        i.bi.bi-layout-three-columns
-                    button.btn-tool(type="button")
-                        i.bi.bi-download
-                        span Xuất
+    .io-stats
+      .io-stat
+        .io-stat-label Tổng phiếu nhập
+        .io-stat-row
+          .io-stat-value= stats.total
+          .io-stat-icon
+            i.bi.bi-clipboard
+      .io-stat
+        .io-stat-label Phiếu nháp
+        .io-stat-row
+          .io-stat-value= stats.draft
+          .io-stat-icon.is-warn
+            i.bi.bi-clock
+      .io-stat
+        .io-stat-label Đã xác nhận
+        .io-stat-row
+          .io-stat-value= stats.confirmed
+          .io-stat-icon.is-ok
+            i.bi.bi-check-circle
+      .io-stat
+        .io-stat-label Tổng giá trị nhập · tổng hợp
+        .io-stat-row
+          .io-stat-value= stats.totalValueLabel
+          .io-stat-icon
+            i.bi.bi-download
 
-            .table-responsive
-                table.orders-table
-                    thead
-                        tr
-                            th MÃ PHIẾU
-                            th NHÀ CUNG CẤP
-                            th NGÀY
-                            th NGƯỜI TẠO
-                            th MẶT HÀNG
-                            th TỔNG GIÁ TRỊ
-                            th TRẠNG THÁI
-                            th
-                    tbody
-                        each order in orders
-                            tr
-                                td
-                                    a.order-code(href="#")= order.code
-                                td= order.partner
-                                td= order.date
-                                td= order.creator
-                                td= order.itemCount
-                                td= order.total
-                                td
-                                    span.status-pill(class=order.statusClass)
-                                        span.status-dot
-                                        | #{order.status}
-                                td
-                                    button.btn-more(type="button")
-                                        i.bi.bi-three-dots
+    form.io-filters(method="GET" action=`${prefixAdmin}/importOrders`)
+      input(type="hidden" name="limit" value=filters.limit)
+      .io-filter-search
+        label Tìm kiếm
+        .io-search
+          i.bi.bi-search
+          input(type="text" name="q" value=filters.q placeholder="Tìm mã phiếu nhập...")
+      .io-filter-item
+        label Trạng thái
+        select(name="status")
+          option(value="" selected=(filters.status === "")) Tất cả
+          option(value="draft" selected=(filters.status === "draft")) Nháp
+          option(value="confirmed" selected=(filters.status === "confirmed")) Đã xác nhận
+      .io-filter-item
+        label Người tạo
+        select(name="createdBy")
+          option(value="" selected=(!filters.createdBy)) Tất cả người dùng
+          each account in accounts
+            option(value=account.id selected=(String(filters.createdBy) === String(account.id)))
+              | #{account.fullName || account.username}
+      .io-filter-item
+        label Khoảng thời gian
+        .io-dates
+          input(type="date" name="from" value=filters.from)
+          span –
+          input(type="date" name="to" value=filters.to)
+      button.io-btn-ghost(type="submit") Lọc
+      a.io-btn-ghost(href=`${prefixAdmin}/importOrders`) Đặt lại
 
-        .process-card
-            .process-title Quy trình xử lý
-            p.process-flow Nháp — Chờ duyệt — Đã duyệt — Hoàn tất
-            .process-steps
-                each step, index in processSteps
-                    if index > 0
-                        .process-line(class=step.state === "done" ? "is-done" : "")
-                    .process-step(class=step.state)
-                        if step.state === "done"
-                            .process-dot
-                                i.bi.bi-check-lg
-                        else
-                            .process-dot= step.number
-                        span.process-label= step.label
+    .io-card
+      .table-responsive
+        table.io-table
+          thead
+            tr
+              th MÃ PHIẾU
+              th NGÀY TẠO
+              th NGƯỜI TẠO
+              th SỐ MẶT HÀNG
+              th TỔNG SỐ LƯỢNG
+              th TỔNG GIÁ TRỊ
+              th TRẠNG THÁI
+              th
+          tbody
+            if orders && orders.length
+              each order in orders
+                tr.io-row(data-order=JSON.stringify(order) tabindex="0")
+                  td
+                    button.io-code(type="button")= order.code
+                  td= order.createdAtLabel
+                  td
+                    .io-user
+                      .io-user-name= order.creatorName
+                      .io-user-sub @#{order.creatorUsername}
+                  td #{order.itemCount} mặt hàng
+                  td= order.totalQty
+                  td= order.totalValueLabel
+                  td
+                    if order.status === "confirmed"
+                      span.io-badge.is-ok
+                        i.bi.bi-check-circle
+                        | Đã xác nhận
+                    else
+                      span.io-badge.is-draft
+                        i.bi.bi-file-earmark
+                        | Nháp
+                  td
+                    .io-more
+                      button.io-more-btn(type="button" aria-label="Thao tác")
+                        i.bi.bi-three-dots
+                      .io-menu
+                        button.io-menu-item.js-open-drawer(type="button") Xem nhanh
+                        a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}`) Xem chi tiết
+                        if order.status === "draft"
+                          a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
+                        button.io-menu-item.js-print(type="button" data-href=`${prefixAdmin}/importOrders/${order.id}`) In phiếu
+            else
+              tr
+                td.io-empty(colspan="8")
+                  i.bi.bi-inbox
+                  p Chưa có phiếu nhập nào.
+                  a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`) Tạo phiếu nhập
+
+      .io-pager
+        .io-pager-info #{fromIndex}–#{toIndex} / #{total} phiếu
+        .io-pager-controls
+          select.io-limit(name="limit")
+            option(value="10" selected=(Number(filters.limit) === 10)) 10 / trang
+            option(value="20" selected=(Number(filters.limit) === 20)) 20 / trang
+            option(value="50" selected=(Number(filters.limit) === 50)) 50 / trang
+          if page > 1
+            a.io-page-btn(href=`${prefixAdmin}/importOrders?q=${filters.q}&status=${filters.status}&createdBy=${filters.createdBy}&from=${filters.from}&to=${filters.to}&limit=${filters.limit}&page=${page - 1}`)
+              i.bi.bi-chevron-left
+          else
+            span.io-page-btn.is-disabled
+              i.bi.bi-chevron-left
+          - const pages = [page - 1, page, page + 1].filter((n) => n >= 1 && n <= pageCount)
+          each n in pages
+            a.io-page-btn(class=(n === page ? "is-active" : "") href=`${prefixAdmin}/importOrders?q=${filters.q}&status=${filters.status}&createdBy=${filters.createdBy}&from=${filters.from}&to=${filters.to}&limit=${filters.limit}&page=${n}`)= n
+          if page < pageCount
+            a.io-page-btn(href=`${prefixAdmin}/importOrders?q=${filters.q}&status=${filters.status}&createdBy=${filters.createdBy}&from=${filters.from}&to=${filters.to}&limit=${filters.limit}&page=${page + 1}`)
+              i.bi.bi-chevron-right
+          else
+            span.io-page-btn.is-disabled
+              i.bi.bi-chevron-right
+
+  .io-overlay
+  aside.io-drawer
+    .io-drawer-head
+      div
+        h2.io-drawer-title
+        p.io-drawer-sub Xem nhanh thông tin phiếu kho
+      button.io-icon-btn.js-close-drawer(type="button")
+        i.bi.bi-x-lg
+    .io-drawer-body
+      .io-drawer-status
+      .io-kv
+        span Người tạo
+        strong.io-kv-creator
+      .io-kv
+        span Ngày tạo
+        strong.io-kv-date
+      .io-kv
+        span Items
+        strong.io-kv-items
+      .io-kv
+        span Tổng số lượng
+        strong.io-kv-qty
+      .io-drawer-lines
+        .io-drawer-lines-label DÒNG CHI TIẾT
+        .io-drawer-lines-list
+    a.io-btn-primary.io-drawer-cta Xem chi tiết
+      i.bi.bi-chevron-right
+
+block script
+  script(src="/js/script.js")
+  script(src="/js/import-orders.js")
