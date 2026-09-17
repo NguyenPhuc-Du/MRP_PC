@@ -12,9 +12,9 @@ const adminRoutes = (app: Express): void =>{
 
     app.use(`${PATH_ADMIN}/accounts`, accountRoutes);
 
-    app.use(`${PATH_ADMIN}/phieu-nhap`, importOrderRoutes);
+    app.use(`${PATH_ADMIN}/importOrders`, importOrderRoutes);
 
-    app.use(`${PATH_ADMIN}/phieu-xuat`, exportOrderRoutes);
+    app.use(`${PATH_ADMIN}/exportOrders`, exportOrderRoutes);
 
 }
 export default adminRoutes;

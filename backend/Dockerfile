@@ -4,7 +4,11 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY package.json package-lock.json* ./
-RUN npm install --ignore-scripts && npm rebuild esbuild
+RUN npm config set fetch-retries 5 \
+    && npm config set fetch-retry-mintimeout 20000 \
+    && npm config set fetch-retry-maxtimeout 120000 \
+    && npm config set fetch-timeout 300000 \
+    && npm install --ignore-scripts && npm rebuild esbuild
 
 COPY . .
 RUN npx prisma generate
