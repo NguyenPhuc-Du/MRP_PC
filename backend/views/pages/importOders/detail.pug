@@ -1,0 +1,168 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+  link(rel="stylesheet" href="/css/import-orders.css")
+  +alert-success(4000)
+  +alert-error(6000)
+
+  .io-page.io-detail
+    a.io-back(href=`${prefixAdmin}/importOrders`)
+      i.bi.bi-arrow-left
+      | Quay lại danh sách
+
+    .io-head
+      div
+        .io-title-row
+          h1.io-title= order.code
+          if order.status === "confirmed"
+            span.io-badge.is-ok
+              i.bi.bi-check-circle
+              | Đã xác nhận
+          else
+            span.io-badge.is-draft
+              i.bi.bi-file-earmark
+              | Nháp
+        p.io-desc Chi tiết giao dịch nhập linh kiện
+      .io-head-actions
+        button.io-btn-ghost(type="button" onclick="window.print()")
+          i.bi.bi-printer
+          | In phiếu
+        if order.status === "draft"
+          a.io-btn-ghost(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
+          button.io-btn-primary#io-open-confirm(type="button")
+            i.bi.bi-check2
+            | Xác nhận phiếu
+
+    .io-card
+      h3.io-card-title Thông tin phiếu
+      .io-meta-grid
+        div
+          .io-label Mã phiếu
+          strong= order.code
+        div
+          .io-label Trạng thái
+          if order.status === "confirmed"
+            span.io-badge.is-ok
+              i.bi.bi-check-circle
+              | Đã xác nhận
+          else
+            span.io-badge.is-draft
+              i.bi.bi-file-earmark
+              | Nháp
+        div
+          .io-label Người tạo
+          strong #{order.creatorName}
+          span.io-user-sub  @#{order.creatorUsername}
+        div
+          .io-label Ngày tạo
+          strong= order.createdAtLabel
+      .io-note
+        .io-label Ghi chú
+        p= order.note || "Không có ghi chú"
+
+    .io-card
+      .io-card-head
+        h3.io-card-title Danh sách linh kiện nhập
+        span.io-card-sub Dữ liệu liên kết từ Components và Component Categories
+      .table-responsive
+        table.io-table
+          thead
+            tr
+              th STT
+              th Mã linh kiện
+              th Tên linh kiện
+              th Danh mục
+              th Đơn vị
+              th Số lượng
+              th Đơn giá
+              th Thành tiền
+          tbody
+            each item in order.items
+              tr
+                td= item.stt
+                td= item.code
+                td
+                  strong= item.name
+                td= item.category
+                td= item.unit
+                td
+                  strong= item.quantity
+                td= item.unitPriceLabel
+                td
+                  strong= item.lineTotalLabel
+      .io-summary
+        div
+          .io-label Tổng số mặt hàng
+          strong= order.itemCount
+        div
+          .io-label Tổng số lượng
+          strong= order.totalQty
+        div
+          .io-label Tổng giá trị nhập
+          strong.io-total= order.totalValueLabel
+
+    if order.status === "confirmed"
+      .io-stock-card
+        .io-stock-title
+          i.bi.bi-check-circle
+          | Tồn kho sau khi xác nhận
+        .io-summary
+          each item in order.items
+            div
+              .io-label Trước khi nhập
+              strong= item.stockBefore
+            div
+              .io-label Số lượng nhập
+              strong.io-plus +#{item.quantity}
+            div
+              .io-label Tồn kho hiện tại
+              strong= item.stockAfter
+
+    .io-card
+      h3.io-card-title
+        i.bi.bi-clock-history
+        |  Lịch sử thao tác
+      if order.logs && order.logs.length
+        each log in order.logs
+          .io-log
+            .io-log-avatar= log.actorInitials
+            div
+              .io-log-title
+                strong= log.actorName
+                span  · #{log.action}
+              p.io-log-detail= log.detail
+            .io-log-time= log.createdAtLabel
+      else
+        p.io-card-sub Chưa có lịch sử thao tác.
+
+  if order.status === "draft"
+    .io-overlay.is-modal
+    .io-modal
+      .io-modal-head
+        div
+          h3 Xác nhận phiếu nhập?
+          p Kiểm tra kỹ thông tin trước khi cập nhật tồn kho.
+        button.io-icon-btn.js-close-modal(type="button")
+          i.bi.bi-x-lg
+      .io-modal-box
+        .io-code-text= order.code
+        .io-summary
+          div
+            .io-label Mặt hàng
+            strong= order.itemCount
+          div
+            .io-label Tổng số lượng
+            strong= order.totalQty
+        .io-total= order.totalValueLabel
+      .io-warn
+        i.bi.bi-exclamation-triangle
+        | Sau khi xác nhận, phiếu không còn ở trạng thái nháp và dữ liệu sẽ được dùng để cập nhật tồn kho.
+      .io-modal-actions
+        button.io-btn-ghost.js-close-modal(type="button") Hủy
+        form(action=`${prefixAdmin}/importOrders/${order.id}/confirm` method="POST")
+          button.io-btn-primary(type="submit") Xác nhận phiếu nhập
+
+block script
+  script(src="/js/script.js")
+  script(src="/js/import-orders.js")
