@@ -473,6 +473,22 @@ a {
   white-space: normal;
 }
 
+.comp-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.comp-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #f3f4f8;
+  flex-shrink: 0;
+}
+
 .comp-name {
   display: inline-block;
   max-width: 168px;
