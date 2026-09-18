@@ -1,0 +1,112 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+mixin permissionGroup(title)
+  tr.perm-group-row
+    td(colspan=records.length + 1)
+      b= title
+
+mixin permissionRow(name, label)
+  tr(data-name=name)
+    td= label
+    each item in records
+      td.text-center
+        label.perm-check
+          input(type="checkbox")
+          span.perm-check-ui
+            i.bi.bi-check-lg
+
+block main
+  link(rel="stylesheet", href="/css/permissions.css")
+  +alert-success(5000)
+  +alert-error(5000)
+
+  .perm-page
+    .perm-card.perm-card-head
+      .perm-head-row
+        .perm-head-text
+          span.perm-eyebrow BẢO MẬT
+          h1.perm-title Phân quyền
+          p.perm-subtitle Tick quyền theo từng vai trò, rồi lưu để áp dụng.
+
+        .perm-head-actions
+          button.perm-btn.perm-btn-light(type="button" button-reset) Hoàn tác
+          button.perm-btn.perm-btn-primary(type="button" button-submit) Cập nhật
+
+    if records && records.length
+      .perm-card.perm-card-table
+        div(data-records=records)
+        .perm-table-wrap
+          table.perm-table(table-permissions)
+            thead
+              tr
+                th.perm-th-module Tính năng
+                each item in records
+                  th.text-center= item.title
+            tbody
+              tr.d-none(data-name="id")
+                td
+                each item in records
+                  td.text-center
+                    input(type="text" value=item.id)
+
+              +permissionGroup("Dashboard")
+              +permissionRow("dashboard_view", "Xem")
+
+              +permissionGroup("Linh kiện")
+              +permissionRow("components_view", "Xem")
+              +permissionRow("components_create", "Thêm mới")
+              +permissionRow("components_edit", "Chỉnh sửa")
+              +permissionRow("components_delete", "Xóa")
+
+              +permissionGroup("Kho")
+              +permissionRow("inventory_view", "Xem")
+              +permissionRow("inventory_edit", "Chỉnh sửa")
+
+              +permissionGroup("Phiếu nhập")
+              +permissionRow("importOrders_view", "Xem")
+              +permissionRow("importOrders_create", "Thêm mới")
+              +permissionRow("importOrders_edit", "Chỉnh sửa")
+              +permissionRow("importOrders_delete", "Xóa")
+
+              +permissionGroup("Phiếu xuất")
+              +permissionRow("exportOrders_view", "Xem")
+              +permissionRow("exportOrders_create", "Thêm mới")
+              +permissionRow("exportOrders_edit", "Chỉnh sửa")
+              +permissionRow("exportOrders_delete", "Xóa")
+              +permissionRow("exportOrders_approve", "Duyệt")
+
+              +permissionGroup("BOM")
+              +permissionRow("bom_view", "Xem")
+              +permissionRow("bom_create", "Thêm mới")
+              +permissionRow("bom_edit", "Chỉnh sửa")
+              +permissionRow("bom_delete", "Xóa")
+
+              +permissionGroup("Sản xuất")
+              +permissionRow("production_view", "Xem")
+              +permissionRow("production_create", "Thêm mới")
+              +permissionRow("production_edit", "Chỉnh sửa")
+              +permissionRow("production_delete", "Xóa")
+
+              +permissionGroup("Tài khoản")
+              +permissionRow("accounts_view", "Xem")
+              +permissionRow("accounts_create", "Thêm mới")
+              +permissionRow("accounts_edit", "Chỉnh sửa")
+              +permissionRow("accounts_delete", "Xóa")
+
+              +permissionGroup("Nhóm quyền")
+              +permissionRow("roles_view", "Xem")
+              +permissionRow("roles_create", "Thêm mới")
+              +permissionRow("roles_edit", "Chỉnh sửa")
+              +permissionRow("roles_delete", "Xóa")
+              +permissionRow("roles_permissions", "Phân quyền")
+
+      form#form-change-permissions.d-none(
+        action=`${prefixAdmin}/permissions?_method=PATCH`
+        method="POST"
+      )
+        input(type="text" name="permissions")
+
+block script
+  script(src="/js/script.js")
+  script(src="/js/permissions.js")

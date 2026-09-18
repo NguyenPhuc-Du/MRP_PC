@@ -1,6 +1,7 @@
 
 import { PrismaClient } from "../src/generated/prisma/index.js";
 import bcrypt from "bcrypt";
+import { DEFAULT_ROLES } from "../src/constants/permissions";
 
 const prisma = new PrismaClient();
 
@@ -42,6 +43,14 @@ async function main() {
       role: "staff",
     },
   });
+
+  for (const role of DEFAULT_ROLES) {
+    await prisma.role.upsert({
+      where: { id: role.id },
+      update: {},
+      create: role,
+    });
+  }
 
   const categoryNames = [
     { name: "CPU", description: "Bộ vi xử lý" },

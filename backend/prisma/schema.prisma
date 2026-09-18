@@ -85,6 +85,14 @@ model Account {
   @@map("accounts")
 }
 
+model Role {
+  id          AccountRole @id
+  permissions String[]    @default([])
+  updatedAt   DateTime?   @updatedAt @map("updated_at")
+
+  @@map("roles")
+}
+
 // --- Nhóm 2: Danh mục, BOM & thuộc tính (EAV) ---
 
 model ComponentCategory {

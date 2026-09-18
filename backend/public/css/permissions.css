@@ -1,0 +1,191 @@
+.perm-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.perm-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+}
+
+.perm-card-head {
+  padding: 22px 24px 18px;
+}
+
+.perm-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.perm-eyebrow {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brand-from);
+  margin-bottom: 6px;
+}
+
+.perm-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.perm-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.perm-head-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.perm-btn {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.perm-btn-light {
+  background: #fff;
+  color: var(--text-main);
+  border-color: #e6e8ef;
+}
+
+.perm-btn-light:hover {
+  background: var(--hover-bg);
+}
+
+.perm-btn-primary {
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+  box-shadow: 0 8px 18px rgba(109, 92, 232, 0.25);
+}
+
+.perm-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.perm-card-table {
+  padding: 8px 8px 16px;
+  overflow: hidden;
+}
+
+.perm-table-wrap {
+  overflow-x: auto;
+}
+
+.perm-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.perm-table th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #98a0b3;
+  padding: 14px 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.perm-th-module {
+  text-align: left !important;
+  padding-left: 18px !important;
+}
+
+.perm-table td {
+  padding: 12px;
+  border-top: 1px solid #f1f2f6;
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+.perm-group-row td {
+  background: #f8f9fd;
+  padding: 12px 18px;
+  border-top: 1px solid #eceef4;
+}
+
+.perm-group-row b {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.perm-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  cursor: pointer;
+}
+
+.perm-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.perm-check-ui {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #f4f5f8;
+  color: transparent;
+  font-size: 16px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.perm-check input:checked + .perm-check-ui {
+  background: #eefbf3;
+  color: #16a34a;
+}
+
+.perm-check:hover .perm-check-ui {
+  background: #eceef4;
+}
+
+.perm-check input:checked:hover + .perm-check-ui,
+.perm-check:hover input:checked + .perm-check-ui {
+  background: #dff6e8;
+}
+
+.perm-check:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.perm-check:has(input:disabled):hover .perm-check-ui {
+  background: #f4f5f8;
+}
+
+.perm-check:has(input:disabled) input:checked + .perm-check-ui {
+  background: #f4f5f8;
+  color: transparent;
+}
+
+@media (max-width: 900px) {
+  .perm-head-row {
+    flex-direction: column;
+  }
+}
