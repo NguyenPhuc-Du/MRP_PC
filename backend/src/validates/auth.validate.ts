@@ -19,7 +19,7 @@ export const loginValidate = async (req: Request, res: Response, next: NextFunct
         return;
     }
 
-    const checkPass = comparePassword(password, isExistUsername.passwordHash);
+    const checkPass = await comparePassword(password, isExistUsername.passwordHash);
 
     if(!checkPass) {
         req.flash("error", "Mật khẩu không chính xác");
