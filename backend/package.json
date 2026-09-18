@@ -8,7 +8,8 @@
     "postinstall": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
-    "r2:check": "tsx src/utils/r2-check.ts"
+    "r2:check": "tsx src/utils/r2-check.ts",
+    "r2:sync-images": "tsx src/utils/sync-r2-images.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

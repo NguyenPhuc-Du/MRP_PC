@@ -1,6 +1,7 @@
 
 import { PrismaClient } from "../src/generated/prisma/index.js";
 import bcrypt from "bcrypt";
+import { syncComponentImagesFromR2 } from "../src/utils/sync-r2-images";
 
 const prisma = new PrismaClient();
 
@@ -42,6 +43,14 @@ async function main() {
       role: "staff",
     },
   });
+
+  for (const role of DEFAULT_ROLES) {
+    await prisma.role.upsert({
+      where: { id: role.id },
+      update: {},
+      create: role,
+    });
+  }
 
   const categoryNames = [
     { name: "CPU", description: "Bộ vi xử lý" },
@@ -166,7 +175,10 @@ async function main() {
     },
   });
 
-  console.log("Seed xong. Tai khoan mau: admin / warehouse / staff — mat khau: admin123");
+  const images = await syncComponentImagesFromR2(prisma);
+  console.log(
+    `Seed xong. Tai khoan mau: admin / warehouse / staff — mat khau: admin123. Anh R2: tao ${images.created}, cap nhat ${images.updated}`,
+  );
 }
 
 main()
