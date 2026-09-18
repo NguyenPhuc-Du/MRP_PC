@@ -1,6 +1,7 @@
 
 import { PrismaClient } from "../src/generated/prisma/index.js";
 import bcrypt from "bcrypt";
+import { DEFAULT_ROLES } from "../src/constants/permissions";
 import { syncComponentImagesFromR2 } from "../src/utils/sync-r2-images";
 
 const prisma = new PrismaClient();
