@@ -12,11 +12,18 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
             return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
         }
 
-        const decoded = jwt.verify(accessToken, process.env.JWT_SECRET as string) as { id: number };
+        const decoded = jwt.verify(accessToken, process.env.JWT_SECRET as string) as { sub: string | number };
+
+        const accountId = Number(decoded.sub);
+
+        if (!Number.isInteger(accountId) || accountId <= 0) {
+            res.clearCookie("access_token");
+            return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+        }
 
         const account = await prisma.account.findUnique({
             where: {
-                id: decoded.id
+                id: accountId
             },
             select: {
                 id: true,
