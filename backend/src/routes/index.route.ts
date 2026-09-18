@@ -22,10 +22,8 @@ const adminRoutes = (app: Express): void => {
   app.use(`${PATH_ADMIN}/bom`, bomRoutes);
 
   app.use(`${PATH_ADMIN}/permissions`, permissionRoutes);
+
+  app.use(`${PATH_ADMIN}/auth`, authRoutes);
 };
 
-    app.use(`${PATH_ADMIN}/auth`, authRoutes);
-
-
-}
 export default adminRoutes;
