@@ -12,4 +12,19 @@ paginationButton.forEach(button => {
         window.location.href = url.toString();
     });
 });
-
+//end pagination
+//delete component
+const deleteButton= document.querySelectorAll('[button-delete]');
+if(deleteButton.length>0){
+deleteButton.forEach(button =>{
+    button.addEventListener("click",()=>{
+        const id = button.getAttribute('data-id');
+        const form = document.getElementById('form-delete-item');
+        const path = form.getAttribute('data-path');
+        const action=`${path}/${id}?_method=DELETE`;
+        form.action=action;
+        form.submit();
+    })
+})
+}
+//end delete component

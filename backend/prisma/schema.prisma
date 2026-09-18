@@ -116,7 +116,8 @@ model Component {
   imageUrl           String?         @map("image_url") @db.VarChar(500)
   status             ComponentStatus @default(active)
   createdAt          DateTime        @default(now()) @map("created_at")
-
+  deleted            Boolean         @default(false)
+  deletedAt          DateTime?       @map("deleted_at")
   category             ComponentCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   attributes           ComponentAttribute[]
   bomItems             BomItem[]
