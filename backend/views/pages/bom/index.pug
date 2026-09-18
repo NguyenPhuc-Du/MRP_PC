@@ -1,7 +1,10 @@
 extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
 
 block main
     link(rel="stylesheet" href="/css/bom.css")
+    +alert-success(4000)
+    +alert-error(6000)
 
     .bom-page
         .bom-head
@@ -9,7 +12,7 @@ block main
                 .bom-eyebrow CÔNG THỨC SẢN PHẨM
                 h1.bom-title BOM / Cấu hình PC
                 p.bom-desc Định nghĩa linh kiện và số lượng để lắp từng cấu hình máy.
-            a.bom-btn-primary(href=`${prefixAdmin}/bom/detail/1`)
+            a.bom-btn-primary(href=`${prefixAdmin}/bom/create`)
                 i.bi.bi-plus-lg
                 span Thêm cấu hình
 
@@ -33,26 +36,32 @@ block main
                             th MÃ BOM
                             th VERSION
                             th LINH KIỆN
-                            th GIÁ BOM
+                            th GIÁ VỐN
+                            th GIÁ BÁN CUỐI
                             th TRẠNG THÁI
                             th
                     tbody
-                        each config in configs
+                        if configs && configs.length
+                            each config in configs
+                                tr
+                                    td
+                                        a.bom-name(href=`${prefixAdmin}/bom/detail/${config.id}`)= config.name
+                                    td
+                                        span.bom-code= config.code
+                                    td= config.version
+                                    td #{config.itemCount} linh kiện · #{config.groupCount} nhóm
+                                    td.bom-money= config.totalCostText
+                                    td.bom-money(class=config.saleLocked ? "is-locked" : "is-open")= config.salePriceText
+                                    td
+                                        span.bom-status(class=`is-${config.status}`)
+                                            span.bom-status-dot
+                                            | #{config.statusLabel}
+                                    td
+                                        a.bom-more(href=`${prefixAdmin}/bom/detail/${config.id}` title="Xem BOM")
+                                            i.bi.bi-arrow-right
+                        else
                             tr
-                                td
-                                    a.bom-name(href=`${prefixAdmin}/bom/detail/${config.id}`)= config.name
-                                td
-                                    span.bom-code= config.code
-                                td= config.version
-                                td #{config.itemCount} linh kiện · #{config.groupCount} nhóm
-                                td.bom-money= config.totalCostText
-                                td
-                                    span.bom-status(class=`is-${config.status}`)
-                                        span.bom-status-dot
-                                        | #{config.statusLabel}
-                                td
-                                    a.bom-more(href=`${prefixAdmin}/bom/detail/${config.id}` title="Xem BOM")
-                                        i.bi.bi-arrow-right
+                                td(colspan="8") Chưa có cấu hình BOM. Bấm “Thêm cấu hình” để tạo mới.
 
 block script
     script(src="/js/script.js")

@@ -419,28 +419,109 @@
 }
 
 .bom-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 18px;
   padding-top: 16px;
   border-top: 1px solid #ecedf2;
 }
 
+.bom-summary-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.bom-summary-final {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eaf8f0;
+}
+
 .bom-summary-label {
-  display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: #8a8d9a;
-  margin-bottom: 4px;
 }
 
 .bom-summary-value {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .bom-margin {
   color: #6d5ce8;
+}
+
+.bom-final,
+.bom-money.is-locked {
+  color: #18794e;
+}
+
+.bom-money.is-open {
+  color: #8a8d9a;
+  font-weight: 600;
+}
+
+.bom-hint {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  color: #8a8d9a;
+}
+
+.bom-slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.bom-slot {
+  display: grid;
+  grid-template-columns: 1fr 90px;
+  gap: 10px;
+  align-items: end;
+}
+
+.bom-slot-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bom-slot-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bom-slot-req {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6d5ce8;
+  background: #eef0ff;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.bom-extra-head {
+  margin-top: 8px;
+}
+
+.bom-item-edit {
+  display: grid;
+  grid-template-columns: 1fr 110px 36px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.bom-form-actions {
+  display: flex;
+  gap: 10px;
 }
 
 @media (max-width: 1100px) {
