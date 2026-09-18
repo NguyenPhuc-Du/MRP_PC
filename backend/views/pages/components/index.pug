@@ -5,8 +5,9 @@ block main
     .d-flex.justify-content-between.align-items-start.mb-4
       div
         .comp-eyebrow DANH MỤC
+        p #{objectPagination.currentPage} haaaa
         h4.fw-bold.mb-1 Quản lý linh kiện
-        .text-secondary.small 1264 linh kiện thuộc kho cơ sở
+        .text-secondary.small #{totalComponents} linh kiện thuộc kho cơ sở
       button.btn.comp-btn.comp-btn-light
         i.bi.bi-box-arrow-in-down
         | Import
@@ -45,124 +46,53 @@ block main
               th GIÁ NHẬP
               th TRẠNG THÁI
               th CẬP NHẬT
+              th Hành động
           tbody
-            tr
-              td
-                span.comp-code CPU-I7-14700K
-              td
-                span.comp-name Intel Core i7-14700K
-              td.comp-muted CPU
-              td.comp-muted Intel
-              td.comp-muted Digiworld
-              td.comp-muted Cái
-              td.comp-stock 128
-              td.comp-muted 40
-              td.comp-muted 10,490,000 đ
-              td
-                span.comp-status.comp-status-ok
-                  span.comp-dot
-                  | Còn hàng
-              td.comp-muted 15/05/2024
-
-            tr
-              td
-                span.comp-code GPU-RTX4070-S
-              td
-                span.comp-name ASUS Dual RTX 4070 Super
-              td.comp-muted GPU
-              td.comp-muted ASUS
-              td.comp-muted Vĩnh Xuân
-              td.comp-muted Cái
-              td.comp-stock 14
-              td.comp-muted 20
-              td.comp-muted 18,490,000 đ
-              td
-                span.comp-status.comp-status-low
-                  span.comp-dot
-                  | Sắp hết
-              td.comp-muted 15/05/2024
-
-            tr
-              td
-                span.comp-code RAM-DDR5-32G
-              td
-                span.comp-name Kingston Fury DDR5 32GB
-              td.comp-muted RAM
-              td.comp-muted Kingston
-              td.comp-muted Synnex FPT
-              td.comp-muted Bộ
-              td.comp-stock 210
-              td.comp-muted 60
-              td.comp-muted 2,450,000 đ
-              td
-                span.comp-status.comp-status-ok
-                  span.comp-dot
-                  | Còn hàng
-              td.comp-muted 15/05/2024
-
-            tr
-              td
-                span.comp-code SSD-SN770-1TB
-              td
-                span.comp-name WD Black SN770 NVMe 1TB
-              td.comp-muted SSD
-              td.comp-muted Western Digital
-              td.comp-muted Digiworld
-              td.comp-muted Cái
-              td.comp-stock 12
-              td.comp-muted 40
-              td.comp-muted 2,190,000 đ
-              td
-                span.comp-status.comp-status-low
-                  span.comp-dot
-                  | Sắp hết
-              td.comp-muted 15/05/2024
-
-            tr
-              td
-                span.comp-code PSU-RM850X
-              td
-                span.comp-name Corsair RM850x 80+ Gold
-              td.comp-muted PSU
-              td.comp-muted Corsair
-              td.comp-muted KTC
-              td.comp-muted Cái
-              td.comp-stock 0
-              td.comp-muted 25
-              td.comp-muted 3,290,000 đ
-              td
-                span.comp-status.comp-status-out
-                  span.comp-dot
-                  | Hết hàng
-              td.comp-muted 15/05/2024
-
-            tr
-              td
-                span.comp-code MB-Z790-PRO
-              td
-                span.comp-name MSI PRO Z790-P WiFi
-              td.comp-muted Mainboard
-              td.comp-muted MSI
-              td.comp-muted Vĩnh Xuân
-              td.comp-muted Cái
-              td.comp-stock 86
-              td.comp-muted 30
-              td.comp-muted 5,490,000 đ
-              td
-                span.comp-status.comp-status-ok
-                  span.comp-dot
-                  | Còn hàng
-              td.comp-muted 15/05/2024
+            if components && components.length
+              each component in components
+                tr
+                  td
+                    span.comp-code= component.code
+                  td
+                    .comp-name-cell
+                      if component.imageUrl
+                        img.comp-thumb(src=component.imageUrl alt=component.name)
+                      span.comp-name= component.name
+                  td.comp-muted= component.category
+                  td.comp-muted —
+                  td.comp-muted —
+                  td.comp-muted= component.unit
+                  td.comp-stock= component.quantityOnHand
+                  td.comp-muted= component.minStockThreshold
+                  td.comp-muted= component.unitPrice
+                  td
+                    span.comp-status(class=`comp-status-${component.stockStatus}`)
+                      span.comp-dot
+                      | #{component.stockLabel}
+                  td.comp-muted= formatDate(component.createdAt)
+                  td  
+                    button.btn.comp-btn.comp-btn-icon
+                      i.bi.bi-pencil
+                    button.btn.comp-btn.comp-btn-icon
+                      i.bi.bi-trash 
+            else
+              tr
+                td.text-center.text-secondary.py-4(colspan="11") Chưa có linh kiện nào.
 
       .d-flex.justify-content-between.align-items-center.mt-4
-        .text-secondary.small Hiển thị 1-6 trong 1,264
+        .text-secondary.small
+          if totalComponents
+            | Hiển thị 1-#{totalComponents} trong #{totalComponents}
+          else
+            | Không có dữ liệu
         nav
           ul.pagination.comp-pagination.mb-0
             li.page-item
               a.page-link(href="#")
-                i.bi.bi-chevron-left
-            li.page-item.active
-              a.page-link(href="#") 1
+            //-     i.bi.bi-chevron-left
+            //- - for (var i = 1; i <= objectPagination.countPage; i++)
+            //-     li.page-item.active
+            //-       a.page-link(href="#") #{i}
             li.page-item
               a.page-link(href="#") 2
             li.page-item
