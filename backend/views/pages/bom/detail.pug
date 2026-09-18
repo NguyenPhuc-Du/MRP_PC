@@ -1,0 +1,81 @@
+extends ../../layouts/admin-layout.pug
+
+block main
+    link(rel="stylesheet" href="/css/bom.css")
+
+    .bom-page
+        .bom-detail-head
+            div
+                .bom-crumb
+                    a(href=`${prefixAdmin}/bom`) BOM / Cấu hình PC
+                    span /
+                    strong= config.name
+                .bom-code-pill #{config.code} · VERSION #{config.version}
+                h1.bom-title= config.name
+                p.bom-desc= config.subtitle
+            .bom-head-actions
+                button.bom-btn-ghost(type="button") Nháp
+                button.bom-btn-ghost(type="button") Lưu nháp
+                button.bom-btn-primary(type="button") Gửi duyệt
+
+        .bom-split
+            .bom-card
+                h2.bom-card-title Thông tin cấu hình
+                label.bom-field
+                    span Tên cấu hình
+                    input.bom-input(type="text" value=config.name)
+                label.bom-field
+                    span Mã BOM
+                    input.bom-input(type="text" value=config.code readonly)
+                .bom-field-row
+                    label.bom-field
+                        span Version
+                        input.bom-input(type="text" value=config.version)
+                    label.bom-field
+                        span Trạng thái
+                        .bom-status-select(class=`is-${config.status}`)
+                            span.bom-status-dot
+                            input.bom-input(type="text" value=config.statusLabel readonly)
+                label.bom-field
+                    span Mô tả
+                    textarea.bom-textarea= config.description
+                button.bom-history-btn(type="button")
+                    i.bi.bi-clock-history
+                    span Lịch sử phiên bản
+
+            .bom-card
+                .bom-card-head
+                    div
+                        h2.bom-card-title Linh kiện trong BOM
+                        p.bom-card-sub #{config.groupCount} nhóm · #{config.itemCount} linh kiện
+                    button.bom-btn-primary.bom-btn-sm(type="button")
+                        i.bi.bi-plus-lg
+                        span Thêm linh kiện
+
+                .bom-item-list
+                    each item in config.items
+                        .bom-item
+                            .bom-item-badge(class=`cat-${item.categoryCode.toLowerCase()}`)= item.categoryCode
+                            .bom-item-info
+                                .bom-item-name= item.name
+                                .bom-item-sku= item.sku
+                            .bom-item-qty #{item.quantity} #{item.unit}
+                            .bom-item-price= item.unitPriceText
+                            .bom-item-total= item.lineTotalText
+                            button.bom-item-del(type="button" title="Xóa khỏi BOM")
+                                i.bi.bi-trash
+
+                .bom-summary
+                    .bom-summary-col
+                        span.bom-summary-label Tổng linh kiện
+                        strong.bom-summary-value= config.itemCount
+                    .bom-summary-col
+                        span.bom-summary-label Tổng giá BOM
+                        strong.bom-summary-value= config.totalCostText
+                    .bom-summary-col
+                        span.bom-summary-label Margin dự kiến
+                        strong.bom-summary-value.bom-margin= config.marginText
+
+block script
+    script(src="/js/script.js")
+    script(src="/js/bom.js")

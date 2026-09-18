@@ -44,6 +44,14 @@ async function main() {
     },
   });
 
+  for (const role of DEFAULT_ROLES) {
+    await prisma.role.upsert({
+      where: { id: role.id },
+      update: {},
+      create: role,
+    });
+  }
+
   const categoryNames = [
     { name: "CPU", description: "Bộ vi xử lý" },
     { name: "Mainboard", description: "Bo mạch chủ" },
