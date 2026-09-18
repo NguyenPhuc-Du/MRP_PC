@@ -1,6 +1,7 @@
 
 import { PrismaClient } from "../src/generated/prisma/index.js";
 import bcrypt from "bcrypt";
+import { DEFAULT_ROLES } from "../src/constants/permissions";
 import { syncComponentImagesFromR2 } from "../src/utils/sync-r2-images";
 
 const prisma = new PrismaClient();
@@ -55,7 +56,7 @@ async function main() {
   const categoryNames = [
     { name: "CPU", description: "Bộ vi xử lý" },
     { name: "Mainboard", description: "Bo mạch chủ" },
-    { name: "Ram", description: "Bộ nhớ trong" },
+    { name: "RAM", description: "Bộ nhớ trong" },
     { name: "GPU", description: "Card đồ họa" },
     { name: "PSU", description: "Nguồn máy tính" },
     { name: "SSD", description: "Ổ cứng SSD" },
@@ -75,7 +76,7 @@ async function main() {
   }
 
   const cpuId = categories.get("CPU")!;
-  const ramId = categories.get("Ram")!;
+  const ramId = categories.get("RAM")!;
   const psuId = categories.get("PSU")!;
 
   const socketAttr = await prisma.attributeDefinition.upsert({
