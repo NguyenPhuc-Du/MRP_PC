@@ -1,3 +1,5 @@
+include ../../mixins/alert.pug
+
 doctype html
 html(lang="vi")
     head
@@ -9,6 +11,8 @@ html(lang="vi")
         link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css")
         link(rel="stylesheet" href="/css/login.css")
 
+    +alert-error(4000)
+
     body
         .login-wrap
             .login-card
@@ -18,7 +22,7 @@ html(lang="vi")
                 h1.login-title Đăng nhập hệ thống
                 p.login-sub Sử dụng tài khoản được cấp để tiếp tục.
 
-                form#form-login(action="/login" method="POST")
+                form#form-login(action=`${prefixAdmin}/auth/login` method="POST")
                     .form-group-custom
                         label.form-label-custom(for="username") Tên đăng nhập
                         .input-icon-wrap
@@ -52,3 +56,4 @@ html(lang="vi")
                 p.login-footer cần hỗ trợ truy cập · liên hệ quản trị viên hệ thống
 
         script(src="/js/login.js")
+        script(src="/js/script.js")
