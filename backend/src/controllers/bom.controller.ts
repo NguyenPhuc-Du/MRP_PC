@@ -1,154 +1,160 @@
 import { Request, Response } from "express";
+import { systemConfig } from "../config/system";
+import { BomItemInput, CreateBomDto } from "../dtos/bom.dto";
+import * as bomService from "../services/bom.service";
 
-type BomStatus = "draft" | "review" | "approved";
+const BASE = () => `${systemConfig.prefixAdmin}/bom`;
 
-type BomItemView = {
-  id: number;
-  categoryCode: string;
-  categoryName: string;
-  name: string;
-  sku: string;
-  unit: string;
-  quantity: number;
-  unitPrice: number;
+const errorMessage = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return "Có lỗi xảy ra";
+  }
+
+  switch (error.message) {
+    case "BOM_NOT_FOUND":
+      return "Không tìm thấy cấu hình BOM";
+    case "NAME_REQUIRED":
+      return "Tên cấu hình không được để trống";
+    case "INVALID_PRICE":
+      return "Giá bán phải lớn hơn 0";
+    case "MISSING_REQUIRED_SLOT":
+      return "BOM phải có đủ CPU, mainboard, RAM, ổ cứng, nguồn, tản nhiệt và case";
+    case "NO_ITEMS":
+      return "Thêm ít nhất một linh kiện vào BOM";
+    case "INVALID_QTY":
+      return "Số lượng linh kiện phải là số nguyên lớn hơn 0";
+    case "DUPLICATE_COMPONENT":
+      return "Mỗi linh kiện chỉ được xuất hiện một lần trong BOM";
+    case "COMPONENT_NOT_FOUND":
+      return "Linh kiện không tồn tại";
+    case "COMPONENT_INACTIVE":
+      return "Không gắn linh kiện đã ngừng kinh doanh";
+    default:
+      return "Thao tác thất bại";
+  }
 };
 
-type BomConfigView = {
-  id: number;
-  name: string;
-  code: string;
-  version: string;
-  subtitle: string;
-  description: string;
-  status: BomStatus;
-  statusLabel: string;
-  updatedAt: string;
-  items: BomItemView[];
-  salePrice: number;
-};
+const parseNamedItems = (raw: unknown): BomItemInput[] => {
+  if (!raw) {
+    return [];
+  }
 
-const STATUS_LABEL: Record<BomStatus, string> = {
-  draft: "Nháp",
-  review: "Chờ duyệt",
-  approved: "Đã duyệt",
-};
-
-const BOM_CONFIGS: BomConfigView[] = [
-  {
-    id: 1,
-    name: "PC Gaming Titan-01",
-    code: "BOM-PC-2026-048",
-    version: "2.4",
-    subtitle: "Cấu hình gaming hiệu năng cao cho dòng sản phẩm Q4",
-    description: "Cấu hình tối ưu cho gaming 2K và streaming.",
-    status: "approved",
-    statusLabel: STATUS_LABEL.approved,
-    updatedAt: "17/09/2026",
-    salePrice: 60320000,
-    items: [
-      { id: 1, categoryCode: "CP", categoryName: "CPU", name: "Intel Core i7-14700K", sku: "CPU-I7-14700K", unit: "Cái", quantity: 1, unitPrice: 10490000 },
-      { id: 2, categoryCode: "MB", categoryName: "Mainboard", name: "MSI PRO Z790-P WIFI", sku: "MB-Z790-PRO", unit: "Cái", quantity: 1, unitPrice: 5490000 },
-      { id: 3, categoryCode: "RA", categoryName: "RAM", name: "Kingston Fury DDR5 32GB", sku: "RAM-DDR5-32G", unit: "Cái", quantity: 2, unitPrice: 2590000 },
-      { id: 4, categoryCode: "SS", categoryName: "SSD", name: "WD Black SN770 1TB", sku: "SSD-SN770-1TB", unit: "Cái", quantity: 1, unitPrice: 2190000 },
-      { id: 5, categoryCode: "GP", categoryName: "GPU", name: "ASUS Dual RTX 4070 Super", sku: "GPU-RTX4070-S", unit: "Cái", quantity: 1, unitPrice: 18490000 },
-      { id: 6, categoryCode: "PS", categoryName: "PSU", name: "Corsair RM850x", sku: "PSU-RM850X", unit: "Cái", quantity: 1, unitPrice: 3290000 },
-      { id: 7, categoryCode: "CA", categoryName: "Case", name: "NZXT H7 Flow", sku: "CASE-H7-FLOW", unit: "Cái", quantity: 1, unitPrice: 2490000 },
-      { id: 8, categoryCode: "CO", categoryName: "Cooler", name: "DeepCool AK620", sku: "COOL-AK620", unit: "Cái", quantity: 1, unitPrice: 1890000 },
-    ],
-  },
-  {
-    id: 2,
-    name: "PC Văn phòng",
-    code: "BOM-PC-2026-012",
-    version: "1.0",
-    subtitle: "Cấu hình văn phòng cơ bản",
-    description: "Máy văn phòng tiết kiệm điện, đủ dùng cho làm việc.",
-    status: "draft",
-    statusLabel: STATUS_LABEL.draft,
-    updatedAt: "15/09/2026",
-    salePrice: 12900000,
-    items: [
-      { id: 1, categoryCode: "CP", categoryName: "CPU", name: "CPU Intel i5-13400", sku: "CPU-I5-13400", unit: "Cái", quantity: 1, unitPrice: 5200000 },
-      { id: 2, categoryCode: "RA", categoryName: "RAM", name: "RAM Kingston Fury 16GB", sku: "RAM-FURY-16G", unit: "Thanh", quantity: 2, unitPrice: 1450000 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Workstation Pro-12",
-    code: "BOM-PC-2026-033",
-    version: "1.3",
-    subtitle: "Máy trạm dựng hình và render",
-    description: "Cấu hình cho thiết kế 3D, edit video và render.",
-    status: "review",
-    statusLabel: STATUS_LABEL.review,
-    updatedAt: "16/09/2026",
-    salePrice: 48900000,
-    items: [
-      { id: 1, categoryCode: "CP", categoryName: "CPU", name: "Intel Core i7-14700K", sku: "CPU-I7-14700K", unit: "Cái", quantity: 1, unitPrice: 10490000 },
-      { id: 2, categoryCode: "RA", categoryName: "RAM", name: "Kingston Fury DDR5 32GB", sku: "RAM-DDR5-32G", unit: "Cái", quantity: 2, unitPrice: 2590000 },
-      { id: 3, categoryCode: "GP", categoryName: "GPU", name: "ASUS Dual RTX 4070 Super", sku: "GPU-RTX4070-S", unit: "Cái", quantity: 1, unitPrice: 18490000 },
-      { id: 4, categoryCode: "SS", categoryName: "SSD", name: "WD Black SN770 1TB", sku: "SSD-SN770-1TB", unit: "Cái", quantity: 1, unitPrice: 2190000 },
-    ],
-  },
-];
-
-function formatVnd(value: number): string {
-  return `${new Intl.NumberFormat("vi-VN").format(value)} đ`;
-}
-
-function withTotals(config: BomConfigView) {
-  const itemCount = config.items.reduce((sum, item) => sum + item.quantity, 0);
-  const groupCount = new Set(config.items.map((item) => item.categoryCode)).size;
-  const totalCost = config.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-  const margin = config.salePrice > 0
-    ? ((config.salePrice - totalCost) / config.salePrice) * 100
-    : 0;
-
-  return {
-    ...config,
-    itemCount,
-    groupCount,
-    totalCost,
-    totalCostText: formatVnd(totalCost),
-    salePriceText: formatVnd(config.salePrice),
-    marginText: `${margin.toFixed(1).replace(".", ",")}%`,
-    items: config.items.map((item) => ({
-      ...item,
-      unitPriceText: formatVnd(item.unitPrice),
-      lineTotalText: formatVnd(item.unitPrice * item.quantity),
-    })),
-  };
-}
-
-export const index = async (_req: Request, res: Response): Promise<void> => {
-  const configs = BOM_CONFIGS.map((config) => {
-    const view = withTotals(config);
+  const rows = Array.isArray(raw) ? raw : Object.values(raw as Record<string, unknown>);
+  return rows.map((row) => {
+    const item = row as Record<string, string>;
     return {
-      id: view.id,
-      name: view.name,
-      code: view.code,
-      version: view.version,
-      itemCount: view.itemCount,
-      groupCount: view.groupCount,
-      totalCostText: view.totalCostText,
-      status: view.status,
-      statusLabel: view.statusLabel,
-      updatedAt: view.updatedAt,
+      componentId: Number(item.componentId),
+      quantity: Number(item.quantity || 1),
     };
   });
+};
+
+const parseBomDto = (req: Request): CreateBomDto => {
+  const slots = (req.body.slots || {}) as Record<string, { componentId?: string; quantity?: string }>;
+  const slotItems = bomService.REQUIRED_SLOTS.map((slot) => ({
+    componentId: Number(slots[slot.key]?.componentId),
+    quantity: Number(slots[slot.key]?.quantity || slot.defaultQty),
+  }));
+
+  return {
+    name: String(req.body.name || ""),
+    description: String(req.body.description || ""),
+    salePrice: Number(req.body.salePrice) || 0,
+    status: req.body.status === "inactive" ? "inactive" : "active",
+    items: [...slotItems, ...parseNamedItems(req.body.extras)],
+  };
+};
+
+const emptyConfig = {
+  id: 0,
+  name: "",
+  code: "Tự tạo khi lưu",
+  version: "1.0",
+  subtitle: "Thêm linh kiện và số lượng để lập công thức lắp ráp.",
+  description: "",
+  status: "approved",
+  statusDb: "active",
+  statusLabel: "Hoạt động",
+  salePrice: "",
+  itemCount: 0,
+  groupCount: 0,
+  totalCostText: "0 đ",
+  marginText: "0,0%",
+  slots: {} as Record<string, { componentId: string; quantity: number }>,
+  extras: [] as Array<{ componentId: number; quantity: number }>,
+};
+
+export const index = async (_req: Request, res: Response): Promise<void> => {
+  const rows = await bomService.getAllConfigs();
 
   res.render("pages/bom/index", {
     pageTitle: "BOM / Cấu hình PC",
-    configs,
+    configs: rows.map(bomService.mapListConfig),
   });
 };
 
-export const detail = async (req: Request, res: Response): Promise<void> => {
-  const id = Number(req.params.id);
-  const config = BOM_CONFIGS.find((item) => item.id === id) ?? BOM_CONFIGS[0];
+export const create = async (_req: Request, res: Response): Promise<void> => {
+  const catalog = await bomService.getComponentOptions();
+  const slots = Object.fromEntries(
+    (catalog.slots || []).map((slot) => [slot.key, { componentId: "", quantity: slot.defaultQty }]),
+  );
 
-  res.render("pages/bom/detail", {
-    pageTitle: config.name,
-    config: withTotals(config),
+  res.render("pages/bom/form", {
+    pageTitle: "Tạo cấu hình BOM",
+    mode: "create",
+    formAction: `${BASE()}/create`,
+    config: { ...emptyConfig, slots },
+    catalog,
   });
+};
+
+export const createPost = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const config = await bomService.createConfig(parseBomDto(req));
+    req.flash("success", "Tạo cấu hình BOM thành công");
+    res.redirect(`${BASE()}/detail/${config.id}`);
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+    res.redirect(`${BASE()}/create`);
+  }
+};
+
+export const detail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const [row, catalog] = await Promise.all([
+      bomService.getConfigById(Number(req.params.id)),
+      bomService.getComponentOptions(),
+    ]);
+
+    res.render("pages/bom/form", {
+      pageTitle: row.name,
+      mode: "edit",
+      formAction: `${BASE()}/detail/${row.id}`,
+      config: bomService.mapDetailConfig(row),
+      catalog,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "BOM_NOT_FOUND") {
+      req.flash("error", errorMessage(error));
+      res.redirect(BASE());
+      return;
+    }
+
+    throw error;
+  }
+};
+
+export const updatePost = async (req: Request, res: Response): Promise<void> => {
+  const id = Number(req.params.id);
+
+  try {
+    await bomService.updateConfig(id, parseBomDto(req));
+    req.flash("success", "Cập nhật cấu hình BOM thành công");
+    res.redirect(`${BASE()}/detail/${id}`);
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+    res.redirect(`${BASE()}/detail/${id}`);
+  }
 };

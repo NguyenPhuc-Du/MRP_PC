@@ -1,0 +1,134 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+    link(rel="stylesheet" href="/css/bom.css")
+    +alert-success(4000)
+    +alert-error(6000)
+
+    - const isEdit = mode === "edit"
+    - const extras = config.extras && config.extras.length ? config.extras : []
+    - const bomSlots = catalog && catalog.slots ? catalog.slots : []
+    - const bomGrouped = catalog && catalog.grouped ? catalog.grouped : {}
+    - const extraOptions = bomGrouped.extra || []
+
+    form.bom-page#bom-form(action=formAction method="POST")
+        .bom-detail-head
+            div
+                .bom-crumb
+                    a(href=`${prefixAdmin}/bom`) BOM / Cấu hình PC
+                    span /
+                    strong= isEdit ? config.name : "Tạo cấu hình"
+                .bom-code-pill #{config.code} · VERSION #{config.version}
+                h1.bom-title= isEdit ? config.name : "Tạo cấu hình BOM"
+                p.bom-desc Chọn đủ 7 linh kiện bắt buộc. Giá bán chốt sau khi đã có giá vốn.
+            .bom-head-actions
+                a.bom-btn-ghost(href=`${prefixAdmin}/bom`) Hủy
+                button.bom-btn-primary(type="submit")= isEdit ? "Lưu cấu hình" : "Tạo cấu hình"
+
+        .bom-split
+            .bom-card
+                h2.bom-card-title Thông tin cấu hình
+                label.bom-field
+                    span Tên cấu hình
+                    input.bom-input(type="text" name="name" required maxlength="100" value=config.name placeholder="vd: PC Văn phòng AMD")
+                label.bom-field
+                    span Mã BOM
+                    input.bom-input(type="text" value=config.code readonly)
+                .bom-field-row
+                    label.bom-field
+                        span Trạng thái
+                        select.bom-input(name="status")
+                            option(value="active" selected=(config.statusDb !== "inactive")) Hoạt động
+                            option(value="inactive" selected=(config.statusDb === "inactive")) Ngưng
+                    label.bom-field
+                        span Giá bán (chốt sau)
+                        input.bom-input#bom-sale-price(type="number" name="salePrice" min="0" step="1000" value=config.salePrice placeholder="Để trống nếu chưa chốt")
+                label.bom-field
+                    span Mô tả
+                    textarea.bom-textarea(name="description" placeholder="Mô tả ngắn cho cấu hình")= config.description
+                p.bom-hint Giá đề xuất = giá vốn chia 0,85 để lãi 15% trên giá bán. Margin thực tế tính theo giá bán cuối nếu đã chốt.
+
+            .bom-card
+                h2.bom-card-title Linh kiện bắt buộc
+                p.bom-card-sub CPU, main, RAM, ổ cứng, nguồn, tản nhiệt, case — mỗi ô chỉ hiện đúng loại.
+
+                .bom-slot-list
+                    each slot in bomSlots
+                        - const value = (config.slots && config.slots[slot.key]) || { componentId: "", quantity: slot.defaultQty }
+                        - const options = bomGrouped[slot.key] || []
+                        .bom-slot
+                            .bom-slot-head
+                                span.bom-slot-label= slot.label
+                                span.bom-slot-req Bắt buộc
+                            select.bom-input.bom-cost-select(
+                                name=`slots[${slot.key}][componentId]`
+                                required
+                                data-bom-required="1"
+                            )
+                                option(value="" data-price="0") -- Chọn #{slot.label} --
+                                each component in options
+                                    option(
+                                        value=component.id
+                                        data-price=component.unitPrice
+                                        selected=(Number(value.componentId) === component.id)
+                                    ) #{component.name}
+                            input.bom-input.bom-cost-qty(
+                                type="number"
+                                name=`slots[${slot.key}][quantity]`
+                                min="1"
+                                step="1"
+                                required
+                                value=value.quantity || slot.defaultQty
+                            )
+
+                .bom-card-head.bom-extra-head
+                    div
+                        h2.bom-card-title Linh kiện đi kèm
+                        p.bom-card-sub GPU, fan thêm, ổ phụ... Không bắt buộc.
+                    button.bom-btn-primary.bom-btn-sm(type="button" id="bom-add-item")
+                        i.bi.bi-plus-lg
+                        span Thêm linh kiện
+
+                #bom-extra-list
+                    each item, index in extras
+                        .bom-item-edit
+                            select.bom-input.bom-cost-select(name=`extras[${index}][componentId]`)
+                                option(value="" data-price="0") -- Chọn linh kiện kèm --
+                                each component in extraOptions
+                                    option(
+                                        value=component.id
+                                        data-price=component.unitPrice
+                                        selected=(Number(item.componentId) === component.id)
+                                    ) #{component.category} · #{component.name}
+                            input.bom-input.bom-cost-qty(type="number" name=`extras[${index}][quantity]` min="1" step="1" value=item.quantity || 1)
+                            button.bom-item-del(type="button" title="Xóa khỏi BOM")
+                                i.bi.bi-trash
+
+                .bom-summary
+                    .bom-summary-col
+                        span.bom-summary-label Giá vốn
+                        strong.bom-summary-value#bom-cost-text= config.totalCostText || "Chưa đủ linh kiện"
+                    .bom-summary-col
+                        span.bom-summary-label Giá đề xuất (lãi 15%)
+                        strong.bom-summary-value#bom-suggest-text= config.suggestedSaleText || "—"
+                    .bom-summary-col.bom-summary-final
+                        span.bom-summary-label Giá bán cuối
+                        strong.bom-summary-value.bom-final#bom-sale-text= config.salePriceText || "Chưa chốt"
+                    .bom-summary-col
+                        span.bom-summary-label Margin thực tế
+                        strong.bom-summary-value.bom-margin#bom-margin-text= config.marginText || "—"
+
+    template#bom-item-template
+        .bom-item-edit
+            select.bom-input.bom-cost-select(name="extras[__index__][componentId]")
+                option(value="" data-price="0") -- Chọn linh kiện kèm --
+                each component in extraOptions
+                    option(value=component.id data-price=component.unitPrice) #{component.category} · #{component.name}
+            input.bom-input.bom-cost-qty(type="number" name="extras[__index__][quantity]" min="1" step="1" value="1")
+            button.bom-item-del(type="button" title="Xóa khỏi BOM")
+                i.bi.bi-trash
+
+block script
+    script(src="/js/script.js")
+    script(src="/js/bom.js")
