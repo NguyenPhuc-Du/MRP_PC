@@ -6,6 +6,7 @@ import { importOrderRoutes } from "./import_orders.route";
 import { exportOrderRoutes } from "./export_orders.route";
 import { bomRoutes } from "./bom.route";
 import { permissionRoutes } from "./permissions.route";
+import { authRoutes } from "./auth.route";
 
 const adminRoutes = (app: Express): void => {
   const PATH_ADMIN = `${systemConfig.prefixAdmin}`;
@@ -23,4 +24,8 @@ const adminRoutes = (app: Express): void => {
   app.use(`${PATH_ADMIN}/permissions`, permissionRoutes);
 };
 
+    app.use(`${PATH_ADMIN}/auth`, authRoutes);
+
+
+}
 export default adminRoutes;
