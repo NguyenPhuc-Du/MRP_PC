@@ -1,6 +1,7 @@
-import bcrypt from "bcrypt";
+import { Request, Response } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { prisma } from "../config/db";
+import { systemConfig } from "../config/system";
 
 function getJwtSecret(): string {
     const secret = process.env.JWT_SECRET;
@@ -10,29 +11,18 @@ function getJwtSecret(): string {
     return secret;
 }
 
-export async function login (username: string, password: string) {
+export async function login (res: Response, username: string) {
     const account = await prisma.account.findUnique({
-        where: { username },
+        where: {
+            username: username
+        }
     });
-
-    if (!account || account.status !== "active") {
-        throw new Error("INVALID_CREDENTIALS");
-    }
-
-    const passwordCorrect = await bcrypt.compare(
-        password,
-        account.passwordHash,
-    );
-
-    if (!passwordCorrect) {
-        throw new Error("INVALID_CREDENTIALS");
-    }
 
     const accessToken = jwt.sign(
         {
-            sub: account.id,
-            username: account.username,
-            role: account.role,
+            sub: account?.id,
+            username: account?.username,
+            role: account?.role,
         },
         getJwtSecret(),
         {
@@ -40,13 +30,13 @@ export async function login (username: string, password: string) {
         },
     );
 
-    return {
-        accessToken,
-        user: {
-            id: account.id,
-            username: account.username,
-            fullname: account.fullName,
-            role: account.role,
-        },
-    };
+    res.cookie("access_token", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 1000,
+    });
+
+
+    res.redirect(`${systemConfig.prefixAdmin}/components`);
 }
