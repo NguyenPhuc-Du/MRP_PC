@@ -1,11 +1,10 @@
 extends ../../layouts/admin-layout.pug
-
+include ../../mixins/pagination.pug
 block main
   .comp-page
     .d-flex.justify-content-between.align-items-start.mb-4
       div
         .comp-eyebrow DANH MỤC
-        p #{objectPagination.currentPage} haaaa
         h4.fw-bold.mb-1 Quản lý linh kiện
         .text-secondary.small #{totalComponents} linh kiện thuộc kho cơ sở
       button.btn.comp-btn.comp-btn-light
@@ -86,17 +85,5 @@ block main
           else
             | Không có dữ liệu
         nav
-          ul.pagination.comp-pagination.mb-0
-            li.page-item
-              a.page-link(href="#")
-            //-     i.bi.bi-chevron-left
-            //- - for (var i = 1; i <= objectPagination.countPage; i++)
-            //-     li.page-item.active
-            //-       a.page-link(href="#") #{i}
-            li.page-item
-              a.page-link(href="#") 2
-            li.page-item
-              a.page-link(href="#") 3
-            li.page-item
-              a.page-link(href="#")
-                i.bi.bi-chevron-right
+          +pagination(objectPagination)
+  script(src="/js/components.js")
