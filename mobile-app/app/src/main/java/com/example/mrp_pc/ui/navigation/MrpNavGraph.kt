@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mrp_pc.ui.login.LoginScreen
 import com.example.mrp_pc.ui.login.LoginViewModel
 import com.example.mrp_pc.ui.orders.OrderListScreen
+import com.example.mrp_pc.ui.orders.OrderViewModel
 import com.example.mrp_pc.ui.orders.SessionLoadingScreen
 
 @Composable
@@ -18,8 +19,15 @@ fun MrpNavGraph() {
         }
 
         state.loggedIn -> {
+            val orderViewModel: OrderViewModel = viewModel()
+            val orderState = orderViewModel.uiState
+
             OrderListScreen(
-                onLogout = loginViewModel::logout
+                orders = orderState.orders,
+                isLoading = orderState.isLoading,
+                errorMessage = orderState.errorMessage,
+                onRetry = orderViewModel::loadOrders,
+                onLogout = loginViewModel::logout,
             )
         }
 
