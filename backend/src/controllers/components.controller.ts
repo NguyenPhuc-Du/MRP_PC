@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as componentService from "../services/components.service";
+import { paginationHelper } from '../utils/pagination.utils';
 
 type StockStatusKey = "ok" | "low" | "out"; //định dạng type mặc định chỉ được đưa 3 gt này vô
 
@@ -31,22 +32,18 @@ const formatVnd = (value: unknown): string => { //khôg biết giá trị của 
 export const index = async (req: Request, res: Response): Promise<void> => {
   try {
     const countComponents= await componentService.countAllComponents();
-    const countPage=Math.ceil(countComponents/10);
+
     //pagination
     const objectPagination={
       currentPage:1,
-      countPage:countPage,
+      countPage:1,
       limit:10,
       skipPage:0,
     };
-if(req.query.page){
-  objectPagination.currentPage = Math.max(1, Number(req.query.page) || 1);
-}
-objectPagination.skipPage=(objectPagination.currentPage-1)*objectPagination.limit;
-console.log("Check dữ liệu phân trang:");
+
+const pagination=paginationHelper(req.query,objectPagination,countComponents);
 //end pagination
-    console.log("Check dữ liệu phân trang:");
-    const rows = await componentService.getAllComponents(objectPagination.skipPage,objectPagination.limit);
+    const rows = await componentService.getAllComponents(objectPagination.skipPage,pagination.limit);
 
     const components = rows.map((row) => {
       const quantityOnHand = row.inventory?.quantityOnHand ?? 0;
@@ -76,7 +73,7 @@ console.log("Check dữ liệu phân trang:");
       pageTitle: "Danh sách linh kiện",
       components:components,
       totalComponents: countComponents,
-      objectPagination:objectPagination,
+      objectPagination:pagination,
     });
   } catch (error) {
     console.error(error);
