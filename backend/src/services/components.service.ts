@@ -8,6 +8,7 @@ import { Prisma } from "../generated/prisma"; // Import type nếu cần định
  */
 export const getAllComponents = async (skip: number, take: number) => {
   return await prisma.component.findMany({
+    where:{deleted:false},
     skip: skip,
     take: take,
     include: {
@@ -28,7 +29,7 @@ export const getAllComponents = async (skip: number, take: number) => {
   });
 };
 export const countAllComponents = async () => {
-  return await prisma.component.count();
+  return await prisma.component.count({where:{deleted:false}});
 };
 /**
  * Lấy thông tin chi tiết 1 linh kiện theo ID
@@ -93,3 +94,9 @@ export const changeComponentStatus = async (
     },
   });
 };
+export const deleteComponent= async (id:number) =>{
+  return await prisma.component.update({
+    where:{id:id},
+    data:{deleted:true,deletedAt: new Date()}
+  });
+}

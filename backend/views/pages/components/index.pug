@@ -70,10 +70,11 @@ block main
                       | #{component.stockLabel}
                   td.comp-muted= formatDate(component.createdAt)
                   td  
-                    button.btn.comp-btn.comp-btn-icon
-                      i.bi.bi-pencil
-                    button.btn.comp-btn.comp-btn-icon
-                      i.bi.bi-trash 
+                    a(
+                      href=`${prefixAdmin}/products/edit/${component.id}`
+                      class="btn btn-warning btn-sm"
+                      ) Sửa
+                    button(class="btn btn-danger btn-sm ml-1" button-delete data-id=component.id) Xóa 
             else
               tr
                 td.text-center.text-secondary.py-4(colspan="11") Chưa có linh kiện nào.
@@ -81,9 +82,15 @@ block main
       .d-flex.justify-content-between.align-items-center.mt-4
         .text-secondary.small
           if totalComponents
-            | Hiển thị 1-#{totalComponents} trong #{totalComponents}
+            | Hiển thị 1-#{objectPagination.limit} trong #{totalComponents}
           else
             | Không có dữ liệu
         nav
           +pagination(objectPagination)
+    form(
+    action=""
+    method="POST"
+    id="form-delete-item"
+    data-path=`${prefixAdmin}/components/delete`
+  )
   script(src="/js/components.js")

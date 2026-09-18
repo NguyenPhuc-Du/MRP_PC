@@ -107,33 +107,31 @@ model ComponentCategory {
 }
 
 model Component {
-  id                 Int             @id @default(autoincrement())
-  categoryId         Int             @map("category_id")
-  name               String          @db.VarChar(150)
-  unit               String?         @db.VarChar(20)
-  unitPrice          Decimal         @map("unit_price") @db.Decimal(12, 2)
-  minStockThreshold  Int             @default(5) @map("min_stock_threshold")
-  imageUrl           String?         @map("image_url") @db.VarChar(500)
-  brandId    Int? @map("brand_id")
-  supplierId Int? @map("supplier_id")
-  status             ComponentStatus @default(active)
-  createdAt          DateTime        @default(now()) @map("created_at")
+  id                Int             @id @default(autoincrement())
+  categoryId        Int             @map("category_id")
+  name              String          @db.VarChar(150)
+  unit              String?         @db.VarChar(20)
+  unitPrice         Decimal         @map("unit_price") @db.Decimal(12, 2)
+  minStockThreshold Int             @default(5) @map("min_stock_threshold")
+  imageUrl          String?         @map("image_url") @db.VarChar(500)
+  brandId           Int?            @map("brand_id")
+  supplierId        Int?            @map("supplier_id")
+  status            ComponentStatus @default(active)
+  createdAt         DateTime        @default(now()) @map("created_at")
+  deleted           Boolean         @default(false)
+  deletedAt         DateTime?       @map("deleted_at")
 
-  brand    Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
-supplier Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
-
-
-  category             ComponentCategory     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  attributes           ComponentAttribute[]
-  bomItems             BomItem[]
-  inventory            Inventory?
-  importOrderItems     ImportOrderItem[]
-  exportOrderItems     ExportOrderItem[]
+  brand            Brand?               @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  supplier         Supplier?            @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  category         ComponentCategory    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  attributes       ComponentAttribute[]
+  bomItems         BomItem[]
+  inventory        Inventory?
+  importOrderItems ImportOrderItem[]
+  exportOrderItems ExportOrderItem[]
 
   @@index([categoryId])
   @@map("components")
-  @@index([brandId])
-@@index([supplierId])
 }
 
 model AttributeDefinition {

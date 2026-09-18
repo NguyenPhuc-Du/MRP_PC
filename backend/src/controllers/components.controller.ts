@@ -43,7 +43,7 @@ export const index = async (req: Request, res: Response): Promise<void> => {
 
 const pagination=paginationHelper(req.query,objectPagination,countComponents);
 //end pagination
-    const rows = await componentService.getAllComponents(objectPagination.skipPage,pagination.limit);
+    const rows = await componentService.getAllComponents(pagination.skipPage,pagination.limit);
 
     const components = rows.map((row) => {
       const quantityOnHand = row.inventory?.quantityOnHand ?? 0;
@@ -85,4 +85,15 @@ const pagination=paginationHelper(req.query,objectPagination,countComponents);
         skipPage:0, },
     });
   }
+};
+export const deleteComponent = async (req: Request, res: Response): Promise<void> => {
+try{
+if(req.params.id){
+  const component= await componentService.deleteComponent(Number(req.params.id));
+  res.redirect(req.get("referer") );
+}
+}
+catch(error){
+  res.send("NO");
+}
 };
