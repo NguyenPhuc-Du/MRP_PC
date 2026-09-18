@@ -1,3 +1,7 @@
 package com.example.mrp_pc.domain.repository
 
-interface ProductionRepository
+import com.example.mrp_pc.domain.model.ProductionOrder
+
+interface ProductionRepository {
+    suspend fun getMyOrders(): List<ProductionOrder>
+}

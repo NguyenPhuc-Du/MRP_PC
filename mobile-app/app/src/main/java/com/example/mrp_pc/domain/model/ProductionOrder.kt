@@ -1,3 +1,10 @@
 package com.example.mrp_pc.domain.model
 
-class ProductionOrder
+data class ProductionOrder (
+    val id: Int,
+    val configName: String,
+    val description: String?,
+    val quantity: Int,
+    val status: String,
+    val createdAt: String,
+)
