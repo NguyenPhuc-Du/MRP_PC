@@ -17,11 +17,11 @@ export async function login(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const result = await authService.login(username.trim(), password);
+        const result = await authService.loginForApi(username.trim(), password);
 
         if (result.user.role !== "staff") {
             res.status(403).json({
-                message: "Wrong credentials",
+                message: "App is only for staff accounts",
             });
             return;
         }
@@ -38,4 +38,10 @@ export async function login(req: Request, res: Response): Promise<void> {
         console.error(error);
         res.status(500).json({message: "Internal server error"});
     }
+}
+
+export function me(req: Request, res: Response): void {
+    res.json({
+        user:req.authUser,
+    });
 }
