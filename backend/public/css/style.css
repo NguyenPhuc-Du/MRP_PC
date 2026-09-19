@@ -724,3 +724,34 @@ a {
   }
   .message.info .alert{ width:100%; }
 }
+
+.topbar-user {
+  cursor: pointer;
+}
+.topbar-user-menu {
+  margin-top: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 12px 32px rgba(30, 31, 38, 0.12);
+  min-width: 200px;
+}
+.topbar-user-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+.topbar-user-menu .dropdown-item:hover {
+  background: var(--hover-bg);
+}
+.topbar-user-menu .dropdown-item.text-danger:hover {
+  background: #feeeee;
+}
+.topbar-user-menu .dropdown-divider {
+  margin: 4px 0;
+  border-color: var(--border-color);
+}
