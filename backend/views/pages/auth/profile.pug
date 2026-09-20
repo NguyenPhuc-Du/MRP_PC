@@ -1,0 +1,150 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+    link(rel="stylesheet", href="/css/profile.css")
+    +alert-success(4000)
+    +alert-error(5000)
+    .profile-page
+        .comp-eyebrow TÀI KHOẢN
+        h2.mb-1 Thông tin cá nhân
+        p.text-muted.mb-4 Xem và cập nhật thông tin đăng nhập, liên hệ của bạn
+
+        .row.g-4
+            //- ============ CỘT TRÁI: TÓM TẮT TÀI KHOẢN ============
+            .col-12.col-lg-4
+                .comp-card.h-100.d-flex.flex-column.align-items-center.text-center.py-4
+                    .profile-avatar-lg
+                        | #{user.fullName ? user.fullName.trim().charAt(0).toUpperCase() : 'U'}
+
+                    h5.mt-3.mb-0 #{user.fullName || user.username}
+                    .text-muted.small.mb-3 \@#{user.username}
+
+                    span.comp-status.mb-2(class=user.status === 'active' ? 'comp-status-ok' : 'comp-status-out')
+                        span.comp-dot
+                        if user.status === 'active'
+                            | Đang hoạt động
+                        else
+                            | Đã khoá
+
+                    .profile-role-chip.mb-4
+                        i.bi.bi-shield-check.me-1
+                        if user.role === 'admin'
+                            | Quản trị viên
+                        else if user.role === 'warehouse_manager'
+                            | Quản lý kho
+                        else if user.role === 'staff'
+                            | Nhân viên lắp ráp
+                        else
+                            | #{user.role}
+
+                    .profile-meta.w-100.text-start
+                        .profile-meta-row
+                            i.bi.bi-calendar3
+                            span Tạo tài khoản: #{user.createdAt.toLocaleDateString('vi-VN')}
+                        if user.updatedAt
+                            .profile-meta-row
+                                i.bi.bi-clock-history
+                                span Cập nhật lần cuối: #{user.updatedAt.toLocaleDateString('vi-VN')}
+
+                    hr.w-100
+
+                    button.comp-btn.comp-btn-light.w-100.text-danger(type="button" data-bs-toggle="modal" data-bs-target="#modal-logout-all")
+                        i.bi.bi-box-arrow-right
+                        | Đăng xuất khỏi tất cả thiết bị
+
+            //- ============ CỘT PHẢI: CHI TIẾT THÔNG TIN ============
+            .col-12.col-lg-8
+                form#form-profile(action=`${prefixAdmin}/auth/profile` method="POST")
+                    .comp-card.mb-4
+                        .d-flex.align-items-center.justify-content-between.mb-3
+                            h6.mb-0 Thông tin liên hệ
+                            button.comp-btn.comp-btn-light(type="button" id="btn-edit-profile")
+                                i.bi.bi-pencil
+                                | Chỉnh sửa
+
+                        .profile-grid
+                            .profile-field
+                                label.profile-field-label Họ và tên
+                                input.form-control.profile-field-input(type="text" name="fullName" value=user.fullName disabled)
+
+                            .profile-field
+                                label.profile-field-label Tên đăng nhập
+                                input.form-control.profile-field-input(type="text" value=user.username disabled)
+                                .profile-field-hint Không thể thay đổi tên đăng nhập
+
+                            .profile-field
+                                label.profile-field-label Email
+                                input.form-control.profile-field-input(type="email" name="email" value=user.email disabled)
+
+                            .profile-field
+                                label.profile-field-label Số điện thoại
+                                input.form-control.profile-field-input(type="text" name="phone" value=user.phone disabled)
+
+                            .profile-field
+                                label.profile-field-label Vai trò
+                                input.form-control.profile-field-input(
+                                    type="text"
+                                    disabled
+                                    value=user.role === 'admin' ? 'Quản trị viên' : user.role === 'warehouse_manager' ? 'Quản lý kho' : 'Nhân viên lắp ráp'
+                                )
+                                .profile-field-hint Liên hệ quản trị viên để đổi vai trò
+
+                            .profile-field
+                                label.profile-field-label Trạng thái tài khoản
+                                input.form-control.profile-field-input(type="text" disabled value=user.status === 'active' ? 'Đang hoạt động' : 'Đã khoá')
+
+                        .profile-form-actions.mt-3.d-none
+                            button.comp-btn.comp-btn-light(type="button" id="btn-cancel-edit") Huỷ
+                            button.comp-btn.comp-btn-primary(type="submit") Lưu thay đổi
+
+                    .comp-card
+                        h6.mb-3 Bảo mật
+                        .profile-security-row
+                            div
+                                .fw-semibold Mật khẩu
+                                .text-muted.small Đổi mật khẩu định kỳ để bảo vệ tài khoản
+                            button.comp-btn.comp-btn-light(type="button" data-bs-toggle="modal" data-bs-target="#modal-change-password")
+                                i.bi.bi-key
+                                | Đổi mật khẩu
+
+    //- ============ MODAL: ĐỔI MẬT KHẨU ============
+    .modal.fade#modal-change-password(tabindex="-1")
+        .modal-dialog.modal-dialog-centered
+            .modal-content
+                form(action=`${prefixAdmin}/auth/profile/change-password` method="POST")
+                    .modal-header
+                        h5.modal-title Đổi mật khẩu
+                        button.btn-close(type="button" data-bs-dismiss="modal")
+                    .modal-body
+                        .mb-3
+                            label.form-label.small Mật khẩu hiện tại
+                            input.form-control(type="password" name="currentPassword" required)
+                        .mb-3
+                            label.form-label.small Mật khẩu mới
+                            input.form-control(type="password" name="newPassword" required minlength="8")
+                        .mb-0
+                            label.form-label.small Xác nhận mật khẩu mới
+                            input.form-control(type="password" name="confirmPassword" required minlength="8")
+                    .modal-footer
+                        button.comp-btn.comp-btn-light(type="button" data-bs-dismiss="modal") Huỷ
+                        button.comp-btn.comp-btn-primary(type="submit") Cập nhật mật khẩu
+
+    //- ============ MODAL: ĐĂNG XUẤT TẤT CẢ THIẾT BỊ ============
+    .modal.fade#modal-logout-all(tabindex="-1")
+        .modal-dialog.modal-dialog-centered
+            .modal-content
+                .modal-header
+                    h5.modal-title Đăng xuất khỏi tất cả thiết bị
+                    button.btn-close(type="button" data-bs-dismiss="modal")
+                .modal-body
+                    p.mb-0 Thao tác này sẽ vô hiệu hoá mọi phiên đăng nhập hiện tại (bao gồm refresh token) trên tất cả thiết bị. Bạn sẽ cần đăng nhập lại.
+                .modal-footer
+                    button.comp-btn.comp-btn-light(type="button" data-bs-dismiss="modal") Huỷ
+                    form(action="/profile/logout-all" method="POST")
+                        button.comp-btn.comp-btn-primary.text-white(type="submit" style="background: linear-gradient(135deg, #DC2626, #F87171); box-shadow:none;")
+                            | Xác nhận đăng xuất
+
+block script
+    script(src="/js/script.js")
+    script(src="/js/profile.js")
