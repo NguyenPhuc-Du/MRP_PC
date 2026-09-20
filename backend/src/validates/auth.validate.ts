@@ -29,3 +29,27 @@ export const loginValidate = async (req: Request, res: Response, next: NextFunct
 
     next();
 }
+
+export const changePasswordValidate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        req.flash("error", "Vui lòng nhập đầy đủ thông tin mật khẩu");
+        res.redirect(`${systemConfig.prefixAdmin}/auth/profile`);
+        return;
+    }
+
+    if (newPassword.length < 8) {
+        req.flash("error", "Mật khẩu mới phải có ít nhất 8 ký tự");
+        res.redirect(`${systemConfig.prefixAdmin}/auth/profile`);
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        req.flash("error", "Mật khẩu xác nhận không khớp");
+        res.redirect(`${systemConfig.prefixAdmin}/auth/profile`);
+        return;
+    }
+
+    next();
+};
