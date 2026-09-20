@@ -86,3 +86,12 @@ export async function login(res: Response, username: string): Promise<void> {
 
   res.redirect(`${systemConfig.prefixAdmin}/components`);
 }
+
+
+export const logout = async (res: Response): Promise<void> => {
+  res.clearCookie("access_token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+}

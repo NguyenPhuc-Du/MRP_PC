@@ -45,8 +45,9 @@ header.topbar
                 li
                     hr.dropdown-divider
                 li
-                    a.dropdown-item.text-danger(href="/logout")
-                        i.bi.bi-box-arrow-right.me-2
-                        | Đăng xuất
+                    form(action=`${prefixAdmin}/auth/logout` method="POST" id="form-logout")
+                        button.dropdown-item.text-danger(type="submit")
+                            i.bi.bi-box-arrow-right.me-2
+                            | Đăng xuất
         
 
