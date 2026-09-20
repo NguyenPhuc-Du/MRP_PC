@@ -11,10 +11,10 @@ block main
       div
         h1.io-title Phiếu nhập kho
         p.io-desc Quản lý các giao dịch nhập linh kiện vào hệ thống tồn kho
-      a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`)
-        i.bi.bi-plus-lg
-        | Tạo phiếu nhập
-
+      if account && account.role === 'warehouse_manager'
+        a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`)
+          i.bi.bi-plus-lg
+          | Tạo phiếu nhập 
     .io-stats
       .io-stat
         .io-stat-label Tổng phiếu nhập
@@ -113,15 +113,15 @@ block main
                       .io-menu
                         button.io-menu-item.js-open-drawer(type="button") Xem nhanh
                         a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}`) Xem chi tiết
-                        if order.status === "draft"
-                          a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
+                        //- if order.status === "draft"
+                        //-   a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
                         button.io-menu-item.js-print(type="button" data-href=`${prefixAdmin}/importOrders/${order.id}`) In phiếu
-            else
-              tr
-                td.io-empty(colspan="8")
-                  i.bi.bi-inbox
-                  p Chưa có phiếu nhập nào.
-                  a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`) Tạo phiếu nhập
+            //- else
+              //- tr
+              //-   td.io-empty(colspan="8")
+              //-     i.bi.bi-inbox
+              //-     p Chưa có phiếu nhập nào.
+              //-     a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`) Tạo phiếu nhập
 
       .io-pager
         .io-pager-info #{fromIndex}–#{toIndex} / #{total} phiếu

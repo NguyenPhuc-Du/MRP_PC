@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { systemConfig } from "../config/system";
 import { ImportOrderItemInput } from "../dtos/import-order.dto";
 import * as importOrderService from "../services/import-order.service";
+import { accountRoutes } from "../routes/account.route";
 
 const BASE = () => `${systemConfig.prefixAdmin}/importOrders`;
 
@@ -83,12 +84,17 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       importOrderService.getComponentOptions(),
       importOrderService.generateCode(),
     ]);
+    const account = req.session.account;
+    if (!account) {
+      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      return;
+    }
 
     res.render("pages/importOders/form", {
       pageTitle: "Tạo phiếu nhập kho",
       mode: "create",
       code,
-      creator,
+      creator: account,
       components,
       order: null,
     });
@@ -99,18 +105,35 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const createPost = async (req: Request, res: Response): Promise<void> => {
+export const createPost = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
-    const creator = await importOrderService.getDefaultCreator();
+    // const creator = await importOrderService.getDefaultCreator();
+    // const order = await importOrderService.createOrder({
+    //   createdBy: creator.id,
+    //   code: String(req.body.code || ""),
+    //   note: String(req.body.note || ""),
+    //   items: parseItems(req.body),
+    // });
+    const accountId = req.session.account?.id;
+    if (!accountId) {
+      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      return;
+    }
     const order = await importOrderService.createOrder({
-      createdBy: creator.id,
+      createdBy: accountId,
       code: String(req.body.code || ""),
       note: String(req.body.note || ""),
       items: parseItems(req.body),
     });
 
     const intent = String(req.body.intent || "create");
-    req.flash("success", intent === "draft" ? "Đã lưu phiếu nháp" : "Tạo phiếu nhập thành công");
+    req.flash(
+      "success",
+      intent === "draft" ? "Đã lưu phiếu nháp" : "Tạo phiếu nhập thành công",
+    );
     if (intent === "draft") {
       res.redirect(BASE());
       return;
@@ -178,9 +201,14 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
 export const editPost = async (req: Request, res: Response): Promise<void> => {
   const orderId = Number(req.params.orderId);
   try {
+    const accountId = req.session.account?.id;
+    if (!accountId) {
+      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      return;
+    }
     const creator = await importOrderService.getDefaultCreator();
     await importOrderService.updateDraft(orderId, {
-      createdBy: creator.id,
+      createdBy: accountId,
       note: String(req.body.note || ""),
       items: parseItems(req.body),
     });
@@ -202,8 +230,15 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
 export const confirm = async (req: Request, res: Response): Promise<void> => {
   const orderId = Number(req.params.orderId);
   try {
-    const creator = await importOrderService.getDefaultCreator();
-    await importOrderService.confirmOrder(orderId, creator.id);
+    // const creator = await importOrderService.getDefaultCreator();
+    // await importOrderService.confirmOrder(orderId, creator.id);
+    const accountId = req.session.account?.id;
+    if (!accountId) {
+      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      return;
+    }
+    await importOrderService.confirmOrder(orderId, accountId);
+
     req.flash("success", "Đã xác nhận phiếu nhập và cập nhật tồn kho");
     res.redirect(`${BASE()}/${orderId}`);
   } catch (error) {
