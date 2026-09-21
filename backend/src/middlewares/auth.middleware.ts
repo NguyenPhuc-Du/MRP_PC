@@ -46,6 +46,7 @@ export const requireAuth = async (
     }
 
     res.locals.user = account;
+
     res.locals.account = {
       id: account.id,
       username: account.username,
@@ -55,13 +56,14 @@ export const requireAuth = async (
     if (!req.session.account) {
       req.session.account = res.locals.account;
     }
+
     next();
   } catch (error) {
     res.clearCookie("access_token");
     return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
   }
 };
-
+// Chỉ quản lý kho được tạo/ sửa/ xác nhận nhập - Dũng
 export const requireWarehouse = (
   req: Request,
   res: Response,
@@ -69,7 +71,10 @@ export const requireWarehouse = (
 ) => {
   const role = req.session.account?.role;
   if (role !== "warehouse_manager") {
-    req.flash("error", "Chỉ quản lý kho được nhập hàng và xác nhận phiếu");
+    req.flash(
+      "error",
+      "Chỉ cho phép quản lý kho được nhập hàng và xác nhận phiếu",
+    );
     return res.redirect(`${systemConfig.prefixAdmin}/importOrders`);
   }
   next();

@@ -3,8 +3,9 @@ import { Request, Response } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { prisma } from "../config/db";
 import { systemConfig } from "../config/system";
-import { comparePassword } from "../utils/password.util";
-import { AccountRole } from "../generated/prisma";
+import { comparePassword, hashPassword } from "../utils/password.util";
+import { Account, AccountRole, Prisma } from "../generated/prisma";
+import { ChangePasswordDto, UpdateProfileDto } from "../dtos/profile.dto";
 
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
@@ -97,3 +98,92 @@ export async function login(
   }
   res.redirect(`${systemConfig.prefixAdmin}/components`);
 }
+
+
+export const logout = async (res: Response): Promise<void> => {
+  res.clearCookie("access_token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+};
+
+const emptyToUndefined = (value?: string): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const uniqueEmailError = (error: unknown): boolean => {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+    return false;
+  }
+  const target = error.meta?.target;
+  const fields = Array.isArray(target) ? target.map(String) : [String(target ?? "")];
+  return fields.some((field) => field.includes("email"));
+};
+
+export const getProfileById = async (accountId: number): Promise<Account | null> => {
+  if (!Number.isInteger(accountId) || accountId <= 0) {
+    return null;
+  }
+
+  return prisma.account.findUnique({
+    where: { id: accountId },
+  });
+};
+
+export const updateProfileById = async (updateProfileDto: UpdateProfileDto, accountId: number): Promise<Account> => {
+  const existing = await getProfileById(accountId);
+
+  if (!existing) {
+    throw new Error("ACCOUNT_NOT_FOUND");
+  }
+
+  try {
+    return await prisma.account.update({
+      where: { id: accountId },
+      data: {
+        fullName: emptyToUndefined(updateProfileDto.fullName),
+        email: emptyToUndefined(updateProfileDto.email),
+        phone: emptyToUndefined(updateProfileDto.phone),
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      throw new Error("ACCOUNT_NOT_FOUND");
+    }
+    if (uniqueEmailError(error)) {
+      throw new Error("EMAIL_TAKEN");
+    }
+    throw error;
+  }
+};
+
+export const changePasswordById = async (changePasswordDto: ChangePasswordDto, accountId: number): Promise<void> => {
+  const { currentPassword, newPassword, confirmPassword } = changePasswordDto;
+
+  if (newPassword !== confirmPassword) {
+    throw new Error("PASSWORD_MISMATCH");
+  }
+
+  const account = await getProfileById(accountId);
+
+  if (!account) {
+    throw new Error("ACCOUNT_NOT_FOUND");
+  }
+
+  const currentOk = await comparePassword(currentPassword, account.passwordHash);
+  if (!currentOk) {
+    throw new Error("WRONG_CURRENT_PASSWORD");
+  }
+
+  await prisma.account.update({
+    where: { id: accountId },
+    data: {
+      passwordHash: await hashPassword(newPassword),
+    },
+  });
+};

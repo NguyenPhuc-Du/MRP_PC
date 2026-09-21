@@ -61,3 +61,35 @@
     });
   });
 })();
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  var editBtn = document.getElementById('btn-edit-profile');
+  var cancelBtn = document.getElementById('btn-cancel-edit');
+  var form = document.getElementById('form-profile');
+  if (!editBtn || !form) return;
+
+  var actions = form.querySelector('.profile-form-actions');
+  // chỉ những field được phép sửa (có thuộc tính name), bỏ qua username/vai trò/trạng thái
+  var editableInputs = form.querySelectorAll('.profile-field-input[name]');
+
+  function setEditing(isEditing) {
+    editableInputs.forEach(function (input) {
+      input.disabled = !isEditing;
+    });
+    actions.classList.toggle('d-none', !isEditing);
+    editBtn.classList.toggle('d-none', isEditing);
+  }
+
+  editBtn.addEventListener('click', function () {
+    setEditing(true);
+    if (editableInputs.length) editableInputs[0].focus();
+  });
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function () {
+      form.reset();
+      setEditing(false);
+    });
+  }
+});
