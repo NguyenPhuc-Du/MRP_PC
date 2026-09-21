@@ -61,6 +61,7 @@ const parseBomDto = (req: Request): CreateBomDto => {
     name: String(req.body.name || ""),
     description: String(req.body.description || ""),
     salePrice: Number(req.body.salePrice) || 0,
+    imageUrl: String(req.body.imageUrl || "").trim(),
     status: req.body.status === "inactive" ? "inactive" : "active",
     items: [...slotItems, ...parseNamedItems(req.body.extras)],
   };
@@ -77,6 +78,7 @@ const emptyConfig = {
   statusDb: "active",
   statusLabel: "Hoạt động",
   salePrice: "",
+  imageUrl: "",
   itemCount: 0,
   groupCount: 0,
   totalCostText: "0 đ",
