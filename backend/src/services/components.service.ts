@@ -68,14 +68,25 @@ export const getComponentById = async (id: number) => {
     },
     include: {
       category: true,
+      brand: true,
+      supplier: true,
       inventory: true,
       attributes: {
         include: {
-          attributeDefinition: true, // Lấy tên và kiểu dữ liệu của thuộc tính
+          attributeDefinition: true,
         },
       },
     },
   });
+};
+
+export const getComponentEditLookups = async () => {
+  const [categories, brands, suppliers] = await Promise.all([
+    prisma.componentCategory.findMany({ orderBy: { name: "asc" } }),
+    prisma.brand.findMany({ orderBy: { name: "asc" } }),
+    prisma.supplier.findMany({ orderBy: { name: "asc" } }),
+  ]);
+  return { categories, brands, suppliers };
 };
 
 /**

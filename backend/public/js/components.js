@@ -44,3 +44,18 @@ if(formSearch){
         window.location.href = url.toString();
     });
 }
+//preview ảnh
+(function () {
+    var input = document.getElementById("image");
+    var img = document.getElementById("image-preview");
+    var empty = document.getElementById("image-preview-empty");
+    if (!input || !img) return;
+    input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        if (!file) return;
+        img.src = URL.createObjectURL(file);
+        img.style.display = "block";
+        if (empty) empty.style.display = "none";
+    });
+})();
+//end preview ảnh

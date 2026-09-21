@@ -1,0 +1,190 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+  link(rel="stylesheet" href="/css/account.css")
+
+  +alert-success(4000)
+  +alert-error(6000)
+
+  .comp-page
+    .page-head
+      div
+        .page-eyebrow DANH MỤC
+        h2.page-title Chỉnh sửa linh kiện
+        p.page-desc Cập nhật thông tin, giá nhập và ngưỡng tồn kho tối thiểu.
+      .page-actions
+        a.btn-soft(href=`${prefixAdmin}/components`)
+          i.bi.bi-arrow-left
+          span Quay lại danh sách
+
+    form#form-edit-component(
+      action=`${prefixAdmin}/components/edit/${component.id}?_method=PATCH`
+      method="POST"
+      enctype="multipart/form-data"
+    )
+      .row.g-4
+        .col-lg-8
+          .form-card
+            .form-card-head
+              .form-card-icon
+                i.bi.bi-cpu
+              div
+                .form-card-title Thông tin linh kiện
+                .form-card-sub Mã #{component.code} · dùng trên danh mục và phiếu kho.
+
+            .row.g-3
+              .col-md-6
+                label.form-label-custom(for="name")
+                  | Tên linh kiện
+                  span.required *
+                input#name.form-control.input-custom(
+                  type="text"
+                  name="name"
+                  maxlength="150"
+                  required
+                  value=component.name
+                )
+              .col-md-6
+                label.form-label-custom(for="categoryId")
+                  | Loại
+                  span.required *
+                select#categoryId.form-select.input-custom(name="categoryId" required)
+                  each category in categories
+                    option(
+                      value=category.id
+                      selected=(category.id === component.categoryId)
+                    )= category.name
+
+              .col-md-6
+                label.form-label-custom(for="brandId") Thương hiệu
+                select#brandId.form-select.input-custom(name="brandId")
+                  option(value="") — Chưa chọn —
+                  each brand in brands
+                    option(
+                      value=brand.id
+                      selected=(brand.id === component.brandId)
+                    )= brand.name
+              .col-md-6
+                label.form-label-custom(for="supplierId") Nhà cung cấp
+                select#supplierId.form-select.input-custom(name="supplierId")
+                  option(value="") — Chưa chọn —
+                  each supplier in suppliers
+                    option(
+                      value=supplier.id
+                      selected=(supplier.id === component.supplierId)
+                    )= supplier.name
+
+              .col-md-4
+                label.form-label-custom(for="unit") Đơn vị tính
+                input#unit.form-control.input-custom(
+                  type="text"
+                  name="unit"
+                  maxlength="20"
+                  placeholder="vd: cái, thanh"
+                  value=component.unit
+                )
+              .col-md-4
+                label.form-label-custom(for="unitPrice")
+                  | Giá nhập (đ)
+                  span.required *
+                input#unitPrice.form-control.input-custom(
+                  type="number"
+                  name="unitPrice"
+                  min="0"
+                  step="1000"
+                  required
+                  value=component.unitPrice
+                )
+              .col-md-4
+                label.form-label-custom(for="minStockThreshold") Tồn tối thiểu
+                input#minStockThreshold.form-control.input-custom(
+                  type="number"
+                  name="minStockThreshold"
+                  min="0"
+                  step="1"
+                  value=component.minStockThreshold
+                )
+
+              .col-12
+                label.form-label-custom(for="image") Ảnh linh kiện
+                input#image(type="file" name="image" accept="image/jpeg,image/png,image/webp")
+                .form-hint Chọn ảnh JPEG, PNG hoặc WebP. Để trống nếu giữ ảnh hiện tại.
+
+          if component.attributes && component.attributes.length
+            .form-card
+              .form-card-head
+                .form-card-icon
+                  i.bi.bi-sliders
+                div
+                  .form-card-title Thuộc tính kỹ thuật
+                  .form-card-sub Theo loại linh kiện (socket, công suất...).
+              .table-responsive
+                table.table.align-middle.mb-0
+                  thead
+                    tr
+                      th Thuộc tính
+                      th Giá trị
+                  tbody
+                    each attr in component.attributes
+                      tr
+                        td.text-secondary= attr.name
+                        td
+                          strong= attr.value
+                          if attr.unit
+                            span.text-secondary  #{attr.unit}
+
+        .col-lg-4
+          .form-card
+            .form-card-head
+              .form-card-icon
+                i.bi.bi-image
+              div
+                .form-card-title Xem trước
+                .form-card-sub Ảnh hiển thị trên danh sách.
+            .comp-edit-preview
+              img#image-preview(
+                src=component.imageUrl || ""
+                alt=component.name
+                style=component.imageUrl ? "display:block" : "display:none"
+              )
+              .comp-edit-preview-empty#image-preview-empty(
+                style=component.imageUrl ? "display:none" : "flex"
+              )
+                i.bi.bi-image
+                span Chưa có ảnh
+
+          .form-card
+            .form-card-head
+              .form-card-icon
+                i.bi.bi-box-seam
+              div
+                .form-card-title Tồn kho
+                .form-card-sub Số lượng thực tế lấy từ kho, không sửa tại đây.
+            .d-flex.justify-content-between.align-items-center.mb-3
+              span.text-secondary Tồn hiện tại
+              strong.fs-4= component.quantityOnHand
+            span.comp-status(class=`comp-status-${component.stockStatus}`)
+              span.comp-dot
+              | #{component.stockLabel}
+
+          .form-card
+            .form-card-head
+              .form-card-icon
+                i.bi.bi-toggle-on
+              div
+                .form-card-title Trạng thái
+                .form-card-sub Ngừng KD sẽ ẩn khỏi luồng nhập mới.
+            select#status.form-select.input-custom(name="status")
+              option(value="active" selected=(component.status === "active")) Đang kinh doanh
+              option(value="discontinued" selected=(component.status === "discontinued")) Ngừng kinh doanh
+
+          .form-actions
+            button.btn-gradient(type="submit")
+              i.bi.bi-check-lg
+              span Lưu thay đổi
+            a.btn-soft.w-100(href=`${prefixAdmin}/components`)
+              i.bi.bi-x-lg
+              span Huỷ
+
+    script(src="/js/components.js")
