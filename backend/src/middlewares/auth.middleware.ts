@@ -62,7 +62,6 @@ export const requireAuth = async (
     return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
   }
 };
-
 // Chỉ quản lý kho được tạo/ sửa/ xác nhận nhập - Dũng
 export const requireWarehouse = (
   req: Request,

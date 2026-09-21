@@ -1,6 +1,10 @@
 import { prisma } from "../config/database";
 import { Prisma } from "../generated/prisma";
-import { ImportOrderFilter, ImportOrderItemInput, SaveImportOrderDto } from "../dtos/import-order.dto";
+import {
+  ImportOrderFilter,
+  ImportOrderItemInput,
+  SaveImportOrderDto,
+} from "../dtos/import-order.dto";
 
 const componentSelect = {
   id: true,
@@ -26,7 +30,9 @@ export const money = (value: number): string => {
   return `₫${Math.round(value).toLocaleString("vi-VN")}`;
 };
 
-export const formatDateTime = (value: Date | string | null | undefined): string => {
+export const formatDateTime = (
+  value: Date | string | null | undefined,
+): string => {
   if (!value) {
     return "—";
   }
@@ -39,16 +45,25 @@ export const formatDateTime = (value: Date | string | null | undefined): string 
 };
 
 export const componentCode = (categoryName: string, id: number): string => {
-  const prefix = (categoryName || "COM").replace(/\s+/g, "").slice(0, 3).toUpperCase();
+  const prefix = (categoryName || "COM")
+    .replace(/\s+/g, "")
+    .slice(0, 3)
+    .toUpperCase();
   return `COMP-${prefix}-${String(id).padStart(3, "0")}`;
 };
 
-const toNumber = (value: Prisma.Decimal | number | string): number => Number(value);
+const toNumber = (value: Prisma.Decimal | number | string): number =>
+  Number(value);
 
-const totalsFromItems = (items: { quantity: number; unitPrice: Prisma.Decimal | number }[]) => {
+const totalsFromItems = (
+  items: { quantity: number; unitPrice: Prisma.Decimal | number }[],
+) => {
   const itemCount = items.length;
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalValue = items.reduce((sum, item) => sum + item.quantity * toNumber(item.unitPrice), 0);
+  const totalValue = items.reduce(
+    (sum, item) => sum + item.quantity * toNumber(item.unitPrice),
+    0,
+  );
   return { itemCount, totalQty, totalValue };
 };
 
@@ -119,7 +134,8 @@ export const mapDetailOrder = async (order: OrderWithRelations) => {
       const unitPrice = toNumber(item.unitPrice);
       const lineTotal = item.quantity * unitPrice;
       const stockAfter = item.component.inventory?.quantityOnHand ?? 0;
-      const stockBefore = order.status === "confirmed" ? stockAfter - item.quantity : stockAfter;
+      const stockBefore =
+        order.status === "confirmed" ? stockAfter - item.quantity : stockAfter;
       return {
         id: item.id,
         stt: String(index + 1).padStart(2, "0"),
@@ -139,7 +155,9 @@ export const mapDetailOrder = async (order: OrderWithRelations) => {
     }),
     logs: logs.map((log) => ({
       actorName: log.account.fullName || log.account.username,
-      actorInitials: (log.account.fullName || log.account.username).slice(0, 2).toUpperCase(),
+      actorInitials: (log.account.fullName || log.account.username)
+        .slice(0, 2)
+        .toUpperCase(),
       action: log.action,
       detail: log.detail || "",
       createdAtLabel: formatDateTime(log.createdAt),
@@ -228,9 +246,18 @@ export const getStats = async () => {
     }),
   ]);
 
-  const totalValue = allItems.reduce((sum, item) => sum + item.quantity * toNumber(item.unitPrice), 0);
+  const totalValue = allItems.reduce(
+    (sum, item) => sum + item.quantity * toNumber(item.unitPrice),
+    0,
+  );
 
-  return { total, draft, confirmed, totalValue, totalValueLabel: money(totalValue) };
+  return {
+    total,
+    draft,
+    confirmed,
+    totalValue,
+    totalValueLabel: money(totalValue),
+  };
 };
 
 export const listOrders = async (filter: ImportOrderFilter) => {
@@ -279,7 +306,9 @@ export const getOrderById = async (id: number) => {
   });
 };
 
-const normalizeItems = (items: ImportOrderItemInput[]): ImportOrderItemInput[] => {
+const normalizeItems = (
+  items: ImportOrderItemInput[],
+): ImportOrderItemInput[] => {
   const map = new Map<number, ImportOrderItemInput>();
   for (const item of items) {
     if (!item.componentId) {
@@ -308,7 +337,8 @@ export const createOrder = async (data: SaveImportOrderDto) => {
   }
 
   const code =
-    data.code && !(await prisma.importOrder.findUnique({ where: { code: data.code } }))
+    data.code &&
+    !(await prisma.importOrder.findUnique({ where: { code: data.code } }))
       ? data.code
       : await generateCode();
   const order = await prisma.importOrder.create({
@@ -394,7 +424,10 @@ export const confirmOrder = async (id: number, accountId: number) => {
   if (existing.status !== "draft") {
     throw new Error("ALREADY_CONFIRMED");
   }
-  if (!existing.items.length || existing.items.some((item) => item.quantity <= 0)) {
+  if (
+    !existing.items.length ||
+    existing.items.some((item) => item.quantity <= 0)
+  ) {
     throw new Error("INVALID_QTY");
   }
 
@@ -408,7 +441,10 @@ export const confirmOrder = async (id: number, accountId: number) => {
       await tx.inventory.upsert({
         where: { componentId: item.componentId },
         update: { quantityOnHand: { increment: item.quantity } },
-        create: { componentId: item.componentId, quantityOnHand: item.quantity },
+        create: {
+          componentId: item.componentId,
+          quantityOnHand: item.quantity,
+        },
       });
     }
 
@@ -423,4 +459,64 @@ export const confirmOrder = async (id: number, accountId: number) => {
     });
   });
 };
+/** Linh kiện cần nhập: tồn <= ngưỡng tối thiểu, còn kinh doanh */
+export const getShortageComponents = async () => {
+  const rows = await prisma.component.findMany({
+    where: { status: "active", deleted: false },
+    include: {
+      inventory: true,
+      category: true,
+      brand: true,
+      supplier: true,
+    },
+  });
 
+  return rows
+    .filter((c) => (c.inventory?.quantityOnHand ?? 0) <= c.minStockThreshold)
+    .map((c) => {
+      const onHand = c.inventory?.quantityOnHand ?? 0;
+      const need = c.minStockThreshold - onHand;
+      return {
+        id: c.id,
+        name: c.name,
+        category: c.category.name,
+        brand: c.brand?.name ?? "—",
+        supplier: c.supplier?.name ?? "Chưa gán NCC",
+        supplierId: c.supplierId,
+        onHand,
+        min: c.minStockThreshold,
+        need: need > 0 ? need : 1,
+        unit: c.unit ?? "cái",
+        unitPrice: Number(c.unitPrice),
+      };
+    });
+};
+
+export const getPrefillItemsByIds = async (ids: number[]) => {
+  if (!ids.length) return [];
+
+  const rows = await prisma.component.findMany({
+    where: { id: { in: ids }, status: "active", deleted: false },
+    include: {
+      inventory: true,
+      category: true,
+    },
+  });
+
+  const order = new Map(ids.map((id, i) => [id, i]));
+  rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+
+  return rows.map((c) => {
+    const onHand = c.inventory?.quantityOnHand ?? 0;
+    const need = c.minStockThreshold - onHand;
+    return {
+      componentId: c.id,
+      code: componentCode(c.category.name, c.id),
+      name: c.name,
+      category: c.category.name,
+      stockAfter: onHand,
+      quantity: need > 0 ? need : 1,
+      unitPrice: Number(c.unitPrice),
+    };
+  });
+};

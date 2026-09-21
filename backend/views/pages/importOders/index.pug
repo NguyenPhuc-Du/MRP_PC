@@ -58,9 +58,9 @@ block main
         label Người tạo
         select(name="createdBy")
           option(value="" selected=(!filters.createdBy)) Tất cả người dùng
-          each account in accounts
-            option(value=account.id selected=(String(filters.createdBy) === String(account.id)))
-              | #{account.fullName || account.username}
+          each acc in accounts
+            option(value=acc.id selected=(String(filters.createdBy) === String(acc.id)))
+              | #{acc.fullName || acc.username}
       .io-filter-item
         label Khoảng thời gian
         .io-dates
@@ -69,7 +69,20 @@ block main
           input(type="date" name="to" value=filters.to)
       button.io-btn-ghost(type="submit") Lọc
       a.io-btn-ghost(href=`${prefixAdmin}/importOrders`) Đặt lại
-
+    if shortages && shortages.length
+      .io-alert
+        .io-alert-head
+          i.bi.bi-exclamation-triangle
+          strong Thiếu linh kiện cần nhập để đủ lắp ráp
+          span.io-alert-count #{shortages.length} mặt hàng
+        ul.io-alert-list
+          each item in shortages
+            li
+              | #{item.name} · #{item.brand} · tồn #{item.onHand}/#{item.min} · gợi ý +#{item.need} #{item.unit}
+              |  · NCC: #{item.supplier}
+        if account && account.role === "warehouse_manager"
+          a.io-btn-primary(href=`${prefixAdmin}/importOrders/create?ids=${shortages.map(s => s.id).join(",")}`)
+            | Tạo phiếu nhập các mặt thiếu 
     .io-card
       .table-responsive
         table.io-table

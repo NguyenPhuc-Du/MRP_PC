@@ -27,3 +27,25 @@ export async function getMyOders(accountId: number) {
     });
 }
 
+export async function getMyOrderById(accountId: number, orderId: number) {
+    return prisma.productionOrder.findFirst({
+        where: {
+            id: orderId,
+            assignedTo: accountId,
+        },
+        select: {
+            id: true,
+            quantityRequested: true,
+            status: true,
+            createdAt: true,
+            completedAt: true,
+            pcConfig: {
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                },
+            },
+        },
+    });
+}

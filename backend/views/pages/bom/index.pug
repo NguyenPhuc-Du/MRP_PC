@@ -1,5 +1,6 @@
 extends ../../layouts/admin-layout.pug
 include ../../mixins/alert.pug
+include ../../mixins/pagination.pug
 
 block main
     link(rel="stylesheet" href="/css/bom.css")
@@ -25,13 +26,14 @@ block main
                     button.bom-btn-ghost(type="button")
                         i.bi.bi-funnel
                         span Bộ lọc
-                    button.bom-btn-icon(type="button")
-                        i.bi.bi-download
+                    //- button.bom-btn-icon(type="button")
+                    //-     i.bi.bi-download
 
             .table-responsive
                 table.bom-table
                     thead
                         tr
+                            th HÌNH ẢNH
                             th TÊN CẤU HÌNH
                             th MÃ BOM
                             th VERSION
@@ -45,13 +47,22 @@ block main
                             each config in configs
                                 tr
                                     td
+                                        if config.imageUrl
+                                            img.bom-thumb(src=config.imageUrl alt=config.name)
+                                        else
+                                            span.bom-thumb.is-empty
+                                    td
                                         a.bom-name(href=`${prefixAdmin}/bom/detail/${config.id}`)= config.name
                                     td
                                         span.bom-code= config.code
                                     td= config.version
                                     td #{config.itemCount} linh kiện · #{config.groupCount} nhóm
                                     td.bom-money= config.totalCostText
-                                    td.bom-money(class=config.saleLocked ? "is-locked" : "is-open")= config.salePriceText
+                                    td.bom-money
+                                      if config.saleLocked
+                                        span.is-locked= config.salePriceText
+                                      else
+                                        span.is-open= config.salePriceText || "Chưa chốt"
                                     td
                                         span.bom-status(class=`is-${config.status}`)
                                             span.bom-status-dot
@@ -61,7 +72,17 @@ block main
                                             i.bi.bi-arrow-right
                         else
                             tr
-                                td(colspan="8") Chưa có cấu hình BOM. Bấm “Thêm cấu hình” để tạo mới.
+                                td(colspan="9") Chưa có cấu hình BOM. Bấm “Thêm cấu hình” để tạo mới.
+
+            .d-flex.justify-content-between.align-items-center.mt-4
+                .text-secondary.small
+                    if totalConfigs
+                        | Hiển thị #{objectPagination.skipPage + 1}-#{objectPagination.skipPage + configs.length} trong #{totalConfigs}
+                    else
+                        | Không có dữ liệu
+                if objectPagination
+                    nav
+                        +pagination(objectPagination)
 
 block script
     script(src="/js/script.js")

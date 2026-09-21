@@ -54,7 +54,7 @@ export const index = async (req: Request, res: Response): Promise<void> => {
   const page = Number(req.query.page || 1);
   const limit = Number(req.query.limit || 20);
 
-  const [list, stats, accounts] = await Promise.all([
+  const [list, stats, accounts, shortages] = await Promise.all([
     importOrderService.listOrders({
       q,
       status: status as "draft" | "confirmed" | "",
@@ -66,6 +66,7 @@ export const index = async (req: Request, res: Response): Promise<void> => {
     }),
     importOrderService.getStats(),
     importOrderService.getAccounts(),
+    importOrderService.getShortageComponents(),
   ]);
 
   res.render("pages/importOders/index", {
@@ -73,17 +74,23 @@ export const index = async (req: Request, res: Response): Promise<void> => {
     ...list,
     stats,
     accounts,
+    shortages,
     filters: { q, status, createdBy: createdBy || "", from, to, limit },
   });
 };
 
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    const [creator, components, code] = await Promise.all([
-      importOrderService.getDefaultCreator(),
+    const ids = String(req.query.ids || "")
+      .split(",")
+      .map((s) => Number(s.trim()))
+      .filter((id) => Number.isInteger(id) && id > 0);
+    const [components, code, initialItems] = await Promise.all([
       importOrderService.getComponentOptions(),
       importOrderService.generateCode(),
+      importOrderService.getPrefillItemsByIds(ids),
     ]);
+
     const account = req.session.account;
     if (!account) {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
@@ -97,6 +104,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       creator: account,
       components,
       order: null,
+      initialItems,
     });
   } catch (error) {
     console.error(error);

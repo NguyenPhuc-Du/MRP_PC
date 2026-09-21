@@ -663,3 +663,25 @@ tr:has(.io-more.is-open) {
     flex-direction: column;
   }
 }
+.io-alert {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid #f5c36b;
+  border-radius: 12px;
+  background: #fff8e8;
+}
+.io-alert-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.io-alert-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: #8a5a00;
+}
+.io-alert-list {
+  margin: 0 0 12px;
+  padding-left: 18px;
+}
