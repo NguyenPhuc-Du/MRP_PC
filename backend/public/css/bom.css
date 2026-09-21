@@ -194,6 +194,23 @@
   font-weight: 700;
 }
 
+.bom-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #f3f4f8;
+  display: block;
+}
+
+.bom-thumb.is-empty {
+  display: inline-block;
+}
+
+.bom-thumb-preview {
+  margin-top: 8px;
+}
+
 .bom-name:hover {
   color: #6d5ce8;
 }

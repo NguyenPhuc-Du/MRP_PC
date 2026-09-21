@@ -47,6 +47,11 @@ block main
                 label.bom-field
                     span Mô tả
                     textarea.bom-textarea(name="description" placeholder="Mô tả ngắn cho cấu hình")= config.description
+                label.bom-field
+                    span Ảnh cấu hình (URL)
+                    input.bom-input(type="url" name="imageUrl" maxlength="500" value=config.imageUrl placeholder="https://.../pc-van-phong.jpg")
+                    if config.imageUrl
+                        img.bom-thumb.bom-thumb-preview(src=config.imageUrl alt=config.name)
                 p.bom-hint Giá đề xuất = giá vốn chia 0,85 để lãi 15% trên giá bán. Margin thực tế tính theo giá bán cuối nếu đã chốt.
 
             .bom-card
