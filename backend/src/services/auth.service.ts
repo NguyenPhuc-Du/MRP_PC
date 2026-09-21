@@ -1,4 +1,5 @@
-import { Response } from "express";
+// import { Response } from "express";
+import { Request, Response } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { prisma } from "../config/db";
 import { systemConfig } from "../config/system";
@@ -26,7 +27,8 @@ function createAccessToken(account: {
     },
     getJwtSecret(),
     {
-      expiresIn: (process.env.JWT_EXPIRES_IN ?? "1h") as SignOptions["expiresIn"],
+      expiresIn: (process.env.JWT_EXPIRES_IN ??
+        "1h") as SignOptions["expiresIn"],
     },
   );
 }
@@ -60,7 +62,11 @@ export async function loginForApi(username: string, password: string) {
 }
 
 /** Login cho Web — password đã check ở validate; set cookie rồi redirect. */
-export async function login(res: Response, username: string): Promise<void> {
+export async function login(
+  req: Request,
+  res: Response,
+  username: string,
+): Promise<void> {
   const account = await prisma.account.findUnique({
     where: { username },
   });
@@ -79,10 +85,15 @@ export async function login(res: Response, username: string): Promise<void> {
     maxAge: 60 * 60 * 1000,
   });
 
+  req.session.account = {
+    id: account.id,
+    username: account.username,
+    fullName: account.fullName,
+    role: account.role,
+  };
   if (account.role === "warehouse_manager") {
-    res.redirect(`${systemConfig.prefixAdmin}/dashboard`);
+    res.redirect(`${systemConfig.prefixAdmin}/importOrders`); // đổi dashboard → importOrders
     return;
   }
-
   res.redirect(`${systemConfig.prefixAdmin}/components`);
 }

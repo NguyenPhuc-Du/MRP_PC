@@ -8,7 +8,8 @@ block main
 
   - const backHref = mode === "edit" ? `${prefixAdmin}/importOrders/${order.id}` : `${prefixAdmin}/importOrders`
   - const formAction = mode === "edit" ? `${prefixAdmin}/importOrders/${order.id}/edit` : `${prefixAdmin}/importOrders/create`
-  - const initialItems = order ? order.items : []
+  //- - const initialItems = order ? order.items : []
+  - const formItems = (typeof initialItems !== "undefined" && initialItems && initialItems.length) ? initialItems : (order && order.items ? order.items : [])
 
   .io-page
     a.io-back(href=backHref)
@@ -42,11 +43,11 @@ block main
             i.bi.bi-plus-lg
             | Thêm linh kiện
 
-        #io-item-empty.io-empty-inline(class=(initialItems.length ? "d-none" : ""))
+        #io-item-empty.io-empty-inline(class=(formItems.length ? "d-none" : ""))
           | Chưa có linh kiện. Bấm “Thêm linh kiện” để chọn từ danh mục.
 
         #io-item-list
-          each item, index in initialItems
+          each item, index in formItems
             .io-item-row
               input(type="hidden" name=`items[${index}][componentId]` value=item.componentId)
               .io-item-info

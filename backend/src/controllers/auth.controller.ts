@@ -5,6 +5,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   res.render("pages/auth/login");
 };
 
+// export const loginPost = async (req: Request, res: Response): Promise<void> => {
+//   await authService.login(res, req.body.username);
+// };
 export const loginPost = async (req: Request, res: Response): Promise<void> => {
-  await authService.login(res, req.body.username);
+  await authService.login(req, res, req.body.username);
 };
