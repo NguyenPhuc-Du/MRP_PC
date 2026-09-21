@@ -54,6 +54,7 @@ fun OrderListScreen(
     isLoading: Boolean,
     onRetry: () -> Unit,
     onLogout: () -> Unit,
+    onOrderClick: (Int) -> Unit,
     errorMessage: String? = null,
 ) {
     Column(
@@ -134,7 +135,10 @@ fun OrderListScreen(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     items(orders, key = { it.id }) { order ->
-                        OrderCard(order = order)
+                        OrderCard(
+                            order = order,
+                            onClick = { onOrderClick(order.id) },
+                        )
                     }
                 }
             }
@@ -206,10 +210,14 @@ private fun OrdersHeader(
 }
 
 @Composable
-private fun OrderCard(order: ProductionOrder) {
+private fun OrderCard(
+    order: ProductionOrder,
+    onClick: () -> Unit,
+) {
     val statusColor = statusColor(order.status)
 
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -361,6 +369,7 @@ private fun OrderListScreenPreview() {
             isLoading = false,
             onLogout = {},
             onRetry = {},
+            onOrderClick = {},
         )
     }
 }
@@ -391,6 +400,7 @@ private fun OrderListWithDataPreview() {
             isLoading = false,
             onLogout = {},
             onRetry = {},
+            onOrderClick = {},
         )
     }
 }
@@ -405,6 +415,7 @@ private fun OrderListErrorPreview() {
             errorMessage = "Không thể tải danh sách lệnh",
             onLogout = {},
             onRetry = {},
+            onOrderClick = {},
         )
     }
 }

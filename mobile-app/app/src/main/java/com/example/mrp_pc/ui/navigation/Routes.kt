@@ -6,4 +6,6 @@ object Routes {
     const val ORDER_DETAIL = "orders/{id}"
     const val STOCK = "stock"
     const val ASSEMBLE = "assemble"
+
+    fun orderDetail(id: Int) = "orders/$id"
 }
