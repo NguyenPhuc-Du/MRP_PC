@@ -1,7 +1,7 @@
 FROM node:20-alpine
 WORKDIR /app
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl font-dejavu
 
 COPY package.json package-lock.json* ./
 RUN npm config set fetch-retries 5 \

@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
 import { systemConfig } from "../config/system";
-import { ImportOrderItemInput } from "../dtos/import-order.dto";
+import { ImportOrderFilter, ImportOrderItemInput } from "../dtos/import-order.dto";
 import * as importOrderService from "../services/import-order.service";
-import { accountRoutes } from "../routes/account.route";
+import {
+  writeImportOrderDetailPdf,
+  writeImportOrdersExcel,
+  writeImportOrdersPdf,
+} from "../utils/import-order-export";
 
 const BASE = () => `${systemConfig.prefixAdmin}/importOrders`;
 
@@ -23,6 +27,10 @@ const errorMessage = (error: unknown): string => {
       return "Số lượng linh kiện phải lớn hơn 0 trước khi xác nhận";
     case "NO_ACCOUNT":
       return "Chưa có tài khoản trong hệ thống để tạo phiếu";
+    case "NO_SUPPLIER_NAME":
+      return "Nhập tên nhà cung cấp";
+    case "NO_BRAND_NAME":
+      return "Nhập tên thương hiệu";
     default:
       return "Thao tác thất bại";
   }
@@ -43,6 +51,27 @@ const parseItems = (body: Request["body"]): ImportOrderItemInput[] => {
       unitPrice: Number(item.unitPrice),
     };
   });
+};
+
+const listFilterFromQuery = (query: Request["query"]): ImportOrderFilter => {
+  const createdBy = Number(query.createdBy || 0);
+  return {
+    q: String(query.q || ""),
+    status: String(query.status || "") as ImportOrderFilter["status"],
+    createdBy: createdBy || undefined,
+    from: String(query.from || "") || undefined,
+    to: String(query.to || "") || undefined,
+  };
+};
+
+const exportFilterLabel = (filter: ImportOrderFilter): string => {
+  const parts = ["Bộ lọc hiện tại"];
+  if (filter.q) parts.push(`mã: ${filter.q}`);
+  if (filter.status) parts.push(`trạng thái: ${filter.status}`);
+  if (filter.from || filter.to) {
+    parts.push(`ngày: ${filter.from || "…"} → ${filter.to || "…"}`);
+  }
+  return parts.join(" · ");
 };
 
 export const index = async (req: Request, res: Response): Promise<void> => {
@@ -81,30 +110,38 @@ export const index = async (req: Request, res: Response): Promise<void> => {
 
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    const ids = String(req.query.ids || "")
-      .split(",")
-      .map((s) => Number(s.trim()))
-      .filter((id) => Number.isInteger(id) && id > 0);
-    const [components, code, initialItems] = await Promise.all([
-      importOrderService.getComponentOptions(),
-      importOrderService.generateCode(),
-      importOrderService.getPrefillItemsByIds(ids),
-    ]);
-
     const account = req.session.account;
     if (!account) {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
       return;
     }
 
+    const ids = String(req.query.ids || "")
+      .split(",")
+      .map((s) => Number(s.trim()))
+      .filter((id) => Number.isInteger(id) && id > 0);
+
+    const [suppliers, brands, components, initialItems, code] =
+      await Promise.all([
+        importOrderService.getSuppliers(),
+        importOrderService.getBrands(),
+        importOrderService.getComponentOptions(),
+        importOrderService.getPrefillItemsByIds(ids),
+        importOrderService.generateCode(),
+      ]);
+
     res.render("pages/importOders/form", {
       pageTitle: "Tạo phiếu nhập kho",
       mode: "create",
       code,
       creator: account,
+      suppliers,
+      brands,
       components,
       order: null,
       initialItems,
+      addedSupplierId: Number(req.query.addedSupplier || 0) || null,
+      addedBrandId: Number(req.query.addedBrand || 0) || null,
     });
   } catch (error) {
     console.error(error);
@@ -118,25 +155,35 @@ export const createPost = async (
   res: Response,
 ): Promise<void> => {
   try {
-    // const creator = await importOrderService.getDefaultCreator();
-    // const order = await importOrderService.createOrder({
-    //   createdBy: creator.id,
-    //   code: String(req.body.code || ""),
-    //   note: String(req.body.note || ""),
-    //   items: parseItems(req.body),
-    // });
-    const accountId = req.session.account?.id;
-    if (!accountId) {
+    // 1) Chặn role: middleware requireWarehouse đã chạy trước
+    // 2) Người tạo = session, không getDefaultCreator()
+    const createdBy = req.session.account?.id;
+    if (!createdBy) {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
       return;
     }
+
+    // 3) NCC bắt buộc — dữ liệu bảng suppliers
+    const supplierId = Number(req.body.supplierId);
+    if (!supplierId) {
+      req.flash("error", "Chọn nhà cung cấp");
+      res.redirect(`${BASE()}/create`);
+      return;
+    }
+
+    // 4) items[] từ form — componentId lấy từ DB picker, không id cứng
+    const items = parseItems(req.body);
+
+    // 5) Service: status draft, chưa cộng kho
     const order = await importOrderService.createOrder({
-      createdBy: accountId,
-      code: String(req.body.code || ""),
+      createdBy,
+      supplierId,
       note: String(req.body.note || ""),
-      items: parseItems(req.body),
+      items,
+      code: String(req.body.code || ""),
     });
 
+    // 6) intent=draft → list; không thì sang detail để xác nhận
     const intent = String(req.body.intent || "create");
     req.flash(
       "success",
@@ -190,14 +237,22 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const components = await importOrderService.getComponentOptions();
+    const [components, suppliers, brands] = await Promise.all([
+      importOrderService.getComponentOptions(),
+      importOrderService.getSuppliers(),
+      importOrderService.getBrands(),
+    ]);
     res.render("pages/importOders/form", {
       pageTitle: `Sửa ${order.code}`,
       mode: "edit",
       code: order.code,
       creator: order.creator,
+      suppliers,
+      brands,
       components,
       order: await importOrderService.mapDetailOrder(order),
+      addedSupplierId: Number(req.query.addedSupplier || 0) || null,
+      addedBrandId: Number(req.query.addedBrand || 0) || null,
     });
   } catch (error) {
     console.error(error);
@@ -214,9 +269,15 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
       return;
     }
-    const creator = await importOrderService.getDefaultCreator();
+    const supplierId = Number(req.body.supplierId);
+    if (!Number.isInteger(supplierId) || supplierId <= 0) {
+      req.flash("error", "Chọn nhà cung cấp");
+      res.redirect(`${BASE()}/${orderId}/edit`);
+      return;
+    }
     await importOrderService.updateDraft(orderId, {
       createdBy: accountId,
+      supplierId,
       note: String(req.body.note || ""),
       items: parseItems(req.body),
     });
@@ -236,10 +297,9 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const confirm = async (req: Request, res: Response): Promise<void> => {
+  // Chỉ QL kho tới đây (requireWarehouse). Phiếu phải đang draft, SL > 0, rồi inventory.increment.
   const orderId = Number(req.params.orderId);
   try {
-    // const creator = await importOrderService.getDefaultCreator();
-    // await importOrderService.confirmOrder(orderId, creator.id);
     const accountId = req.session.account?.id;
     if (!accountId) {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
@@ -254,4 +314,93 @@ export const confirm = async (req: Request, res: Response): Promise<void> => {
     req.flash("error", errorMessage(error));
     res.redirect(`${BASE()}/${orderId}`);
   }
+};
+
+export const exportExcel = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const filter = listFilterFromQuery(req.query);
+    const rows = await importOrderService.listOrdersForExport(filter);
+    await writeImportOrdersExcel(res, rows);
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+    res.redirect(BASE());
+  }
+};
+
+export const exportPdf = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const filter = listFilterFromQuery(req.query);
+    const rows = await importOrderService.listOrdersForExport(filter);
+    writeImportOrdersPdf(res, rows, exportFilterLabel(filter));
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+    res.redirect(BASE());
+  }
+};
+
+export const exportOrderPdf = async (req: Request, res: Response): Promise<void> => {
+  const orderId = Number(req.params.orderId);
+  try {
+    const found = await importOrderService.getOrderById(orderId);
+    if (!found) {
+      req.flash("error", "Không tìm thấy phiếu nhập");
+      res.redirect(BASE());
+      return;
+    }
+    const order = await importOrderService.mapDetailOrder(found);
+    writeImportOrderDetailPdf(res, order);
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+    res.redirect(BASE());
+  }
+};
+export const createSupplierPost = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const fallback = `${BASE()}/create`;
+  const rawReturnTo = String(req.body.returnTo || fallback);
+  const returnTo = rawReturnTo.startsWith(`${systemConfig.prefixAdmin}/importOrders`)
+    ? rawReturnTo
+    : fallback;
+  try {
+    const created = await importOrderService.upsertSupplierByName(
+      String(req.body.name || ""),
+    );
+    req.flash("success", "Đã thêm nhà cung cấp");
+    const joiner = returnTo.includes("?") ? "&" : "?";
+    res.redirect(`${returnTo}${joiner}addedSupplier=${created.id}`);
+    return;
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+  }
+  res.redirect(returnTo);
+};
+
+export const createBrandPost = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const fallback = `${BASE()}/create`;
+  const rawReturnTo = String(req.body.returnTo || fallback);
+  const returnTo = rawReturnTo.startsWith(`${systemConfig.prefixAdmin}/importOrders`)
+    ? rawReturnTo
+    : fallback;
+  try {
+    const created = await importOrderService.upsertBrandByName(
+      String(req.body.name || ""),
+    );
+    req.flash("success", "Đã thêm thương hiệu");
+    const joiner = returnTo.includes("?") ? "&" : "?";
+    res.redirect(`${returnTo}${joiner}addedBrand=${created.id}`);
+    return;
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+  }
+  res.redirect(returnTo);
 };

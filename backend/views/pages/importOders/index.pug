@@ -6,15 +6,32 @@ block main
   +alert-success(4000)
   +alert-error(6000)
 
+  -
+    const exportQuery = [
+      filters.q ? `q=${encodeURIComponent(filters.q)}` : "",
+      filters.status ? `status=${encodeURIComponent(filters.status)}` : "",
+      filters.createdBy ? `createdBy=${encodeURIComponent(String(filters.createdBy))}` : "",
+      filters.from ? `from=${encodeURIComponent(filters.from)}` : "",
+      filters.to ? `to=${encodeURIComponent(filters.to)}` : "",
+    ].filter(Boolean).join("&")
+
   .io-page(data-prefix=prefixAdmin)
     .io-head
       div
-        h1.io-title Phiếu nhập kho
+        p.io-kicker Phiếu nhập kho
+        h1.io-title Danh sách phiếu
         p.io-desc Quản lý các giao dịch nhập linh kiện vào hệ thống tồn kho
-      if account && account.role === 'warehouse_manager'
-        a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`)
-          i.bi.bi-plus-lg
-          | Tạo phiếu nhập 
+      .io-head-actions
+        if account && account.role === "warehouse_manager"
+          a.io-btn-ghost(href=`${prefixAdmin}/importOrders/export.xlsx${exportQuery ? `?${exportQuery}` : ""}`)
+            i.bi.bi-file-earmark-excel
+            | Excel
+          a.io-btn-ghost(href=`${prefixAdmin}/importOrders/export.pdf${exportQuery ? `?${exportQuery}` : ""}`)
+            i.bi.bi-file-earmark-pdf
+            | PDF
+          a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`)
+            i.bi.bi-plus-lg
+            | Tạo phiếu nhập 
     .io-stats
       .io-stat
         .io-stat-label Tổng phiếu nhập
@@ -88,13 +105,14 @@ block main
         table.io-table
           thead
             tr
-              th MÃ PHIẾU
-              th NGÀY TẠO
-              th NGƯỜI TẠO
-              th SỐ MẶT HÀNG
-              th TỔNG SỐ LƯỢNG
-              th TỔNG GIÁ TRỊ
-              th TRẠNG THÁI
+              th Mã phiếu
+              th Ngày tạo
+              th Người tạo
+              th NCC
+              th.text-end Số mặt
+              th.text-end Tổng SL
+              th.text-end Tổng tiền
+              th Trạng thái
               th
           tbody
             if orders && orders.length
@@ -107,9 +125,10 @@ block main
                     .io-user
                       .io-user-name= order.creatorName
                       .io-user-sub @#{order.creatorUsername}
-                  td #{order.itemCount} mặt hàng
-                  td= order.totalQty
-                  td= order.totalValueLabel
+                  td= order.supplierName
+                  td.text-end.io-num #{order.itemCount}
+                  td.text-end.io-num= order.totalQty
+                  td.text-end.io-money= order.totalValueLabel
                   td
                     if order.status === "confirmed"
                       span.io-badge.is-ok
@@ -128,7 +147,7 @@ block main
                         a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}`) Xem chi tiết
                         //- if order.status === "draft"
                         //-   a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
-                        button.io-menu-item.js-print(type="button" data-href=`${prefixAdmin}/importOrders/${order.id}`) In phiếu
+                        button.io-menu-item.js-print(type="button" data-href=`${prefixAdmin}/importOrders/${order.id}/pdf`) In phiếu
             //- else
               //- tr
               //-   td.io-empty(colspan="8")

@@ -21,6 +21,7 @@
     "connect-redis": "^10.0.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "express-flash": "^0.0.2",
     "express-session": "^1.19.0",
@@ -28,6 +29,7 @@
     "jsonwebtoken": "^9.0.3",
     "method-override": "^3.0.0",
     "nodemon": "^3.1.14",
+    "pdfkit": "^0.20.2",
     "pug": "^3.0.4",
     "redis": "^6.2.1"
   },
@@ -40,6 +42,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/method-override": "^3.0.0",
     "@types/node": "^20.19.13",
+    "@types/pdfkit": "^0.17.6",
     "prisma": "^6.16.1",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"

@@ -19,4 +19,5 @@ export type SaveImportOrderDto = {
   note?: string;
   items: ImportOrderItemInput[];
   createdBy: number;
+  supplierId: number;
 };
