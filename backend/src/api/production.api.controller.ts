@@ -41,7 +41,7 @@ export async function getMyOrderById(req: Request, res: Response): Promise<void>
             return;
         }
 
-        if (Number.isInteger(orderId) || orderId <= 0) {
+        if (!Number.isInteger(orderId) || orderId <= 0) {
             res.status(400).json({
                 message: "Invalid order Id"
             });
@@ -67,6 +67,45 @@ export async function getMyOrderById(req: Request, res: Response): Promise<void>
         console.error(error);
         res.status(500).json({
             message: "Internal server error"
+        });
+    }
+}
+
+export async function getOrderStock(req: Request, res: Response): Promise<void> {
+    try {
+        const accountId = req.authUser?.accountId;
+        const orderId = Number(req.params.id);
+
+        if (!accountId) {
+            res.status(401).json({
+                message: "Authentication is required",
+            });
+            return;
+        }
+
+        if (!Number.isInteger(orderId) || orderId <= 0) {
+            res.status(400).json({
+                message: "Invalid order id",
+            });
+            return;
+        }
+
+        const result = await productionService.getOrderStockCheck(accountId, orderId);
+
+        if (!result) {
+            res.status(404).json({
+                message: "Order not found",
+            });
+            return;
+        }
+
+        res.json({
+            data: result,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Internal server error",
         });
     }
 }
