@@ -9,10 +9,11 @@ block main
   .io-page.io-detail
     a.io-back(href=`${prefixAdmin}/importOrders`)
       i.bi.bi-arrow-left
-      | Quay lại danh sách
-    
+      | Danh sách phiếu nhập
+
     .io-head
       div
+        p.io-kicker Chi tiết phiếu nhập
         .io-title-row
           h1.io-title= order.code
           if order.status === "confirmed"
@@ -23,21 +24,16 @@ block main
             span.io-badge.is-draft
               i.bi.bi-file-earmark
               | Nháp
-        p.io-desc Chi tiết giao dịch nhập linh kiện
+        p.io-desc #{order.supplierName} · #{order.creatorName} · #{order.createdAtLabel}
       .io-head-actions
         button.io-btn-ghost(type="button" onclick="window.print()")
           i.bi.bi-printer
           | In phiếu
-        //- if order.status === "draft" 
-        //-   a.io-btn-ghost(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
-        //-   button.io-btn-primary#io-open-confirm(type="button")
-        //-     i.bi.bi-check2
-        //-     | Xác nhận phiếu
-        if order.status === "draft" && account && account.role === 'warehouse_manager'
+        if order.status === "draft" && account && account.role === "warehouse_manager"
           a.io-btn-ghost(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
           button.io-btn-primary#io-open-confirm(type="button")
             i.bi.bi-check2
-            | Xác nhận phiếu    
+            | Xác nhận phiếu
 
     .io-card
       h3.io-card-title Thông tin phiếu
@@ -46,15 +42,8 @@ block main
           .io-label Mã phiếu
           strong= order.code
         div
-          .io-label Trạng thái
-          if order.status === "confirmed"
-            span.io-badge.is-ok
-              i.bi.bi-check-circle
-              | Đã xác nhận
-          else
-            span.io-badge.is-draft
-              i.bi.bi-file-earmark
-              | Nháp
+          .io-label Nhà cung cấp
+          strong= order.supplierName
         div
           .io-label Người tạo
           strong #{order.creatorName}
@@ -68,34 +57,41 @@ block main
 
     .io-card
       .io-card-head
-        h3.io-card-title Danh sách linh kiện nhập
-        span.io-card-sub Dữ liệu liên kết từ Components và Component Categories
+        div
+          h3.io-card-title Danh sách linh kiện nhập
+          span.io-card-sub #{order.itemCount} mặt hàng · #{order.totalQty} sản phẩm
       .table-responsive
         table.io-table
           thead
             tr
               th STT
-              th Mã linh kiện
-              th Tên linh kiện
-              th Danh mục
+              th Mã
+              th Linh kiện
+              th Thương hiệu
               th Đơn vị
               th Số lượng
               th Đơn giá
               th Thành tiền
           tbody
-            each item in order.items
+            if order.items && order.items.length
+              each item in order.items
+                tr
+                  td= item.stt
+                  td
+                    span.io-item-code= item.code
+                  td
+                    strong= item.name
+                    .io-user-sub= item.category
+                  td= item.brandName || "—"
+                  td= item.unit
+                  td
+                    strong= item.quantity
+                  td= item.unitPriceLabel
+                  td
+                    strong= item.lineTotalLabel
+            else
               tr
-                td= item.stt
-                td= item.code
-                td
-                  strong= item.name
-                td= item.category
-                td= item.unit
-                td
-                  strong= item.quantity
-                td= item.unitPriceLabel
-                td
-                  strong= item.lineTotalLabel
+                td.io-empty(colspan="8") Phiếu chưa có linh kiện.
       .io-summary
         div
           .io-label Tổng số mặt hàng
@@ -107,22 +103,21 @@ block main
           .io-label Tổng giá trị nhập
           strong.io-total= order.totalValueLabel
 
-    if order.status === "confirmed"
+    if order.status === "confirmed" && order.items && order.items.length
       .io-stock-card
         .io-stock-title
           i.bi.bi-check-circle
           | Tồn kho sau khi xác nhận
-        .io-summary
+        .io-stock-list
           each item in order.items
-            div
-              .io-label Trước khi nhập
-              strong= item.stockBefore
-            div
-              .io-label Số lượng nhập
-              strong.io-plus +#{item.quantity}
-            div
-              .io-label Tồn kho hiện tại
-              strong= item.stockAfter
+            .io-stock-row
+              div
+                strong= item.name
+                .io-user-sub= item.code
+              .io-stock-nums
+                span Trước #{item.stockBefore}
+                span.io-plus +#{item.quantity}
+                span Hiện #{item.stockAfter}
 
     .io-card
       h3.io-card-title
@@ -143,11 +138,11 @@ block main
 
   if order.status === "draft"
     .io-overlay.is-modal
-    .io-modal
+    .io-modal#io-confirm-modal
       .io-modal-head
         div
           h3 Xác nhận phiếu nhập?
-          p Kiểm tra kỹ thông tin trước khi cập nhật tồn kho.
+          p Kiểm tra kỹ trước khi cộng tồn kho. Phiếu sẽ không còn là nháp.
         button.io-icon-btn.js-close-modal(type="button")
           i.bi.bi-x-lg
       .io-modal-box
@@ -162,7 +157,7 @@ block main
         .io-total= order.totalValueLabel
       .io-warn
         i.bi.bi-exclamation-triangle
-        | Sau khi xác nhận, phiếu không còn ở trạng thái nháp và dữ liệu sẽ được dùng để cập nhật tồn kho.
+        | Sau khi xác nhận, dữ liệu phiếu được dùng để cập nhật tồn kho.
       .io-modal-actions
         button.io-btn-ghost.js-close-modal(type="button") Hủy
         form(action=`${prefixAdmin}/importOrders/${order.id}/confirm` method="POST")

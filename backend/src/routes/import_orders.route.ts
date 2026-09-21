@@ -8,8 +8,9 @@ router.get("/", c.index); // staff/admin có thể xem nếu bạn cho
 // router.get("/export.pdf", requireWarehouse, c.exportPdf);
 router.get("/create", requireWarehouse, c.create);
 router.post("/create", requireWarehouse, c.createPost);
+router.post("/suppliers", requireWarehouse, c.createSupplierPost); // QL kho, TRƯỚC :orderId
 router.get("/:orderId/edit", requireWarehouse, c.edit);
 router.post("/:orderId/edit", requireWarehouse, c.editPost);
-router.post("/:orderId/confirm", requireWarehouse, c.confirm); // cộng kho
+router.post("/:orderId/confirm", requireWarehouse, c.confirm);
 router.get("/:orderId", c.detail);
 export const importOrderRoutes = router;

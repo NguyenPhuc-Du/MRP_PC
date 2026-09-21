@@ -9,7 +9,7 @@ block main
   .io-page(data-prefix=prefixAdmin)
     .io-head
       div
-        h1.io-title Phiếu nhập kho
+        //- h1.io-title Phiếu nhập kho
         p.io-desc Quản lý các giao dịch nhập linh kiện vào hệ thống tồn kho
       if account && account.role === 'warehouse_manager'
         a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`)
@@ -91,6 +91,7 @@ block main
               th MÃ PHIẾU
               th NGÀY TẠO
               th NGƯỜI TẠO
+              th NCC
               th SỐ MẶT HÀNG
               th TỔNG SỐ LƯỢNG
               th TỔNG GIÁ TRỊ
@@ -107,6 +108,7 @@ block main
                     .io-user
                       .io-user-name= order.creatorName
                       .io-user-sub @#{order.creatorUsername}
+                  td= order.supplierName
                   td #{order.itemCount} mặt hàng
                   td= order.totalQty
                   td= order.totalValueLabel

@@ -12,11 +12,14 @@ const componentSelect = {
   unit: true,
   unitPrice: true,
   category: { select: { name: true } },
+  brand: { select: { name: true } },
+  supplier: { select: { name: true } },
   inventory: { select: { quantityOnHand: true } },
 } as const;
 
 const orderInclude = {
   creator: true,
+  supplier: true,
   items: {
     include: {
       component: {
@@ -70,6 +73,7 @@ const totalsFromItems = (
 type OrderWithRelations = Prisma.ImportOrderGetPayload<{
   include: {
     creator: true;
+    supplier: true;
     items: {
       include: {
         component: {
@@ -79,6 +83,8 @@ type OrderWithRelations = Prisma.ImportOrderGetPayload<{
             unit: true;
             unitPrice: true;
             category: { select: { name: true } };
+            brand: { select: { name: true } };
+            supplier: { select: { name: true } };
             inventory: { select: { quantityOnHand: true } };
           };
         };
@@ -94,6 +100,7 @@ export const mapListOrder = (order: OrderWithRelations) => {
     code: order.code,
     note: order.note || "",
     status: order.status,
+    supplierName: order.supplier?.name ?? "—",
     statusLabel: order.status === "confirmed" ? "Đã xác nhận" : "Nháp",
     createdAtLabel: formatDateTime(order.createdAt),
     creatorName: order.creator.fullName || order.creator.username,
@@ -122,6 +129,8 @@ export const mapDetailOrder = async (order: OrderWithRelations) => {
     code: order.code,
     note: order.note || "",
     status: order.status,
+    supplierId: order.supplierId,
+    supplierName: order.supplier?.name ?? "—",
     statusLabel: order.status === "confirmed" ? "Đã xác nhận" : "Nháp",
     createdAtLabel: formatDateTime(order.createdAt),
     creatorName: order.creator.fullName || order.creator.username,
@@ -130,20 +139,26 @@ export const mapDetailOrder = async (order: OrderWithRelations) => {
     totalQty,
     totalValue,
     totalValueLabel: money(totalValue),
-    items: order.items.map((item, index) => {
+    items: (order.items ?? []).map((item, index) => {
+      const component = item.component;
       const unitPrice = toNumber(item.unitPrice);
       const lineTotal = item.quantity * unitPrice;
-      const stockAfter = item.component.inventory?.quantityOnHand ?? 0;
+      const stockAfter = component?.inventory?.quantityOnHand ?? 0;
       const stockBefore =
         order.status === "confirmed" ? stockAfter - item.quantity : stockAfter;
+      const categoryName = component?.category?.name || "LK";
       return {
         id: item.id,
         stt: String(index + 1).padStart(2, "0"),
         componentId: item.componentId,
-        code: componentCode(item.component.category.name, item.component.id),
-        name: item.component.name,
-        category: item.component.category.name,
-        unit: item.component.unit || "cái",
+        code: component
+          ? componentCode(categoryName, component.id)
+          : `COMP-${item.componentId}`,
+        name: component?.name || "Linh kiện không còn trong danh mục",
+        category: categoryName,
+        brandName: component?.brand?.name ?? "—",
+        supplierName: component?.supplier?.name ?? "—",
+        unit: component?.unit || "cái",
         quantity: item.quantity,
         unitPrice,
         unitPriceLabel: money(unitPrice),
@@ -153,15 +168,17 @@ export const mapDetailOrder = async (order: OrderWithRelations) => {
         stockAfter,
       };
     }),
-    logs: logs.map((log) => ({
-      actorName: log.account.fullName || log.account.username,
-      actorInitials: (log.account.fullName || log.account.username)
-        .slice(0, 2)
-        .toUpperCase(),
-      action: log.action,
-      detail: log.detail || "",
-      createdAtLabel: formatDateTime(log.createdAt),
-    })),
+    logs: logs.map((log) => {
+      const actorName =
+        log.account?.fullName?.trim() || log.account?.username || "Hệ thống";
+      return {
+        actorName,
+        actorInitials: actorName.slice(0, 2).toUpperCase(),
+        action: log.action,
+        detail: log.detail || "",
+        createdAtLabel: formatDateTime(log.createdAt),
+      };
+    }),
   };
 };
 
@@ -198,12 +215,16 @@ export const getAccounts = async () => {
 
 export const getComponentOptions = async () => {
   const rows = await prisma.component.findMany({
-    where: { status: "active" },
+    where: { status: "active", deleted: false },
     select: {
       id: true,
       name: true,
       unit: true,
       unitPrice: true,
+      brandId: true,
+      supplierId: true,
+      brand: { select: { name: true } },
+      supplier: { select: { name: true } },
       category: { select: { name: true } },
       inventory: { select: { quantityOnHand: true } },
     },
@@ -218,6 +239,10 @@ export const getComponentOptions = async () => {
     stock: row.inventory?.quantityOnHand ?? 0,
     category: row.category.name,
     code: componentCode(row.category.name, row.id),
+    brandId: row.brandId,
+    brandName: row.brand?.name ?? "—",
+    supplierId: row.supplierId,
+    supplierName: row.supplier?.name ?? "Chưa gán NCC",
   }));
 };
 
@@ -345,6 +370,7 @@ export const createOrder = async (data: SaveImportOrderDto) => {
     data: {
       code,
       createdBy: data.createdBy,
+      supplierId: data.supplierId,
       note: data.note?.trim() || null,
       status: "draft",
       items: {
@@ -391,6 +417,7 @@ export const updateDraft = async (id: number, data: SaveImportOrderDto) => {
       where: { id },
       data: {
         note: data.note?.trim() || null,
+        supplierId: data.supplierId,
         items: {
           create: items.map((item) => ({
             componentId: item.componentId,
@@ -491,6 +518,21 @@ export const getShortageComponents = async () => {
       };
     });
 };
+export const getSuppliers = () =>
+  prisma.supplier.findMany({ orderBy: { name: "asc" } });
+
+export const getBrands = () =>
+  prisma.brand.findMany({ orderBy: { name: "asc" } });
+
+export const upsertSupplierByName = async (rawName: string) => {
+  const name = rawName.trim();
+  if (!name) throw new Error("NO_SUPPLIER_NAME");
+  return prisma.supplier.upsert({
+    where: { name },
+    update: {},
+    create: { name },
+  });
+};
 
 export const getPrefillItemsByIds = async (ids: number[]) => {
   if (!ids.length) return [];
@@ -500,6 +542,8 @@ export const getPrefillItemsByIds = async (ids: number[]) => {
     include: {
       inventory: true,
       category: true,
+      brand: true,
+      supplier: true,
     },
   });
 
@@ -514,6 +558,8 @@ export const getPrefillItemsByIds = async (ids: number[]) => {
       code: componentCode(c.category.name, c.id),
       name: c.name,
       category: c.category.name,
+      brandName: c.brand?.name ?? "—",
+      supplierName: c.supplier?.name ?? "Chưa gán NCC",
       stockAfter: onHand,
       quantity: need > 0 ? need : 1,
       unitPrice: Number(c.unitPrice),

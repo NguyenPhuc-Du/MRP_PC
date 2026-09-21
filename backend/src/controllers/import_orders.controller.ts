@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { systemConfig } from "../config/system";
 import { ImportOrderItemInput } from "../dtos/import-order.dto";
 import * as importOrderService from "../services/import-order.service";
-import { accountRoutes } from "../routes/account.route";
 
 const BASE = () => `${systemConfig.prefixAdmin}/importOrders`;
 
@@ -23,6 +22,8 @@ const errorMessage = (error: unknown): string => {
       return "Số lượng linh kiện phải lớn hơn 0 trước khi xác nhận";
     case "NO_ACCOUNT":
       return "Chưa có tài khoản trong hệ thống để tạo phiếu";
+    case "NO_SUPPLIER_NAME":
+      return "Nhập tên nhà cung cấp";
     default:
       return "Thao tác thất bại";
   }
@@ -81,27 +82,33 @@ export const index = async (req: Request, res: Response): Promise<void> => {
 
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    const ids = String(req.query.ids || "")
-      .split(",")
-      .map((s) => Number(s.trim()))
-      .filter((id) => Number.isInteger(id) && id > 0);
-    const [components, code, initialItems] = await Promise.all([
-      importOrderService.getComponentOptions(),
-      importOrderService.generateCode(),
-      importOrderService.getPrefillItemsByIds(ids),
-    ]);
-
     const account = req.session.account;
     if (!account) {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
       return;
     }
 
+    const ids = String(req.query.ids || "")
+      .split(",")
+      .map((s) => Number(s.trim()))
+      .filter((id) => Number.isInteger(id) && id > 0);
+
+    const [suppliers, brands, components, initialItems, code] =
+      await Promise.all([
+        importOrderService.getSuppliers(),
+        importOrderService.getBrands(),
+        importOrderService.getComponentOptions(),
+        importOrderService.getPrefillItemsByIds(ids),
+        importOrderService.generateCode(),
+      ]);
+
     res.render("pages/importOders/form", {
       pageTitle: "Tạo phiếu nhập kho",
       mode: "create",
       code,
       creator: account,
+      suppliers,
+      brands,
       components,
       order: null,
       initialItems,
@@ -130,8 +137,16 @@ export const createPost = async (
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
       return;
     }
+    const supplierId = Number(req.body.supplierId);
+    if (!Number.isInteger(supplierId) || supplierId <= 0) {
+      req.flash("error", "Chọn nhà cung cấp");
+      res.redirect(`${BASE()}/create`);
+      return;
+    }
+
     const order = await importOrderService.createOrder({
       createdBy: accountId,
+      supplierId,
       code: String(req.body.code || ""),
       note: String(req.body.note || ""),
       items: parseItems(req.body),
@@ -190,12 +205,18 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const components = await importOrderService.getComponentOptions();
+    const [components, suppliers, brands] = await Promise.all([
+      importOrderService.getComponentOptions(),
+      importOrderService.getSuppliers(),
+      importOrderService.getBrands(),
+    ]);
     res.render("pages/importOders/form", {
       pageTitle: `Sửa ${order.code}`,
       mode: "edit",
       code: order.code,
       creator: order.creator,
+      suppliers,
+      brands,
       components,
       order: await importOrderService.mapDetailOrder(order),
     });
@@ -214,9 +235,15 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
       return;
     }
-    const creator = await importOrderService.getDefaultCreator();
+    const supplierId = Number(req.body.supplierId);
+    if (!Number.isInteger(supplierId) || supplierId <= 0) {
+      req.flash("error", "Chọn nhà cung cấp");
+      res.redirect(`${BASE()}/${orderId}/edit`);
+      return;
+    }
     await importOrderService.updateDraft(orderId, {
       createdBy: accountId,
+      supplierId,
       note: String(req.body.note || ""),
       items: parseItems(req.body),
     });
@@ -254,4 +281,22 @@ export const confirm = async (req: Request, res: Response): Promise<void> => {
     req.flash("error", errorMessage(error));
     res.redirect(`${BASE()}/${orderId}`);
   }
+};
+export const createSupplierPost = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const fallback = `${BASE()}/create`;
+  const rawReturnTo = String(req.body.returnTo || fallback);
+  const returnTo = rawReturnTo.startsWith(`${systemConfig.prefixAdmin}/importOrders`)
+    ? rawReturnTo
+    : fallback;
+  try {
+    await importOrderService.upsertSupplierByName(String(req.body.name || ""));
+    req.flash("success", "Đã thêm nhà cung cấp");
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+  }
+  res.redirect(returnTo);
 };

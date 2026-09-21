@@ -8,52 +8,83 @@ block main
 
   - const backHref = mode === "edit" ? `${prefixAdmin}/importOrders/${order.id}` : `${prefixAdmin}/importOrders`
   - const formAction = mode === "edit" ? `${prefixAdmin}/importOrders/${order.id}/edit` : `${prefixAdmin}/importOrders/create`
-  //- - const initialItems = order ? order.items : []
   - const formItems = (typeof initialItems !== "undefined" && initialItems && initialItems.length) ? initialItems : (order && order.items ? order.items : [])
+  - const supplierList = typeof suppliers !== "undefined" && suppliers ? suppliers : []
+  - const brandList = typeof brands !== "undefined" && brands ? brands : []
+  - const returnTo = mode === "edit" ? `${prefixAdmin}/importOrders/${order.id}/edit` : `${prefixAdmin}/importOrders/create`
 
-  .io-page
-    a.io-back(href=backHref)
-      i.bi.bi-arrow-left
-      | Quay lại danh sách
-
-    h1.io-title= mode === "edit" ? code : "Tạo phiếu nhập kho"
-    p.io-desc Thông tin được lưu đúng theo cấu trúc dữ liệu hiện tại
+  .io-page.io-form-page(data-prefix=prefixAdmin)
+    .io-form-hero
+      a.io-back(href=backHref)
+        i.bi.bi-arrow-left
+        | Danh sách phiếu nhập
+      .io-form-hero-row
+        div
+          //- p.io-kicker= mode === "edit" ? "Cập nhật phiếu nháp" : "Phiếu nhập kho"
+          h1.io-title= mode === "edit" ? code : "Tạo phiếu nhập"
+          p.io-desc Chọn nhà cung cấp, lọc theo thương hiệu, rồi thêm đúng linh kiện cần nhập.
+        .io-form-hero-meta
+          .io-hero-chip
+            i.bi.bi-person
+            span= creator.fullName || creator.username
 
     form#io-form(action=formAction method="POST")
       input#io-intent(type="hidden" name="intent" value="create")
 
       .io-card
-        h3.io-card-title Thông tin chung
-        .io-grid-2
+        .io-card-head
           div
+            h3.io-card-title Thông tin chung
+            p.io-card-sub Mã phiếu được cấp tự động. Nhà cung cấp bắt buộc trước khi lưu.
+        .io-grid-2
+          div.io-field
             label.io-label Mã phiếu
             input.io-input(type="text" name="code" value=code readonly)
-          div
+          div.io-field
             label.io-label Người tạo
             input.io-input(type="text" value=`${creator.fullName || creator.username} · @${creator.username}` readonly)
-        label.io-label Ghi chú
-        textarea.io-input.io-textarea(name="note" placeholder="Nhập ghi chú cho phiếu nhập...")= order ? order.note : ""
+        .io-field
+          .io-label-row
+            label.io-label(for="supplierId") Nhà cung cấp
+            button.io-text-btn(type="button" id="io-open-supplier")
+              i.bi.bi-plus-lg
+              | Thêm nhà cung cấp
+          select#supplierId.io-input(name="supplierId" required)
+            option(value="") Chọn nhà cung cấp
+            each s in supplierList
+              option(value=s.id selected=(order && Number(order.supplierId) === Number(s.id)))= s.name
+        .io-field
+          label.io-label(for="note") Ghi chú
+          textarea#note.io-input.io-textarea(name="note" placeholder="Ghi chú cho thủ kho, số hóa đơn, điều kiện giao hàng...")= order ? order.note : ""
 
       .io-card
         .io-card-head
           div
-            h3.io-card-title Danh sách linh kiện
-            p.io-card-sub Mỗi linh kiện chỉ xuất hiện một lần trong phiếu
-          button.io-btn-soft(type="button" id="io-add-btn")
-            i.bi.bi-plus-lg
-            | Thêm linh kiện
+            h3.io-card-title Linh kiện nhập
+            p.io-card-sub Mỗi linh kiện chỉ xuất hiện một lần. Lọc thương hiệu trước khi chọn.
+          .io-toolbar
+            select.io-input.io-input-compact#io-brand-filter
+              option(value="") Tất cả thương hiệu
+              each b in brandList
+                option(value=b.id)= b.name
+            button.io-btn-primary(type="button" id="io-add-btn")
+              i.bi.bi-plus-lg
+              | Thêm linh kiện
 
-        #io-item-empty.io-empty-inline(class=(formItems.length ? "d-none" : ""))
-          | Chưa có linh kiện. Bấm “Thêm linh kiện” để chọn từ danh mục.
+        #io-item-empty.io-empty-state(class=(formItems.length ? "d-none" : ""))
+          .io-empty-icon
+            i.bi.bi-box-seam
+          strong Chưa có linh kiện
+          p Bấm “Thêm linh kiện”, chọn đúng thương hiệu, rồi đưa vào phiếu.
 
         #io-item-list
           each item, index in formItems
             .io-item-row
               input(type="hidden" name=`items[${index}][componentId]` value=item.componentId)
               .io-item-info
-                .io-item-code= item.code
+                span.io-item-code= item.code
                 .io-item-name= item.name
-                .io-item-meta #{item.category} · Tồn kho hiện tại #{item.stockAfter}
+                .io-item-meta #{item.brandName || item.category} · #{item.supplierName || "Chưa gán NCC"} · Tồn #{item.stockAfter}
               .io-item-fields
                 label
                   span Số lượng
@@ -69,29 +100,53 @@ block main
         button.io-btn-ghost(type="submit" data-intent="draft") Lưu nháp
         button.io-btn-primary(type="submit" data-intent="create")= mode === "edit" ? "Cập nhật phiếu" : "Tạo phiếu nhập"
 
-  .io-overlay.is-picker
-  .io-picker
-    .io-picker-head
-      h3 Thêm linh kiện
-      button.io-icon-btn#io-picker-close(type="button")
-        i.bi.bi-x-lg
-    .io-search
-      i.bi.bi-search
-      input#io-picker-q(type="text" placeholder="Tìm mã hoặc tên linh kiện...")
-    .io-picker-list#io-picker-list
-      each component in components
-        button.io-picker-item(
-          type="button"
-          data-id=component.id
-          data-code=component.code
-          data-name=component.name
-          data-category=component.category
-          data-stock=component.stock
-          data-price=component.unitPrice
-        )
-          .io-item-code= component.code
-          .io-item-name= component.name
-          .io-item-meta #{component.category} · Tồn #{component.stock} · #{component.unitPrice.toLocaleString("vi-VN")} đ
+    .io-overlay.is-picker
+    .io-picker
+      .io-picker-head
+        div
+          h3 Thêm linh kiện
+          p.io-card-sub Danh sách theo thương hiệu đang lọc
+        button.io-icon-btn#io-picker-close(type="button")
+          i.bi.bi-x-lg
+      .io-search
+        i.bi.bi-search
+        input#io-picker-q(type="text" placeholder="Tìm mã hoặc tên linh kiện...")
+      .io-picker-list#io-picker-list
+        each component in components
+          button.io-picker-item(
+            type="button"
+            data-id=component.id
+            data-code=component.code
+            data-name=component.name
+            data-category=component.category
+            data-stock=component.stock
+            data-price=component.unitPrice
+            data-brand-id=(component.brandId || "")
+            data-brand-name=component.brandName
+            data-supplier-id=(component.supplierId || "")
+            data-supplier-name=component.supplierName
+          )
+            .io-picker-item-top
+              span.io-item-code= component.code
+              span.io-picker-stock Tồn #{component.stock}
+            .io-item-name= component.name
+            .io-item-meta #{component.brandName} · #{component.supplierName}
+
+    .io-overlay.is-modal
+    .io-modal#io-supplier-modal
+      .io-modal-head
+        div
+          h3 Thêm nhà cung cấp
+          p Tên sẽ xuất hiện trong danh sách chọn. Không gõ sẵn tên cứng.
+        button.io-icon-btn.js-close-supplier(type="button")
+          i.bi.bi-x-lg
+      form(action=`${prefixAdmin}/importOrders/suppliers` method="POST")
+        input(type="hidden" name="returnTo" value=returnTo)
+        label.io-label(for="new-supplier-name") Tên nhà cung cấp
+        input#new-supplier-name.io-input(type="text" name="name" placeholder="Ví dụ: Digiworld, FPT Trading..." required autocomplete="off")
+        .io-modal-actions
+          button.io-btn-ghost.js-close-supplier(type="button") Hủy
+          button.io-btn-primary(type="submit") Lưu nhà cung cấp
 
 block script
   script(src="/js/script.js")
