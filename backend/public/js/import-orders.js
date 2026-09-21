@@ -198,6 +198,12 @@
     });
   }
   var brandFilter = qs("#io-brand-filter");
+  var brandChipText = qs("#io-brand-chip-text");
+  function syncBrandChip() {
+    if (!brandChipText || !brandFilter) return;
+    var opt = brandFilter.options[brandFilter.selectedIndex];
+    brandChipText.textContent = opt && opt.value ? opt.text : "Tất cả thương hiệu";
+  }
   function applyPickerFilters() {
     var brandId = brandFilter ? String(brandFilter.value) : "";
     var q = pickerQ ? pickerQ.value.toLowerCase() : "";
@@ -208,7 +214,13 @@
       item.style.display = matchBrand && matchQ ? "" : "none";
     });
   }
-  if (brandFilter) brandFilter.addEventListener("change", applyPickerFilters);
+  if (brandFilter) {
+    brandFilter.addEventListener("change", function () {
+      syncBrandChip();
+      applyPickerFilters();
+    });
+    syncBrandChip();
+  }
   if (pickerQ) pickerQ.addEventListener("input", applyPickerFilters);
   if (itemList) {
     itemList.addEventListener("click", function (e) {
@@ -235,15 +247,21 @@
 
   var confirmModal = qs("#io-confirm-modal");
   var supplierModal = qs("#io-supplier-modal");
+  var brandModal = qs("#io-brand-modal");
   var modalOverlay = qs(".io-overlay.is-modal");
 
-  function openModal(el) {
+  function openModal(el, focusSel) {
     openEl(modalOverlay);
     openEl(el);
+    if (focusSel) {
+      var field = qs(focusSel, el);
+      if (field) setTimeout(function () { field.focus(); }, 40);
+    }
   }
   function closeModals() {
     closeEl(confirmModal);
     closeEl(supplierModal);
+    closeEl(brandModal);
     closeEl(modalOverlay);
   }
   if (qs("#io-open-confirm")) {
@@ -253,10 +271,15 @@
   }
   if (qs("#io-open-supplier")) {
     qs("#io-open-supplier").addEventListener("click", function () {
-      openModal(supplierModal);
+      openModal(supplierModal, "#new-supplier-name");
     });
   }
-  qsa(".js-close-modal, .js-close-supplier").forEach(function (btn) {
+  if (qs("#io-open-brand")) {
+    qs("#io-open-brand").addEventListener("click", function () {
+      openModal(brandModal, "#new-brand-name");
+    });
+  }
+  qsa(".js-close-modal, .js-close-supplier, .js-close-brand").forEach(function (btn) {
     btn.addEventListener("click", closeModals);
   });
   if (modalOverlay) modalOverlay.addEventListener("click", closeModals);

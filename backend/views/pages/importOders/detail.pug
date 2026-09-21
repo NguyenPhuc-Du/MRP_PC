@@ -26,7 +26,7 @@ block main
               | Nháp
         p.io-desc #{order.supplierName} · #{order.creatorName} · #{order.createdAtLabel}
       .io-head-actions
-        button.io-btn-ghost(type="button" onclick="window.print()")
+        a.io-btn-ghost(href=`${prefixAdmin}/importOrders/${order.id}/pdf`)
           i.bi.bi-printer
           | In phiếu
         if order.status === "draft" && account && account.role === "warehouse_manager"
@@ -55,53 +55,51 @@ block main
         .io-label Ghi chú
         p= order.note || "Không có ghi chú"
 
-    .io-card
+    .io-card.io-items-card
       .io-card-head
         div
           h3.io-card-title Danh sách linh kiện nhập
-          span.io-card-sub #{order.itemCount} mặt hàng · #{order.totalQty} sản phẩm
+          span.io-card-sub #{order.items ? order.items.length : 0} dòng · dữ liệu Components
       .table-responsive
-        table.io-table
+        table.io-items-table
+          colgroup
+            col.io-col-stt
+            col.io-col-item
+            col.io-col-brand
+            col.io-col-ncc
+            col.io-col-qty
+            col.io-col-price
+            col.io-col-total
           thead
             tr
               th STT
-              th Mã
               th Linh kiện
               th Thương hiệu
-              th Đơn vị
-              th Số lượng
-              th Đơn giá
-              th Thành tiền
+              th NCC
+              th.text-end SL
+              th.text-end Đơn giá
+              th.text-end Thành tiền
           tbody
             if order.items && order.items.length
               each item in order.items
                 tr
-                  td= item.stt
-                  td
-                    span.io-item-code= item.code
-                  td
-                    strong= item.name
-                    .io-user-sub= item.category
-                  td= item.brandName || "—"
-                  td= item.unit
-                  td
-                    strong= item.quantity
-                  td= item.unitPriceLabel
-                  td
-                    strong= item.lineTotalLabel
+                  td.io-stt= item.stt
+                  td.io-cell-item
+                    .io-item-name= item.name
+                    .io-item-code= item.code
+                  td.io-cell-text= item.brand
+                  td.io-cell-text= item.supplier
+                  td.text-end.io-num= item.quantity
+                  td.text-end.io-num= item.unitPriceLabel
+                  td.text-end.io-money= item.lineTotalLabel
             else
               tr
-                td.io-empty(colspan="8") Phiếu chưa có linh kiện.
-      .io-summary
-        div
-          .io-label Tổng số mặt hàng
-          strong= order.itemCount
-        div
-          .io-label Tổng số lượng
-          strong= order.totalQty
-        div
-          .io-label Tổng giá trị nhập
-          strong.io-total= order.totalValueLabel
+                td.io-empty(colspan="7") Phiếu chưa có linh kiện.
+          if order.items && order.items.length
+            tfoot
+              tr
+                td.io-tfoot-label(colspan="6") Tổng
+                td.text-end.io-money= order.totalValueLabel
 
     if order.status === "confirmed" && order.items && order.items.length
       .io-stock-card

@@ -156,6 +156,8 @@ export const mapDetailOrder = async (order: OrderWithRelations) => {
           : `COMP-${item.componentId}`,
         name: component?.name || "Linh kiện không còn trong danh mục",
         category: categoryName,
+        brand: component?.brand?.name ?? "—",
+        supplier: component?.supplier?.name ?? "—",
         brandName: component?.brand?.name ?? "—",
         supplierName: component?.supplier?.name ?? "—",
         unit: component?.unit || "cái",
@@ -322,6 +324,29 @@ export const listOrders = async (filter: ImportOrderFilter) => {
     fromIndex: total === 0 ? 0 : (page - 1) * limit + 1,
     toIndex: Math.min(total, page * limit),
   };
+};
+
+export const listOrdersForExport = async (filter: ImportOrderFilter) => {
+  const where: Prisma.ImportOrderWhereInput = {
+    ...parseRange(filter.from, filter.to),
+  };
+  if (filter.q) {
+    where.code = { contains: filter.q.trim(), mode: "insensitive" };
+  }
+  if (filter.status === "draft" || filter.status === "confirmed") {
+    where.status = filter.status;
+  }
+  if (filter.createdBy) {
+    where.createdBy = filter.createdBy;
+  }
+
+  const rows = await prisma.importOrder.findMany({
+    where,
+    include: orderInclude,
+    orderBy: { createdAt: "desc" },
+  });
+
+  return rows.map(mapListOrder);
 };
 
 export const getOrderById = async (id: number) => {
@@ -528,6 +553,16 @@ export const upsertSupplierByName = async (rawName: string) => {
   const name = rawName.trim();
   if (!name) throw new Error("NO_SUPPLIER_NAME");
   return prisma.supplier.upsert({
+    where: { name },
+    update: {},
+    create: { name },
+  });
+};
+
+export const upsertBrandByName = async (rawName: string) => {
+  const name = rawName.trim();
+  if (!name) throw new Error("NO_BRAND_NAME");
+  return prisma.brand.upsert({
     where: { name },
     update: {},
     create: { name },

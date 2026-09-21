@@ -12,6 +12,9 @@ block main
   - const supplierList = typeof suppliers !== "undefined" && suppliers ? suppliers : []
   - const brandList = typeof brands !== "undefined" && brands ? brands : []
   - const returnTo = mode === "edit" ? `${prefixAdmin}/importOrders/${order.id}/edit` : `${prefixAdmin}/importOrders/create`
+  - const selectedSupplierId = (order && order.supplierId) ? Number(order.supplierId) : Number(typeof addedSupplierId !== "undefined" ? addedSupplierId : 0)
+  - const selectedBrandId = Number(typeof addedBrandId !== "undefined" ? addedBrandId : 0)
+  - const selectedBrand = brandList.find((b) => Number(b.id) === selectedBrandId)
 
   .io-page.io-form-page(data-prefix=prefixAdmin)
     .io-form-hero
@@ -22,7 +25,7 @@ block main
         div
           //- p.io-kicker= mode === "edit" ? "Cập nhật phiếu nháp" : "Phiếu nhập kho"
           h1.io-title= mode === "edit" ? code : "Tạo phiếu nhập"
-          p.io-desc Chọn nhà cung cấp, lọc theo thương hiệu, rồi thêm đúng linh kiện cần nhập.
+          p.io-desc Chọn nhà cung cấp và thương hiệu từ danh mục, hoặc thêm mới bằng tay.
         .io-form-hero-meta
           .io-hero-chip
             i.bi.bi-person
@@ -35,7 +38,7 @@ block main
         .io-card-head
           div
             h3.io-card-title Thông tin chung
-            p.io-card-sub Mã phiếu được cấp tự động. Nhà cung cấp bắt buộc trước khi lưu.
+            p.io-card-sub Mã phiếu cấp tự động. Nhà cung cấp bắt buộc. Thương hiệu dùng để lọc linh kiện.
         .io-grid-2
           div.io-field
             label.io-label Mã phiếu
@@ -43,16 +46,38 @@ block main
           div.io-field
             label.io-label Người tạo
             input.io-input(type="text" value=`${creator.fullName || creator.username} · @${creator.username}` readonly)
-        .io-field
-          .io-label-row
-            label.io-label(for="supplierId") Nhà cung cấp
-            button.io-text-btn(type="button" id="io-open-supplier")
-              i.bi.bi-plus-lg
-              | Thêm nhà cung cấp
-          select#supplierId.io-input(name="supplierId" required)
-            option(value="") Chọn nhà cung cấp
-            each s in supplierList
-              option(value=s.id selected=(order && Number(order.supplierId) === Number(s.id)))= s.name
+        .io-pick-grid
+          .io-pick.is-ncc
+            .io-pick-head
+              .io-pick-icon
+                i.bi.bi-building
+              .io-pick-copy
+                h4 Nhà cung cấp
+                p Bắt buộc · chọn sẵn hoặc nhập tay
+              button.io-pick-add(type="button" id="io-open-supplier")
+                i.bi.bi-plus-lg
+                | Thêm
+            .io-pick-select
+              select#supplierId(name="supplierId" required)
+                option(value="") Chọn nhà cung cấp
+                each s in supplierList
+                  option(value=s.id selected=(selectedSupplierId === Number(s.id)))= s.name
+          .io-pick.is-brand
+            .io-pick-head
+              .io-pick-icon
+                i.bi.bi-tags
+              .io-pick-copy
+                h4 Thương hiệu
+                p Lọc linh kiện · chọn sẵn hoặc nhập tay
+              button.io-pick-add(type="button" id="io-open-brand")
+                i.bi.bi-plus-lg
+                | Thêm
+            .io-pick-select
+              select#io-brand-filter
+                option(value="") Tất cả thương hiệu
+                each b in brandList
+                  option(value=b.id selected=(selectedBrandId === Number(b.id)))= b.name
+
         .io-field
           label.io-label(for="note") Ghi chú
           textarea#note.io-input.io-textarea(name="note" placeholder="Ghi chú cho thủ kho, số hóa đơn, điều kiện giao hàng...")= order ? order.note : ""
@@ -61,12 +86,11 @@ block main
         .io-card-head
           div
             h3.io-card-title Linh kiện nhập
-            p.io-card-sub Mỗi linh kiện chỉ xuất hiện một lần. Lọc thương hiệu trước khi chọn.
+            p.io-card-sub Mỗi linh kiện chỉ một lần. Thương hiệu bên trên lọc danh sách chọn.
           .io-toolbar
-            select.io-input.io-input-compact#io-brand-filter
-              option(value="") Tất cả thương hiệu
-              each b in brandList
-                option(value=b.id)= b.name
+            .io-brand-chip#io-brand-chip
+              i.bi.bi-tags
+              span#io-brand-chip-text= selectedBrand ? selectedBrand.name : "Tất cả thương hiệu"
             button.io-btn-primary(type="button" id="io-add-btn")
               i.bi.bi-plus-lg
               | Thêm linh kiện
@@ -75,7 +99,7 @@ block main
           .io-empty-icon
             i.bi.bi-box-seam
           strong Chưa có linh kiện
-          p Bấm “Thêm linh kiện”, chọn đúng thương hiệu, rồi đưa vào phiếu.
+          p Bấm “Thêm linh kiện”. Danh sách đã lọc theo thương hiệu đang chọn.
 
         #io-item-list
           each item, index in formItems
@@ -143,10 +167,25 @@ block main
       form(action=`${prefixAdmin}/importOrders/suppliers` method="POST")
         input(type="hidden" name="returnTo" value=returnTo)
         label.io-label(for="new-supplier-name") Tên nhà cung cấp
-        input#new-supplier-name.io-input(type="text" name="name" placeholder="Ví dụ: Digiworld, FPT Trading..." required autocomplete="off")
+        input#new-supplier-name.io-input(type="text" name="name" placeholder="Gõ tên NCC, ví dụ nhà phân phối đang làm việc" required autocomplete="off")
         .io-modal-actions
           button.io-btn-ghost.js-close-supplier(type="button") Hủy
           button.io-btn-primary(type="submit") Lưu nhà cung cấp
+
+    .io-modal#io-brand-modal
+      .io-modal-head
+        div
+          h3 Thêm thương hiệu
+          p Gõ tay tên hãng. Tên lưu vào bảng Brands, không dùng danh sách cứng.
+        button.io-icon-btn.js-close-brand(type="button")
+          i.bi.bi-x-lg
+      form(action=`${prefixAdmin}/importOrders/brands` method="POST")
+        input(type="hidden" name="returnTo" value=returnTo)
+        label.io-label(for="new-brand-name") Tên thương hiệu
+        input#new-brand-name.io-input(type="text" name="name" placeholder="Gõ tên hãng, ví dụ tên trên hộp linh kiện" required autocomplete="off")
+        .io-modal-actions
+          button.io-btn-ghost.js-close-brand(type="button") Hủy
+          button.io-btn-primary(type="submit") Lưu thương hiệu
 
 block script
   script(src="/js/script.js")
