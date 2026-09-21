@@ -457,11 +457,11 @@
 }
 
 .bom-final,
-.bom-money.is-locked {
+.bom-money .is-locked {
   color: #18794e;
 }
 
-.bom-money.is-open {
+.bom-money .is-open {
   color: #8a8d9a;
   font-weight: 600;
 }

@@ -84,11 +84,17 @@ const totalsOf = (config: BomConfigRow) => {
   return { itemCount, groupCount, totalCost, salePrice, suggestedSale, margin };
 };
 
-export const getAllConfigs = async (): Promise<BomConfigRow[]> => {
+export const getAllConfigs = async (skip : number, take: number): Promise<BomConfigRow[]> => {
   return prisma.pcConfig.findMany({
+    skip: skip,
+    take: take,
     include: bomInclude,
     orderBy: { createdAt: "desc" },
   });
+};
+
+export const countAllConfigs = async () => {
+  return await prisma.pcConfig.count();
 };
 
 export const getConfigById = async (id: number): Promise<BomConfigRow> => {
