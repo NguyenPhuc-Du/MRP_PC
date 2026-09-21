@@ -6,30 +6,56 @@ import { Prisma } from "../generated/prisma"; // Import type nếu cần định
  * Lấy danh sách tất cả linh kiện
  * Có kèm theo thông tin Danh mục và Số lượng tồn kho
  */
-export const getAllComponents = async (skip: number, take: number) => {
-  return await prisma.component.findMany({
-    where:{deleted:false},
-    skip: skip,
-    take: take,
-    include: {
-      category: {
-        select: {
-          name: true, // Chỉ lấy tên danh mục cho nhẹ
-        },
-      },
-      inventory: {
-        select: {
-          quantityOnHand: true, // Lấy số lượng tồn kho hiện tại
-        },
-      },
+const listWhere = (keyword = "") => ({
+  deleted: false as const,
+  ...(keyword
+    ? { name: { contains: keyword, mode: "insensitive" as const } }
+    : {}),
+});
+
+const listInclude = {
+  category: {
+    select: {
+      name: true,
     },
+  },
+  inventory: {
+    select: {
+      quantityOnHand: true,
+    },
+  },
+} as const;
+
+export const getAllComponents = async (
+  skip: number,
+  take: number,
+  keyword = "",
+) => {
+  return prisma.component.findMany({
+    where: listWhere(keyword),
+    skip,
+    take,
+    include: listInclude,
     orderBy: {
-      createdAt: "desc", // Sắp xếp mới nhất lên đầu
+      createdAt: "desc",
     },
   });
 };
-export const countAllComponents = async () => {
-  return await prisma.component.count({where:{deleted:false}});
+
+export const getAllComponentsSearch = async (
+  skip: number,
+  take: number,
+  keyword: string,
+) => {
+  return getAllComponents(skip, take, keyword);
+};
+
+export const countAllComponents = async (keyword = "") => {
+  return prisma.component.count({ where: listWhere(keyword) });
+};
+
+export const countAllComponentsSearch = async (keyword: string) => {
+  return countAllComponents(keyword);
 };
 /**
  * Lấy thông tin chi tiết 1 linh kiện theo ID

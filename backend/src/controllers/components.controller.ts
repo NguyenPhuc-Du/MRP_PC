@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as componentService from "../services/components.service";
 import { paginationHelper } from '../utils/pagination.utils';
+import { formsearchHelper } from '../utils/formsearch.utils';
 
 type StockStatusKey = "ok" | "low" | "out"; //định dạng type mặc định chỉ được đưa 3 gt này vô
 
@@ -31,19 +32,28 @@ const formatVnd = (value: unknown): string => { //khôg biết giá trị của 
 
 export const index = async (req: Request, res: Response): Promise<void> => {
   try {
-    const countComponents= await componentService.countAllComponents();
+    const objectSearch = formsearchHelper(req.query);
+    const countComponents = await componentService.countAllComponents(
+      objectSearch.keyword,
+    );
 
-    //pagination
-    const objectPagination={
-      currentPage:1,
-      countPage:1,
-      limit:10,
-      skipPage:0,
+    const objectPagination = {
+      currentPage: 1,
+      countPage: 1,
+      limit: 10,
+      skipPage: 0,
     };
+    const pagination = paginationHelper(
+      req.query,
+      objectPagination,
+      countComponents,
+    );
 
-const pagination=paginationHelper(req.query,objectPagination,countComponents);
-//end pagination
-    const rows = await componentService.getAllComponents(pagination.skipPage,pagination.limit);
+    const rows = await componentService.getAllComponents(
+      pagination.skipPage,
+      pagination.limit,
+      objectSearch.keyword,
+    );
 
     const components = rows.map((row) => {
       const quantityOnHand = row.inventory?.quantityOnHand ?? 0;
@@ -74,6 +84,7 @@ const pagination=paginationHelper(req.query,objectPagination,countComponents);
       components:components,
       totalComponents: countComponents,
       objectPagination:pagination,
+      keyword: objectSearch.keyword,
     });
   } catch (error) {
     console.error(error);
@@ -83,6 +94,7 @@ const pagination=paginationHelper(req.query,objectPagination,countComponents);
       totalComponents: 0,
       objectPagination: { currentPage: 1, countPage: 1  ,    limit:10,
         skipPage:0, },
+        keyword: "",
     });
   }
 };

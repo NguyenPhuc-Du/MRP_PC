@@ -28,3 +28,19 @@ deleteButton.forEach(button =>{
 })
 }
 //end delete component
+const formSearch = document.getElementById('form-search');
+if(formSearch){
+    formSearch.addEventListener('submit', (e) => {
+        e.preventDefault();
+        console.log(formSearch);
+        const keyword = formSearch.querySelector('input[name="keyword"]').value;
+        
+        const url = new URL(window.location.href);
+        if(keyword){
+            url.searchParams.set('keyword', keyword);
+        } else {
+            url.searchParams.delete('keyword');
+        }
+        window.location.href = url.toString();
+    });
+}

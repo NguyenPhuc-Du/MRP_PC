@@ -4,29 +4,34 @@ block main
   .comp-page
     .d-flex.justify-content-between.align-items-start.mb-4
       div
-        .comp-eyebrow DANH MỤC
+        .comp-eyebrow DANH MỤC 
         h4.fw-bold.mb-1 Quản lý linh kiện
         .text-secondary.small #{totalComponents} linh kiện thuộc kho cơ sở
       button.btn.comp-btn.comp-btn-light
         i.bi.bi-box-arrow-in-down
         | Import
-
     .comp-card
       .d-flex.flex-wrap.align-items-center.gap-2.mb-4
-        .input-group.comp-search.flex-grow-1
-          span.input-group-text
-            i.bi.bi-search
-          input.form-control(type="text" placeholder="Tìm kiếm theo mã hoặc tên...")
-
-        button.btn.comp-btn.comp-btn-light
+        form#form-search.comp-search.flex-grow-1(method="get" action=`${prefixAdmin}/components`)
+          .input-group
+            span.input-group-text
+              i.bi.bi-search
+            input.form-control(
+              type="text"
+              name="keyword"
+              placeholder="Tìm kiếm theo tên..."
+              value=keyword || ""
+            )
+            button.btn.btn-success(type="submit") Tìm
+        button.btn.comp-btn.comp-btn-light(type="button")
           i.bi.bi-funnel
           | Bộ lọc
-        button.btn.comp-btn.comp-btn-icon
+        button.btn.comp-btn.comp-btn-icon(type="button")
           i.bi.bi-layout-sidebar
-        button.btn.comp-btn.comp-btn-light
+        button.btn.comp-btn.comp-btn-light(type="button")
           i.bi.bi-download
           | Xuất
-        button.btn.comp-btn.comp-btn-primary
+        button.btn.comp-btn.comp-btn-primary(type="button")
           i.bi.bi-plus-lg
           | Thêm linh kiện
 
