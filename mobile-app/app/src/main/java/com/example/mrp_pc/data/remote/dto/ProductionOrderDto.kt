@@ -4,6 +4,10 @@ data class ProductionOrderResponse(
     val data: List<ProductionOrderDto>
 )
 
+data class ProductionOrderDetailResponse(
+    val data: ProductionOrderDto
+)
+
 data class ProductionOrderDto (
     val id: Int,
     val quantityRequested: Int,

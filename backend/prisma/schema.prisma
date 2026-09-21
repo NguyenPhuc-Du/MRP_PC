@@ -170,6 +170,7 @@ model PcConfig {
   name        String         @db.VarChar(100)
   description String?        @db.Text
   salePrice   Decimal        @map("sale_price") @db.Decimal(12, 2)
+  imageUrl    String?        @map("image_url") @db.VarChar(500)
   status      PcConfigStatus @default(active)
   createdAt   DateTime       @default(now()) @map("created_at")
 
