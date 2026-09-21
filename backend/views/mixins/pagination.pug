@@ -2,12 +2,12 @@ mixin pagination(objectPagination)
     ul.pagination.comp-pagination.mb-0
         if objectPagination.currentPage>1
             li.page-item
-                button.page-link
-                    i.bi.bi-chevron-left(data-page=objectPagination.currentPage-1 pagination-button)
+                button.page-link(data-page=objectPagination.currentPage-1 pagination-button)
+                    i.bi.bi-chevron-left
         - for (var i = 1; i <= objectPagination.countPage; i++)
             li(class=`page-item ${i==objectPagination.currentPage ? 'active' : ''}`)
                 button.page-link(data-page=i pagination-button) #{i}
         if objectPagination.currentPage<objectPagination.countPage
             li.page-item
-                button.page-link
-                    i.bi.bi-chevron-right(data-page=objectPagination.currentPage+1 pagination-button)
+                button.page-link(data-page=objectPagination.currentPage+1 pagination-button)
+                    i.bi.bi-chevron-right

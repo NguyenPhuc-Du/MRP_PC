@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { systemConfig } from "../config/system";
 import { BomItemInput, CreateBomDto } from "../dtos/bom.dto";
-import * as bomService from "../services/bom.service";
 
+import * as bomService from "../services/bom.service";
+import { paginationHelper } from "../utils/pagination.utils";
 const BASE = () => `${systemConfig.prefixAdmin}/bom`;
 
 const errorMessage = (error: unknown): string => {
@@ -84,12 +85,24 @@ const emptyConfig = {
   extras: [] as Array<{ componentId: number; quantity: number }>,
 };
 
-export const index = async (_req: Request, res: Response): Promise<void> => {
-  const rows = await bomService.getAllConfigs();
+export const index = async (req: Request, res: Response): Promise<void> => {
+  const totalConfigs = await bomService.countAllConfigs();
+
+  const objectPagination = {
+    currentPage: 1,
+    countPage: 1,
+    limit: 10,
+    skipPage: 0,
+  };
+
+  const pagination = paginationHelper(req.query, objectPagination, totalConfigs);
+  const rows = await bomService.getAllConfigs(pagination.skipPage, pagination.limit);
 
   res.render("pages/bom/index", {
     pageTitle: "BOM / Cấu hình PC",
     configs: rows.map(bomService.mapListConfig),
+    totalConfigs,
+    objectPagination: pagination,
   });
 };
 
