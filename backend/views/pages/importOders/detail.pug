@@ -10,7 +10,7 @@ block main
     a.io-back(href=`${prefixAdmin}/importOrders`)
       i.bi.bi-arrow-left
       | Quay lại danh sách
-
+    
     .io-head
       div
         .io-title-row
@@ -28,7 +28,7 @@ block main
         button.io-btn-ghost(type="button" onclick="window.print()")
           i.bi.bi-printer
           | In phiếu
-        //- if order.status === "draft"
+        //- if order.status === "draft" 
         //-   a.io-btn-ghost(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
         //-   button.io-btn-primary#io-open-confirm(type="button")
         //-     i.bi.bi-check2
@@ -37,7 +37,7 @@ block main
           a.io-btn-ghost(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
           button.io-btn-primary#io-open-confirm(type="button")
             i.bi.bi-check2
-            | Xác nhận phiếu  
+            | Xác nhận phiếu    
 
     .io-card
       h3.io-card-title Thông tin phiếu

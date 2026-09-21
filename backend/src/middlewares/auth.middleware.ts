@@ -46,13 +46,23 @@ export const requireAuth = async (
     }
 
     res.locals.user = account;
+
+    res.locals.account = {
+      id: account.id,
+      username: account.username,
+      fullName: account.fullName,
+      role: account.role,
+    };
+    if (!req.session.account) {
+      req.session.account = res.locals.account;
+    }
+
     next();
   } catch (error) {
     res.clearCookie("access_token");
     return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
   }
 };
-
 // Chỉ quản lý kho được tạo/ sửa/ xác nhận nhập - Dũng
 export const requireWarehouse = (
   req: Request,
