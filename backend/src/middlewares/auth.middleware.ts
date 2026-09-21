@@ -40,23 +40,22 @@ export const requireAuth = async (
       },
     });
 
+    const role = await prisma.role.findUnique({
+      where: { id: account?.role } // account.role lúc này là 'admin', 'staff', ...
+    });
+
+    // Lấy ra mảng permissions để dùng
+    const permissions = role?.permissions || [];
+
     if (!account || account.status === "locked") {
       res.clearCookie("access_token");
       return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
     }
 
-    res.locals.user = account;
-
-    res.locals.account = {
-      id: account.id,
-      username: account.username,
-      fullName: account.fullName,
-      role: account.role,
+    res.locals.user = {
+      ...account,
+      permissions, // Thêm mảng permissions vào object user
     };
-    if (!req.session.account) {
-      req.session.account = res.locals.account;
-    }
-
     next();
   } catch (error) {
     res.clearCookie("access_token");

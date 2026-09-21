@@ -25,10 +25,11 @@ export const PERMISSION_KEYS = [
   "production_create",
   "production_edit",
   "production_delete",
-  "accounts_view",
-  "accounts_create",
-  "accounts_edit",
-  "accounts_delete",
+  "reports_view",
+  "account_view",
+  "account_create",
+  "account_edit",
+  "account_lock",
   "roles_view",
   "roles_create",
   "roles_edit",
@@ -80,48 +81,58 @@ export type RolePermissionPayload = {
   permissions: string[];
 };
 
+export const ADMIN_PERMISSIONS: PermissionKey[] = [
+  "account_view",
+  "account_create",
+  "account_edit",
+  "account_lock",
+  "roles_view",
+  "roles_create",
+  "roles_edit",
+  "roles_delete",
+  "roles_permissions",
+];
+
+export const WAREHOUSE_MANAGER_PERMISSIONS: PermissionKey[] = [
+  "dashboard_view",
+  "components_view",
+  "components_create",
+  "components_edit",
+  "components_delete",
+  "importOrders_view",
+  "importOrders_create",
+  "importOrders_edit",
+  "importOrders_delete",
+  "exportOrders_view",
+  "exportOrders_create",
+  "exportOrders_edit",
+  "exportOrders_delete",
+  "exportOrders_approve",
+  "bom_view",
+  "bom_create",
+  "bom_edit",
+  "bom_delete",
+  "production_view",
+  "production_create",
+  "production_edit",
+  "production_delete",
+  "reports_view",
+];
+
 export const DEFAULT_ROLES: Array<{
   id: AccountRole;
   permissions: string[];
 }> = [
   {
     id: "admin",
-    permissions: [...PERMISSION_KEYS],
+    permissions: [...ADMIN_PERMISSIONS],
   },
   {
     id: "warehouse_manager",
-    permissions: [
-      "dashboard_view",
-      "components_view",
-      "components_create",
-      "components_edit",
-      "inventory_view",
-      "inventory_edit",
-      "importOrders_view",
-      "importOrders_create",
-      "importOrders_edit",
-      "importOrders_delete",
-      "exportOrders_view",
-      "exportOrders_create",
-      "exportOrders_edit",
-      "exportOrders_approve",
-      "bom_view",
-      "production_view",
-    ],
+    permissions: [...WAREHOUSE_MANAGER_PERMISSIONS],
   },
   {
     id: "staff",
-    permissions: [
-      "dashboard_view",
-      "components_view",
-      "inventory_view",
-      "importOrders_view",
-      // "importOrders_create", // xemOK ko còn staff chỉ dc goi
-      "exportOrders_view",
-      "exportOrders_create",
-      "bom_view",
-      "production_view",
-      "production_create",
-    ],
+    permissions: [],
   },
 ];
