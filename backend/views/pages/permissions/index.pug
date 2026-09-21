@@ -31,12 +31,13 @@ block main
 
         .perm-head-actions
           button.perm-btn.perm-btn-light(type="button" button-reset) Hoàn tác
-          button.perm-btn.perm-btn-primary(type="button" button-submit) Cập nhật
+          if user.permissions && user.permissions.includes('roles_permissions')
+            button.perm-btn.perm-btn-primary(type="button" button-submit) Cập nhật
 
     if records && records.length
       .perm-card.perm-card-table
         div(data-records=records)
-        .perm-table-wrap
+        .perm-table-wrap(data-can-edit=user.permissions && user.permissions.includes('roles_permissions') ? "true" : "false")
           table.perm-table(table-permissions)
             thead
               tr
@@ -104,11 +105,12 @@ block main
               +permissionRow("roles_delete", "Xóa")
               +permissionRow("roles_permissions", "Phân quyền")
 
-      form#form-change-permissions.d-none(
-        action=`${prefixAdmin}/permissions?_method=PATCH`
-        method="POST"
-      )
-        input(type="text" name="permissions")
+      if user.permissions && user.permissions.includes('roles_permissions')
+        form#form-change-permissions.d-none(
+          action=`${prefixAdmin}/permissions?_method=PATCH`
+          method="POST"
+        )
+          input(type="text" name="permissions")
 
 block script
   script(src="/js/script.js")

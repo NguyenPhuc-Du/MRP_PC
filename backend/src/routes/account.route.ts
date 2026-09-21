@@ -1,19 +1,20 @@
 import { Router } from "express";
 import * as accountController from "../controllers/account.controller";
 import * as accountValidate from "../validates/account.validate"
+import { requirePermission } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.get("/", accountController.index);
+router.get("/", requirePermission("account_view"), accountController.index);
 
-router.get("/create", accountController.create);
+router.get("/create", requirePermission("account_create"), accountController.create);
 
-router.post("/create", accountValidate.validateCreateAccount, accountController.createPost);
+router.post("/create", requirePermission("account_create"), accountValidate.validateCreateAccount, accountController.createPost);
 
-router.get("/edit/:accountId", accountController.edit);
+router.get("/edit/:accountId", requirePermission("account_edit"), accountController.edit);
 
-router.patch("/edit/:accountId", accountValidate.validateUpdateAccount, accountController.editPatch);
+router.patch("/edit/:accountId", requirePermission("account_edit"), accountValidate.validateUpdateAccount, accountController.editPatch);
 
-router.patch("/lock/:accountId", accountController.lock);
+router.patch("/lock/:accountId", requirePermission("account_lock"), accountController.lock);
 
 export const accountRoutes = router;

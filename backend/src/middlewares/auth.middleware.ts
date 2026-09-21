@@ -175,3 +175,17 @@ export async function authenticateToken(
     });
   }
 }
+
+
+export const requirePermission = (permissionKey: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const permissions: string[] = res.locals.user?.permissions || [];
+
+    if (permissions.includes(permissionKey)) {
+      return next();
+    }
+
+    const backUrl = req.get("Referrer") || `${systemConfig.prefixAdmin}/dashboard`;
+    return res.redirect(backUrl);
+  }
+}

@@ -10,9 +10,6 @@ VALUES (
         'account_edit',
         'account_lock',
         'roles_view',
-        'roles_create',
-        'roles_edit',
-        'roles_delete',
         'roles_permissions'
     ]::TEXT[]
 )
