@@ -1,6 +1,9 @@
 extends ../../layouts/admin-layout.pug
 include ../../mixins/pagination.pug
+include ../../mixins/alert.pug
 block main
+  +alert-success(4000)
+  +alert-error(6000)
   .comp-page
     .d-flex.justify-content-between.align-items-start.mb-4
       div
@@ -76,7 +79,7 @@ block main
                   td.comp-muted= formatDate(component.createdAt)
                   td  
                     a(
-                      href=`${prefixAdmin}/products/edit/${component.id}`
+                      href=`${prefixAdmin}/components/edit/${component.id}`
                       class="btn btn-warning btn-sm"
                       ) Sửa
                     button(class="btn btn-danger btn-sm ml-1" button-delete data-id=component.id) Xóa 

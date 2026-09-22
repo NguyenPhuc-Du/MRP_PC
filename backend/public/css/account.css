@@ -163,6 +163,32 @@
 
 /* ---- Buttons ---- */
 .form-actions{ display:flex; flex-direction:column; gap:10px; }
+
+.comp-edit-preview{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:220px;
+  background:var(--hover-bg);
+  border-radius:14px;
+  overflow:hidden;
+}
+.comp-edit-preview img{
+  width:100%;
+  max-height:280px;
+  object-fit:contain;
+}
+.comp-edit-preview-empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  color:var(--text-muted);
+  font-size:13px;
+}
+.comp-edit-preview-empty i{
+  font-size:36px;
+}
 .btn-gradient{
   display:flex;
   align-items:center;
