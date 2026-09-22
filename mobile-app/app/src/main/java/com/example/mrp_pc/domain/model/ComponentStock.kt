@@ -1,3 +1,20 @@
 package com.example.mrp_pc.domain.model
 
-class ComponentStock
+data class ComponentStock (
+    val componentId: Int,
+    val componentName: String,
+    val unit: String?,
+    val bomQtyPerUnit: Int,
+    val requireQty: Int,
+    val onHandQty: Int,
+    val missingQty: Int,
+    val isEnough: Boolean,
+)
+
+data class StockCheckResult (
+    val orderId: Int,
+    val configName: String,
+    val quantityRequested: Int,
+    val allEnough: Boolean,
+    val items: List<ComponentStock>,
+)
