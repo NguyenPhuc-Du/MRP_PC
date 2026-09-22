@@ -1,6 +1,7 @@
 (function () {
   var tablePermissions = document.querySelector("[table-permissions]");
   var recordsEl = document.querySelector("[data-records]");
+  var wrapEl = document.querySelector("[data-can-edit]");
   var formChangePermissions = document.getElementById("form-change-permissions");
   var buttonSubmit = document.querySelector("[button-submit]");
   var buttonReset = document.querySelector("[button-reset]");
@@ -8,6 +9,8 @@
   if (!tablePermissions || !recordsEl) {
     return;
   }
+
+  var canEdit = wrapEl ? wrapEl.getAttribute("data-can-edit") === "true" : true;
 
   function parseRecords() {
     var raw = recordsEl.getAttribute("data-records");
@@ -66,25 +69,20 @@
   }
 
   function syncGroupColumn(group, index) {
+    if (!canEdit) return;
+
     var view = viewRow(group);
-    if (!view) {
-      return;
-    }
+    if (!view) return;
 
     var viewInput = checkboxInputs(view)[index];
-    if (!viewInput) {
-      return;
-    }
+    if (!viewInput) return;
 
     var enabled = viewInput.checked;
     group.forEach(function (row) {
-      if (isViewRow(row)) {
-        return;
-      }
+      if (isViewRow(row)) return;
       var input = checkboxInputs(row)[index];
-      if (!input) {
-        return;
-      }
+      if (!input) return;
+
       if (!enabled) {
         input.checked = false;
         input.disabled = true;
@@ -126,6 +124,12 @@
     });
 
     syncAllViewLocks();
+
+    if (!canEdit) {
+      tablePermissions.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
+        input.disabled = true;
+      });
+    }
   }
 
   function collectPermissions(records) {
@@ -156,6 +160,8 @@
   applyRecords(records);
 
   tablePermissions.addEventListener("change", function (event) {
+    if (!canEdit) return;
+
     var input = event.target;
     if (!input || input.type !== "checkbox") {
       return;

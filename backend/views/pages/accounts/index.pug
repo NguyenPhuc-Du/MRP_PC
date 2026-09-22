@@ -37,10 +37,11 @@ block main
       .page-eyebrow HỆ THỐNG
       h1.page-title Quản lý người dùng
       p.page-desc #{totalAccounts} tài khoản trong hệ thống.
-    .page-actions
-      a.btn-gradient(href=`${prefixAdmin}/accounts/create`)
-        i.bi.bi-plus-lg
-        | Thêm người dùng
+    if user.permissions && user.permissions.includes('account_create')
+      .page-actions
+        a.btn-gradient(href=`${prefixAdmin}/accounts/create`)
+          i.bi.bi-plus-lg
+          | Thêm người dùng
 
   .form-card.toolbar-card
     .toolbar-row
@@ -67,7 +68,8 @@ block main
             th VAI TRÒ
             th TRẠNG THÁI
             th ĐĂNG NHẬP CUỐI
-            th.text-end THAO TÁC
+            if user.permissions && (user.permissions.includes('account_edit') || user.permissions.includes('account_lock'))
+              th.text-end THAO TÁC
         tbody
           if accounts && accounts.length
             each account in accounts
@@ -92,16 +94,19 @@ block main
                   .row-actions
                     a.row-action-btn.action-view(href=`${prefixAdmin}/accounts/${account.id}` title="Chi tiết")
                       i.bi.bi-eye
-                    a.row-action-btn.action-edit(href=`${prefixAdmin}/accounts/edit/${account.id}` title="Sửa")
-                      i.bi.bi-pencil
-                    if account.status === "active" && account.role !== "admin"
-                      form.row-lock-form(
-                        action=`${prefixAdmin}/accounts/lock/${account.id}?_method=PATCH`
-                        method="POST"
-                        onsubmit="return confirm('Khóa tài khoản này? Người dùng sẽ không đăng nhập được.')"
-                      )
-                        button.row-action-btn.action-delete(type="submit" title="Khóa tài khoản")
-                          i.bi.bi-lock
+                    if user.permissions && user.permissions.includes('account_edit')
+                      a.row-action-btn.action-edit(href=`${prefixAdmin}/accounts/edit/${account.id}` title="Sửa")
+                        i.bi.bi-pencil
+                    
+                    if user.permissions && user.permissions.includes('account_lock')
+                      if account.status === "active" && account.role !== "admin"
+                        form.row-lock-form(
+                          action=`${prefixAdmin}/accounts/lock/${account.id}?_method=PATCH`
+                          method="POST"
+                          onsubmit="return confirm('Khóa tài khoản này? Người dùng sẽ không đăng nhập được.')"
+                        )
+                          button.row-action-btn.action-delete(type="submit" title="Khóa tài khoản")
+                            i.bi.bi-lock
           else
             tr
               td.empty-state(colspan="6")
