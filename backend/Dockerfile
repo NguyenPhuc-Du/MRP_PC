@@ -13,4 +13,5 @@ RUN npm config set fetch-retries 5 \
 COPY . .
 RUN npx prisma generate
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma generate && npm run dev"]
+# Sync deps into backend_node_modules volume when package.json changes
+CMD ["sh", "-c", "npm install && npx prisma generate && npm run dev"]
