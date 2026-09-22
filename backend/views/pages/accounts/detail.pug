@@ -1,0 +1,120 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+mixin roleBadge(role)
+  case role
+    when 'admin'
+      span.role-badge.role-admin
+        i.bi.bi-shield-fill-check
+        | Admin
+    when 'warehouse_manager'
+      span.role-badge.role-warehouse
+        i.bi.bi-box-seam-fill
+        | Quản lý kho
+    when 'staff'
+      span.role-badge.role-staff
+        i.bi.bi-person-fill
+        | Nhân viên
+
+mixin statusBadge(status)
+  if status === 'active'
+    span.status-badge.status-active
+      span.status-dot
+      | Hoạt động
+  else
+    span.status-badge.status-locked
+      span.status-dot
+      | Đã khóa
+
+block main
+  link(rel="stylesheet" href="/css/account.css")
+
+  +alert-success(4000)
+  +alert-error(6000)
+
+  .page-head
+    div
+      .page-eyebrow HỆ THỐNG
+      h1.page-title Chi tiết tài khoản
+      p.page-desc Thông tin đầy đủ của tài khoản ##{account.id}.
+    .page-actions
+      a.btn-soft(href=`${prefixAdmin}/accounts`)
+        i.bi.bi-arrow-left
+        | Quay lại
+      if user.permissions && user.permissions.includes('account_edit')
+        a.btn-gradient(href=`${prefixAdmin}/accounts/edit/${account.id}`)
+          i.bi.bi-pencil
+          | Sửa tài khoản
+
+  .detail-layout
+    // ---- Cột trái: profile card ----
+    .form-card.profile-card
+      .profile-avatar(class=`avatar-${account.role}`)= (account.fullName || account.username).slice(0, 2).toUpperCase()
+      h2.profile-name= account.fullName || account.username
+      p.profile-username @#{account.username}
+      .profile-badges
+        +roleBadge(account.role)
+        +statusBadge(account.status)
+
+      if user.permissions && user.permissions.includes('account_lock') && account.role !== 'admin'
+        if account.status === 'active'
+          form.profile-action-form(
+            action=`${prefixAdmin}/accounts/lock/${account.id}?_method=PATCH`
+            method="POST"
+            onsubmit="return confirm('Khóa tài khoản này? Người dùng sẽ không đăng nhập được.')"
+          )
+            button.btn-soft.w-100.text-danger(type="submit")
+              i.bi.bi-lock
+              | Khóa tài khoản
+        else
+          form.profile-action-form(
+            action=`${prefixAdmin}/accounts/unlock/${account.id}?_method=PATCH`
+            method="POST"
+          )
+            button.btn-soft.w-100(type="submit")
+              i.bi.bi-unlock
+              | Mở khóa tài khoản
+
+    // ---- Cột phải: thông tin chi tiết ----
+    .form-card.info-card
+      .form-card-head
+        .form-card-icon
+          i.bi.bi-person-lines-fill
+        div
+          .form-card-title Thông tin tài khoản
+          .form-card-sub Dữ liệu định danh và liên hệ
+
+      .info-grid
+        .info-item
+          .info-label Mã tài khoản
+          .info-value ##{account.id}
+        .info-item
+          .info-label Tên đăng nhập
+          .info-value @#{account.username}
+        .info-item
+          .info-label Họ và tên
+          .info-value= account.fullName || '—'
+        .info-item
+          .info-label Email
+          .info-value
+            i.bi.bi-envelope
+            | #{account.email || '—'}
+        .info-item
+          .info-label Số điện thoại
+          .info-value
+            i.bi.bi-telephone
+            | #{account.phone || '—'}
+        .info-item
+          .info-label Vai trò
+          .info-value
+            +roleBadge(account.role)
+        .info-item
+          .info-label Trạng thái
+          .info-value
+            +statusBadge(account.status)
+        .info-item
+          .info-label Ngày tạo
+          .info-value= formatDate(account.createdAt)
+        .info-item
+          .info-label Cập nhật lần cuối
+          .info-value= formatDate(account.updatedAt || account.createdAt)
