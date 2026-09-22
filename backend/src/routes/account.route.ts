@@ -17,4 +17,8 @@ router.patch("/edit/:accountId", requirePermission("account_edit"), accountValid
 
 router.patch("/lock/:accountId", requirePermission("account_lock"), accountController.lock);
 
+router.patch("/unlock/:accountId", requirePermission("account_lock"), accountController.unlock);
+
+router.get("/:accountId", requirePermission("account_view"), accountController.detail);
+
 export const accountRoutes = router;

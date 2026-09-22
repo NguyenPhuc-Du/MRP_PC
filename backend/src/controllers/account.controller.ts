@@ -20,6 +20,9 @@ const uniqueErrorMessage = (error: unknown): string | null => {
   if (error.message === "ACCOUNT_ALREADY_LOCKED") {
     return "Tài khoản này đã bị khóa";
   }
+  if (error.message === "ACCOUNT_ALREADY_UNLOCKED") {
+    return "Tài khoản này đang hoạt động";
+  }
   if (error.message === "CANNOT_LOCK_ADMIN") {
     return "Không thể khóa tài khoản admin";
   }
@@ -90,6 +93,29 @@ export const createPost = async (
   }
 };
 
+export const detail = async (req: Request, res: Response): Promise<void> => {
+  const accountId: number = Number(req.params.accountId);
+
+  try {
+    const account = await accountService.getAccountById(accountId);
+
+    if (!account) {
+      req.flash("error", "ID không hợp lệ");
+      res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+      return;
+    }
+
+    res.render("pages/accounts/detail", {
+      pageTitle: "Chi tiết tài khoản",
+      account,
+    });
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Không tải được tài khoản");
+    res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+  }
+};
+
 export const edit = async (req: Request, res: Response): Promise<void> => {
   const accountId: number = Number(req.params.accountId);
   const oldInput = req.session.oldInput ?? {};
@@ -155,10 +181,25 @@ export const lock = async (req: Request, res: Response): Promise<void> => {
     await accountService.lockAccountById(accountId);
 
     req.flash("success", "Đã khóa tài khoản");
-    res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+    res.redirect(`${systemConfig.prefixAdmin}/accounts/${accountId}`);
   } catch (error) {
     console.error(error);
     req.flash("error", uniqueErrorMessage(error) ?? "Khóa tài khoản thất bại!");
-    res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+    res.redirect(`${systemConfig.prefixAdmin}/accounts/${accountId}`);
+  }
+};
+
+export const unlock = async (req: Request, res: Response): Promise<void> => {
+  const accountId: number = Number(req.params.accountId);
+
+  try {
+    await accountService.unlockAccountById(accountId);
+
+    req.flash("success", "Đã mở khóa tài khoản");
+    res.redirect(`${systemConfig.prefixAdmin}/accounts/${accountId}`);
+  } catch (error) {
+    console.error(error);
+    req.flash("error", uniqueErrorMessage(error) ?? "Mở khóa tài khoản thất bại!");
+    res.redirect(`${systemConfig.prefixAdmin}/accounts/${accountId}`);
   }
 };

@@ -169,3 +169,26 @@ export const lockAccountById = async (accountId: number): Promise<void> => {
         data: { status: "locked" },
     });
 };
+
+export const unlockAccountById = async (accountId: number): Promise<void> => {
+    if (!Number.isInteger(accountId) || accountId <= 0) {
+        throw new Error("ACCOUNT_NOT_FOUND");
+    }
+
+    const account = await prisma.account.findUnique({
+        where: { id: accountId },
+    });
+
+    if (!account) {
+        throw new Error("ACCOUNT_NOT_FOUND");
+    }
+
+    if (account.status === "active") {
+        throw new Error("ACCOUNT_ALREADY_UNLOCKED");
+    }
+
+    await prisma.account.update({
+        where: { id: accountId },
+        data: { status: "active" },
+    });
+};
