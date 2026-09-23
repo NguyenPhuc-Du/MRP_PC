@@ -6,11 +6,12 @@ import { Prisma } from "../generated/prisma"; // Import type nếu cần định
  * Lấy danh sách tất cả linh kiện
  * Có kèm theo thông tin Danh mục và Số lượng tồn kho
  */
-const listWhere = (keyword = "") => ({
+const listWhere = (keyword = "",status="all") => ({
   deleted: false as const,
   ...(keyword
     ? { name: { contains: keyword, mode: "insensitive" as const } }
     : {}),
+  ...(status !== "all" ? { status: status as "active" | "discontinued" } : {}),
 });
 
 const listInclude = {
@@ -30,9 +31,10 @@ export const getAllComponents = async (
   skip: number,
   take: number,
   keyword = "",
+  status="all",
 ) => {
   return prisma.component.findMany({
-    where: listWhere(keyword),
+    where: listWhere(keyword,status),
     skip,
     take,
     include: listInclude,

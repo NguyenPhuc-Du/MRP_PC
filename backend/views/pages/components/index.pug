@@ -27,15 +27,16 @@ block main
             )
             button.btn.btn-success(type="submit") Tìm
         button.btn.comp-btn.comp-btn-light(type="button")
-          i.bi.bi-funnel
-          | Bộ lọc
+          select.form-select(name="status" id="form-status")
+            option(value="all" selected=status === "all") Tất cả
+            option(value="active" selected=status === "active") Đang kinh doanh 
+            option(value="discontinued" selected=status === "discontinued") Ngừng kinh doanh 
         button.btn.comp-btn.comp-btn-icon(type="button")
           i.bi.bi-layout-sidebar
         button.btn.comp-btn.comp-btn-light(type="button")
           i.bi.bi-download
           | Xuất
-        button.btn.comp-btn.comp-btn-primary(type="button")
-          i.bi.bi-plus-lg
+        a.btn.comp-btn.comp-btn-primary(href=`${prefixAdmin}/components/create`)
           | Thêm linh kiện
 
       .table-responsive.comp-table-wrap
