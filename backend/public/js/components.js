@@ -77,3 +77,18 @@ if(formStatus){
     })
 }
 //end status
+//prevent spam
+const form = document.getElementById("form-create-component");
+if (form) {
+  form.addEventListener("submit", function () {
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn.dataset.submitting === "1") {
+      event.preventDefault();
+      return;
+    }
+    btn.dataset.submitting = "1";
+    btn.disabled = true;
+    btn.querySelector("span").textContent = "Đang lưu...";
+  });
+}
+//end prevent spam

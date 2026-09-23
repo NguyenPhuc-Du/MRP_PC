@@ -11,8 +11,6 @@ block main
         h4.fw-bold.mb-1 Quản lý linh kiện
         .text-secondary.small #{totalComponents} linh kiện thuộc kho cơ sở
       button.btn.comp-btn.comp-btn-light
-        i.bi.bi-box-arrow-in-down
-        | Import
     .comp-card
       .d-flex.flex-wrap.align-items-center.gap-2.mb-4
         form#form-search.comp-search.flex-grow-1(method="get" action=`${prefixAdmin}/components`)
@@ -26,16 +24,11 @@ block main
               value=keyword || ""
             )
             button.btn.btn-success(type="submit") Tìm
-        button.btn.comp-btn.comp-btn-light(type="button")
+        div.d-flex.align-items-center.gap-2
           select.form-select(name="status" id="form-status")
             option(value="all" selected=status === "all") Tất cả
             option(value="active" selected=status === "active") Đang kinh doanh 
             option(value="discontinued" selected=status === "discontinued") Ngừng kinh doanh 
-        button.btn.comp-btn.comp-btn-icon(type="button")
-          i.bi.bi-layout-sidebar
-        button.btn.comp-btn.comp-btn-light(type="button")
-          i.bi.bi-download
-          | Xuất
         a.btn.comp-btn.comp-btn-primary(href=`${prefixAdmin}/components/create`)
           | Thêm linh kiện
 
