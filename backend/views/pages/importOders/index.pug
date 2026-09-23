@@ -22,7 +22,7 @@ block main
         h1.io-title Danh sách phiếu
         p.io-desc Quản lý các giao dịch nhập linh kiện vào hệ thống tồn kho
       .io-head-actions
-        if account && account.role === "warehouse_manager"
+        if user && user.role === "warehouse_manager"
           a.io-btn-ghost(href=`${prefixAdmin}/importOrders/export.xlsx${exportQuery ? `?${exportQuery}` : ""}`)
             i.bi.bi-file-earmark-excel
             | Excel
@@ -90,14 +90,14 @@ block main
       .io-alert
         .io-alert-head
           i.bi.bi-exclamation-triangle
-          strong Thiếu linh kiện cần nhập để đủ lắp ráp
+          strong Linh kiện đang ở hoặc dưới ngưỡng tồn tối thiểu
           span.io-alert-count #{shortages.length} mặt hàng
         ul.io-alert-list
           each item in shortages
             li
-              | #{item.name} · #{item.brand} · tồn #{item.onHand}/#{item.min} · gợi ý +#{item.need} #{item.unit}
+              | #{item.name} · #{item.brand} · cần #{item.required}  · tồn #{item.onHand} · thiếu #{item.need} #{item.unit}
               |  · NCC: #{item.supplier}
-        if account && account.role === "warehouse_manager"
+        if user && user.role === "warehouse_manager"
           a.io-btn-primary(href=`${prefixAdmin}/importOrders/create?ids=${shortages.map(s => s.id).join(",")}`)
             | Tạo phiếu nhập các mặt thiếu 
     .io-card

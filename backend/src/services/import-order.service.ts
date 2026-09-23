@@ -512,36 +512,97 @@ export const confirmOrder = async (id: number, accountId: number) => {
   });
 };
 /** Linh kiện cần nhập: tồn <= ngưỡng tối thiểu, còn kinh doanh */
+/** Linh kiện cần nhập: tồn thấp hơn ngưỡng tối thiểu, còn kinh doanh */
+/** Linh kiện thiếu để lắp: cộng BOM của lệnh sản xuất chưa xong, trừ tồn kho */
 export const getShortageComponents = async () => {
-  const rows = await prisma.component.findMany({
-    where: { status: "active", deleted: false },
-    include: {
-      inventory: true,
-      category: true,
-      brand: true,
-      supplier: true,
+  const orders = await prisma.productionOrder.findMany({
+    where: {
+      status: { in: ["pending", "in_progress"] },
+    },
+    select: {
+      quantityRequested: true,
+      pcConfig: {
+        select: {
+          bomItems: {
+            select: {
+              quantity: true,
+              component: {
+                select: {
+                  id: true,
+                  name: true,
+                  unit: true,
+                  unitPrice: true,
+                  supplierId: true,
+                  status: true,
+                  deleted: true,
+                  brand: { select: { name: true } },
+                  supplier: { select: { name: true } },
+                  category: { select: { name: true } },
+                  inventory: { select: { quantityOnHand: true } },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 
-  return rows
-    .filter((c) => (c.inventory?.quantityOnHand ?? 0) <= c.minStockThreshold)
-    .map((c) => {
-      const onHand = c.inventory?.quantityOnHand ?? 0;
-      const need = c.minStockThreshold - onHand;
-      return {
+  type Row = {
+    id: number;
+    name: string;
+    category: string;
+    brand: string;
+    supplier: string;
+    supplierId: number | null;
+    onHand: number;
+    required: number;
+    unit: string;
+    unitPrice: number;
+  };
+
+  const map = new Map<number, Row>();
+
+  for (const order of orders) {
+    for (const bom of order.pcConfig.bomItems) {
+      const c = bom.component;
+      if (c.status !== "active" || c.deleted) {
+        continue;
+      }
+
+      const addQty = bom.quantity * order.quantityRequested;
+      const current = map.get(c.id);
+
+      if (current) {
+        current.required += addQty;
+        continue;
+      }
+
+      map.set(c.id, {
         id: c.id,
         name: c.name,
         category: c.category.name,
         brand: c.brand?.name ?? "—",
         supplier: c.supplier?.name ?? "Chưa gán NCC",
         supplierId: c.supplierId,
-        onHand,
-        min: c.minStockThreshold,
-        need: need > 0 ? need : 1,
+        onHand: c.inventory?.quantityOnHand ?? 0,
+        required: addQty,
         unit: c.unit ?? "cái",
         unitPrice: Number(c.unitPrice),
+      });
+    }
+  }
+
+  return [...map.values()]
+    .map((row) => {
+      const need = row.required - row.onHand;
+      return {
+        ...row,
+        min: row.required,
+        need,
       };
-    });
+    })
+    .filter((row) => row.need > 0);
 };
 export const getSuppliers = () =>
   prisma.supplier.findMany({ orderBy: { name: "asc" } });
@@ -572,32 +633,27 @@ export const upsertBrandByName = async (rawName: string) => {
 export const getPrefillItemsByIds = async (ids: number[]) => {
   if (!ids.length) return [];
 
-  const rows = await prisma.component.findMany({
-    where: { id: { in: ids }, status: "active", deleted: false },
-    include: {
-      inventory: true,
-      category: true,
-      brand: true,
-      supplier: true,
-    },
-  });
+  const shortages = await getShortageComponents();
+  const byId = new Map(shortages.map((item) => [item.id, item]));
 
-  const order = new Map(ids.map((id, i) => [id, i]));
-  rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  return ids.flatMap((id) => {
+    const item = byId.get(id);
+    if (!item) {
+      return [];
+    }
 
-  return rows.map((c) => {
-    const onHand = c.inventory?.quantityOnHand ?? 0;
-    const need = c.minStockThreshold - onHand;
-    return {
-      componentId: c.id,
-      code: componentCode(c.category.name, c.id),
-      name: c.name,
-      category: c.category.name,
-      brandName: c.brand?.name ?? "—",
-      supplierName: c.supplier?.name ?? "Chưa gán NCC",
-      stockAfter: onHand,
-      quantity: need > 0 ? need : 1,
-      unitPrice: Number(c.unitPrice),
-    };
+    return [
+      {
+        componentId: item.id,
+        code: componentCode(item.category, item.id),
+        name: item.name,
+        category: item.category,
+        brandName: item.brand,
+        supplierName: item.supplier,
+        stockAfter: item.onHand,
+        quantity: item.need,
+        unitPrice: item.unitPrice,
+      },
+    ];
   });
 };

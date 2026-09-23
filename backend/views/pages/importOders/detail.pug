@@ -29,7 +29,7 @@ block main
         a.io-btn-ghost(href=`${prefixAdmin}/importOrders/${order.id}/pdf`)
           i.bi.bi-printer
           | In phiếu
-        if order.status === "draft" && account && account.role === "warehouse_manager"
+        if order.status === "draft" && user && user.role === "warehouse_manager"
           a.io-btn-ghost(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
           button.io-btn-primary#io-open-confirm(type="button")
             i.bi.bi-check2
