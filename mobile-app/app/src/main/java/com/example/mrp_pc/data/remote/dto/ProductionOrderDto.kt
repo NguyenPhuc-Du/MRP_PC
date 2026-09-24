@@ -13,7 +13,7 @@ data class ProductionOrderDto (
     val quantityRequested: Int,
     val status: String,
     val createdAt: String,
-    val completedAt: String,
+    val completedAt: String?,
     val pcConfig: PcConfigDto,
 )
 
