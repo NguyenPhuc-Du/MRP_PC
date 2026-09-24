@@ -33,7 +33,7 @@ async function main() {
     },
   });
 
-  await prisma.account.upsert({
+  const staff = await prisma.account.upsert({
     where: { username: "staff" },
     update: {},
     create: {
@@ -163,6 +163,18 @@ async function main() {
           { componentId: ram.id, quantity: 2 },
         ],
       },
+    },
+  });
+
+  await prisma.productionOrder.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      pcConfigId: officePc.id,
+      quantityRequested: 1,
+      assignedTo: staff.id,
+      createdBy: admin.id,
+      status: "pending",
     },
   });
 

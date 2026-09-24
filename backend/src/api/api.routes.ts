@@ -30,6 +30,34 @@ router.get(
 );
 
 router.get(
+  "/production-orders/:id/assemble",
+  authenticateToken,
+  requireRole("staff"),
+  productionController.getAssembleStatus,
+);
+
+router.post(
+  "/production-orders/:id/request-material",
+  authenticateToken,
+  requireRole("staff"),
+  productionController.requestMaterialExport,
+);
+
+router.post(
+  "/production-orders/:id/confirm",
+  authenticateToken,
+  requireRole("staff"),
+  productionController.confirmAssemble,
+);
+
+router.post(
+  "/production-orders/:id/request-product",
+  authenticateToken,
+  requireRole("staff"),
+  productionController.requestProductExport,
+);
+
+router.get(
   "/production-orders/:id",
   authenticateToken,
   requireRole("staff"),

@@ -1,15 +1,15 @@
 package com.example.mrp_pc.data.remote.dto
 
-data class StockCheckResponse (
+data class StockCheckResponse(
     val data: StockCheckDto,
 )
 
-data class StockCheckDto (
+data class StockCheckDto(
     val orderId: Int,
     val configName: String,
     val quantityRequested: Int,
     val allEnough: Boolean,
-    val items: List<StockItemDto>
+    val items: List<StockItemDto>,
 )
 
 data class StockItemDto(
