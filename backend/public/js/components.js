@@ -59,3 +59,36 @@ if(formSearch){
     });
 })();
 //end preview ảnh
+//status
+const formStatus = document.getElementById('form-status');
+if(formStatus){
+    formStatus.addEventListener('change', (e) => {
+
+        const status = formStatus.value;
+        console.log(status);
+        const url= new URL(window.location.href);
+        if(status){
+            url.searchParams.set('status', status);
+        } else {
+            url.searchParams.delete('status');
+        }
+        window.location.href = url.toString();
+        e.preventDefault();
+    })
+}
+//end status
+//prevent spam
+const form = document.getElementById("form-create-component");
+if (form) {
+  form.addEventListener("submit", function () {
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn.dataset.submitting === "1") {
+      event.preventDefault();
+      return;
+    }
+    btn.dataset.submitting = "1";
+    btn.disabled = true;
+    btn.querySelector("span").textContent = "Đang lưu...";
+  });
+}
+//end prevent spam

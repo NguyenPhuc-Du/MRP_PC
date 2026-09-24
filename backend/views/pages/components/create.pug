@@ -1,0 +1,136 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+  link(rel="stylesheet" href="/css/account.css")
+
+  +alert-success(4000)
+  +alert-error(6000)
+
+  .comp-page
+    .page-head
+      div
+        .page-eyebrow DANH MỤC
+        h2.page-title Thêm linh kiện
+        p.page-desc Nhập thông tin, giá nhập và ảnh linh kiện mới.
+      .page-actions
+        a.btn-soft(href=`${prefixAdmin}/components`)
+          i.bi.bi-arrow-left
+          span Quay lại danh sách
+
+    form#form-create-component(
+      action=`${prefixAdmin}/components/create`
+      method="POST"
+      enctype="multipart/form-data"
+    )
+      .row.g-4
+        .col-lg-8
+          .form-card
+            .form-card-head
+              .form-card-icon
+                i.bi.bi-cpu
+              div
+                .form-card-title Thông tin linh kiện
+                .form-card-sub Dùng trên danh mục và phiếu kho.
+
+            .row.g-3
+              .col-md-6
+                label.form-label-custom(for="name")
+                  | Tên linh kiện
+                  span.required *
+                input#name.form-control.input-custom(
+                  type="text"
+                  name="name"
+                  maxlength="150"
+                  required
+                )
+              .col-md-6
+                label.form-label-custom(for="categoryId")
+                  | Loại
+                  span.required *
+                select#categoryId.form-select.input-custom(name="categoryId" required)
+                  option(value="") — Chọn loại —
+                  each category in categories
+                    option(value=category.id)= category.name
+
+              .col-md-6
+                label.form-label-custom(for="brandId") Thương hiệu
+                select#brandId.form-select.input-custom(name="brandId")
+                  option(value="") — Chưa chọn —
+                  each brand in brands
+                    option(value=brand.id)= brand.name
+              .col-md-6
+                label.form-label-custom(for="supplierId") Nhà cung cấp
+                select#supplierId.form-select.input-custom(name="supplierId")
+                  option(value="") — Chưa chọn —
+                  each supplier in suppliers
+                    option(value=supplier.id)= supplier.name
+
+              .col-md-4
+                label.form-label-custom(for="unit") Đơn vị tính
+                input#unit.form-control.input-custom(
+                  type="text"
+                  name="unit"
+                  maxlength="20"
+                  placeholder="vd: cái, thanh"
+                )
+              .col-md-4
+                label.form-label-custom(for="unitPrice")
+                  | Giá nhập (đ)
+                  span.required *
+                input#unitPrice.form-control.input-custom(
+                  type="number"
+                  name="unitPrice"
+                  min="0"
+                  step="1000"
+                  required
+                )
+              .col-md-4
+                label.form-label-custom(for="minStockThreshold") Tồn tối thiểu
+                input#minStockThreshold.form-control.input-custom(
+                  type="number"
+                  name="minStockThreshold"
+                  min="0"
+                  step="1"
+                  value="5"
+                )
+
+              .col-12
+                label.form-label-custom(for="image") Ảnh linh kiện
+                input#image(type="file" name="image" accept="image/jpeg,image/png,image/webp")
+                .form-hint Chọn ảnh JPEG, PNG hoặc WebP.
+
+        .col-lg-4
+          .form-card
+            .form-card-head
+              .form-card-icon
+                i.bi.bi-image
+              div
+                .form-card-title Xem trước
+                .form-card-sub Ảnh hiển thị trên danh sách.
+            .comp-edit-preview
+              img#image-preview(src="" alt="" style="display:none")
+              .comp-edit-preview-empty#image-preview-empty(style="display:flex")
+                i.bi.bi-image
+                span Chưa có ảnh
+
+          .form-card
+            .form-card-head
+              .form-card-icon
+                i.bi.bi-toggle-on
+              div
+                .form-card-title Trạng thái
+                .form-card-sub Ngừng KD sẽ ẩn khỏi luồng nhập mới.
+            select#status.form-select.input-custom(name="status")
+              option(value="active" selected) Đang kinh doanh
+              option(value="discontinued") Ngừng kinh doanh
+
+          .form-actions
+            button.btn-gradient(type="submit")
+              i.bi.bi-check-lg
+              span Thêm linh kiện
+            a.btn-soft.w-100(href=`${prefixAdmin}/components`)
+              i.bi.bi-x-lg
+              span Huỷ
+
+    script(src="/js/components.js")

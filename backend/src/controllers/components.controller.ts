@@ -68,11 +68,12 @@ export const index = async (req: Request, res: Response): Promise<void> => {
       objectPagination,
       countComponents,
     );
-
+    const status = req.query.status || "all";
     const rows = await componentService.getAllComponents(
       pagination.skipPage,
       pagination.limit,
       objectSearch.keyword,
+      status,
     );
 
     const components = rows.map((row) => {
@@ -105,6 +106,7 @@ export const index = async (req: Request, res: Response): Promise<void> => {
       totalComponents: countComponents,
       objectPagination:pagination,
       keyword: objectSearch.keyword,
+      status:status
     });
   } catch (error) {
     console.error(error);
@@ -122,10 +124,12 @@ export const deleteComponent = async (req: Request, res: Response): Promise<void
 try{
 if(req.params.id){
   const component= await componentService.deleteComponent(Number(req.params.id));
+  req.flash("success", "Xoá linh kiện thành công");
   res.redirect(req.get("referer") );
 }
 }
 catch(error){
+  req.flash("error", "Xoá linh kiện thất bại");
   res.send("NO");
 }
 };
@@ -235,5 +239,58 @@ export const editComponentPatch = async (req: Request, res: Response): Promise<v
     console.error(error);
     req.flash("error", "Cập nhật linh kiện thất bại");
     res.redirect(listUrl);
+  }
+};
+export const createComponent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const lookups = await componentService.getComponentEditLookups();
+    res.render("pages/components/create", {
+      pageTitle: "Thêm linh kiện",
+      categories: lookups.categories,
+      brands: lookups.brands,
+      suppliers: lookups.suppliers,
+    });
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Không tải được form thêm linh kiện");
+    res.redirect(`${systemConfig.prefixAdmin}/components`);
+  }
+};
+
+export const createComponentPost = async (req: Request, res: Response): Promise<void> => {
+  const listUrl = `${systemConfig.prefixAdmin}/components`;
+  const createUrl = `${listUrl}/create`;
+
+  try {
+    const lookups = await componentService.getComponentEditLookups();
+    const categoryId = Number(req.body.categoryId);
+    const category = lookups.categories.find((item) => item.id === categoryId);
+
+    const created = await componentService.createComponent({
+      name: req.body.name,
+      unit: req.body.unit || null,
+      unitPrice: req.body.unitPrice,
+      minStockThreshold: Number(req.body.minStockThreshold) || 5,
+      status: req.body.status || "active",
+      categoryId,
+      brandId: optionalFkId(req.body.brandId),
+      supplierId: optionalFkId(req.body.supplierId),
+    });
+
+    const file = req.file;
+    if (file) {
+      const folder = categoryFolderOf(category?.name);
+      const ext = path.extname(file.originalname) || ".jpg";
+      const key = componentImageKey(folder, `${created.id}-${Date.now()}${ext}`);
+      const imageUrl = await uploadPublicImage(key, file.buffer, file.mimetype);
+      await componentService.updateComponent(created.id, { imageUrl });
+    }
+
+    req.flash("success", "Thêm linh kiện thành công");
+    res.redirect(listUrl);
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Thêm linh kiện thất bại");
+    res.redirect(createUrl);
   }
 };
