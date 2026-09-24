@@ -29,8 +29,9 @@ block main
             option(value="all" selected=status === "all") Tất cả
             option(value="active" selected=status === "active") Đang kinh doanh 
             option(value="discontinued" selected=status === "discontinued") Ngừng kinh doanh 
-        a.btn.comp-btn.comp-btn-primary(href=`${prefixAdmin}/components/create`)
-          | Thêm linh kiện
+        if user && user.permissions && user.permissions.includes('components_create')
+          a.btn.comp-btn.comp-btn-primary(href=`${prefixAdmin}/components/create`)
+            | Thêm linh kiện
 
       .table-responsive.comp-table-wrap
         table.table.table-borderless.align-middle.mb-0.comp-table
@@ -71,12 +72,15 @@ block main
                       span.comp-dot
                       | #{component.stockLabel}
                   td.comp-muted= formatDate(component.createdAt)
-                  td  
-                    a(
-                      href=`${prefixAdmin}/components/edit/${component.id}`
-                      class="btn btn-warning btn-sm"
-                      ) Sửa
-                    button(class="btn btn-danger btn-sm ml-1" button-delete data-id=component.id) Xóa 
+                  if user && user.permissions && (user.permissions.includes('components_edit') || user.permissions.includes('components_delete'))
+                    td
+                      if user.permissions.includes('components_edit')
+                        a(
+                          href=`${prefixAdmin}/components/edit/${component.id}`
+                          class="btn btn-warning btn-sm"
+                          ) Sửa
+                      if user.permissions.includes('components_delete')
+                        button(class="btn btn-danger btn-sm ml-1" button-delete data-id=component.id) Xóa 
             else
               tr
                 td.text-center.text-secondary.py-4(colspan="11") Chưa có linh kiện nào.

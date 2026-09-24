@@ -7,6 +7,10 @@ block main
   +alert-error(6000)
 
   -
+    const canView = user && user.permissions && user.permissions.includes('importOrders_view');
+    const canCreate = user && user.permissions && user.permissions.includes('importOrders_create');
+    const canEdit = user && user.permissions && user.permissions.includes('importOrders_edit');
+
     const exportQuery = [
       filters.q ? `q=${encodeURIComponent(filters.q)}` : "",
       filters.status ? `status=${encodeURIComponent(filters.status)}` : "",
@@ -22,13 +26,14 @@ block main
         h1.io-title Danh sách phiếu
         p.io-desc Quản lý các giao dịch nhập linh kiện vào hệ thống tồn kho
       .io-head-actions
-        if user && user.role === "warehouse_manager"
+        if canView
           a.io-btn-ghost(href=`${prefixAdmin}/importOrders/export.xlsx${exportQuery ? `?${exportQuery}` : ""}`)
             i.bi.bi-file-earmark-excel
             | Excel
           a.io-btn-ghost(href=`${prefixAdmin}/importOrders/export.pdf${exportQuery ? `?${exportQuery}` : ""}`)
             i.bi.bi-file-earmark-pdf
             | PDF
+        if canCreate
           a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`)
             i.bi.bi-plus-lg
             | Tạo phiếu nhập 
@@ -97,7 +102,7 @@ block main
             li
               | #{item.name} · #{item.brand} · cần #{item.required}  · tồn #{item.onHand} · thiếu #{item.need} #{item.unit}
               |  · NCC: #{item.supplier}
-        if user && user.role === "warehouse_manager"
+        if canCreate
           a.io-btn-primary(href=`${prefixAdmin}/importOrders/create?ids=${shortages.map(s => s.id).join(",")}`)
             | Tạo phiếu nhập các mặt thiếu 
     .io-card
@@ -113,13 +118,17 @@ block main
               th.text-end Tổng SL
               th.text-end Tổng tiền
               th Trạng thái
-              th
+              if canView
+                th
           tbody
             if orders && orders.length
               each order in orders
                 tr.io-row(data-order=JSON.stringify(order) tabindex="0")
                   td
-                    button.io-code(type="button")= order.code
+                    if canView
+                      a.io-code(href=`${prefixAdmin}/importOrders/${order.id}`)= order.code
+                    else
+                      span.io-code= order.code
                   td= order.createdAtLabel
                   td
                     .io-user
@@ -138,22 +147,24 @@ block main
                       span.io-badge.is-draft
                         i.bi.bi-file-earmark
                         | Nháp
-                  td
-                    .io-more
-                      button.io-more-btn(type="button" aria-label="Thao tác")
-                        i.bi.bi-three-dots
-                      .io-menu
-                        button.io-menu-item.js-open-drawer(type="button") Xem nhanh
-                        a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}`) Xem chi tiết
-                        //- if order.status === "draft"
-                        //-   a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
-                        button.io-menu-item.js-print(type="button" data-href=`${prefixAdmin}/importOrders/${order.id}/pdf`) In phiếu
-            //- else
-              //- tr
-              //-   td.io-empty(colspan="8")
-              //-     i.bi.bi-inbox
-              //-     p Chưa có phiếu nhập nào.
-              //-     a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`) Tạo phiếu nhập
+                  if canView
+                    td
+                      .io-more
+                        button.io-more-btn(type="button" aria-label="Thao tác")
+                          i.bi.bi-three-dots
+                        .io-menu
+                          button.io-menu-item.js-open-drawer(type="button") Xem nhanh
+                          a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}`) Xem chi tiết
+                          if canEdit && order.status === "draft"
+                            a.io-menu-item(href=`${prefixAdmin}/importOrders/${order.id}/edit`) Chỉnh sửa
+                          button.io-menu-item.js-print(type="button" data-href=`${prefixAdmin}/importOrders/${order.id}/pdf`) In phiếu
+            else
+              tr
+                td.io-empty(colspan="8")
+                  i.bi.bi-inbox
+                  p Chưa có phiếu nhập nào.
+                  if canCreate
+                    a.io-btn-primary(href=`${prefixAdmin}/importOrders/create`) Tạo phiếu nhập
 
       .io-pager
         .io-pager-info #{fromIndex}–#{toIndex} / #{total} phiếu
@@ -203,8 +214,9 @@ block main
       .io-drawer-lines
         .io-drawer-lines-label DÒNG CHI TIẾT
         .io-drawer-lines-list
-    a.io-btn-primary.io-drawer-cta Xem chi tiết
-      i.bi.bi-chevron-right
+    if canView
+      a.io-btn-primary.io-drawer-cta Xem chi tiết
+        i.bi.bi-chevron-right
 
 block script
   script(src="/js/script.js")

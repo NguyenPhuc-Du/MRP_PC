@@ -28,7 +28,6 @@ VALUES (
         'importOrders_view',
         'importOrders_create',
         'importOrders_edit',
-        'importOrders_delete',
         'exportOrders_view',
         'exportOrders_create',
         'exportOrders_edit',
