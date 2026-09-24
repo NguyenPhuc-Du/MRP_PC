@@ -50,8 +50,10 @@ import com.example.mrp_pc.ui.theme.Ink
 import com.example.mrp_pc.ui.theme.MutedText
 import com.example.mrp_pc.ui.theme.Success
 import com.example.mrp_pc.ui.theme.SuccessSoft
+import com.example.mrp_pc.ui.theme.MrppcTheme
 import com.example.mrp_pc.ui.theme.Warning
 import com.example.mrp_pc.ui.theme.WarningSoft
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AssembleScreen(
@@ -242,4 +244,88 @@ private fun exportStatusLabel(status: String): String = when (status.lowercase()
     "approved" -> "Đã duyệt"
     "rejected" -> "Từ chối"
     else -> status
+}
+
+private val previewAssemble = AssembleStatus(
+    orderId = 1,
+    configName = "PC Văn phòng",
+    description = "Cấu hình văn phòng cơ bản",
+    quantity = 1,
+    status = "in_progress",
+    allEnough = true,
+    missingCount = 0,
+    materialExport = ExportTicket(1, "PXM-260924-012", "pending"),
+    productExport = null,
+    canRequestMaterial = false,
+    canConfirmAssemble = true,
+    canRequestProduct = false,
+)
+
+@Preview(showBackground = true, name = "Assemble")
+@Composable
+private fun AssemblePreview() {
+    MrppcTheme {
+        AssembleScreen(
+            state = AssembleUiState(isLoading = false, status = previewAssemble),
+            onBack = {},
+            onRetry = {},
+            onRequestMaterial = {},
+            onConfirmAssemble = {},
+            onRequestProduct = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Assemble - xong")
+@Composable
+private fun AssembleDonePreview() {
+    MrppcTheme {
+        AssembleScreen(
+            state = AssembleUiState(
+                isLoading = false,
+                status = previewAssemble.copy(
+                    status = "done",
+                    productExport = ExportTicket(2, "PXP-260924-008", "pending"),
+                    canConfirmAssemble = false,
+                    canRequestProduct = false,
+                ),
+                successMessage = "Đã gửi đề nghị xuất thành phẩm",
+            ),
+            onBack = {},
+            onRetry = {},
+            onRequestMaterial = {},
+            onConfirmAssemble = {},
+            onRequestProduct = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Assemble - loading")
+@Composable
+private fun AssembleLoadingPreview() {
+    MrppcTheme {
+        AssembleScreen(
+            state = AssembleUiState(isLoading = true),
+            onBack = {},
+            onRetry = {},
+            onRequestMaterial = {},
+            onConfirmAssemble = {},
+            onRequestProduct = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Assemble - lỗi")
+@Composable
+private fun AssembleErrorPreview() {
+    MrppcTheme {
+        AssembleScreen(
+            state = AssembleUiState(isLoading = false, errorMessage = "Không thể tải thông tin lắp ráp"),
+            onBack = {},
+            onRetry = {},
+            onRequestMaterial = {},
+            onConfirmAssemble = {},
+            onRequestProduct = {},
+        )
+    }
 }

@@ -43,8 +43,10 @@ import com.example.mrp_pc.ui.theme.Ink
 import com.example.mrp_pc.ui.theme.MutedText
 import com.example.mrp_pc.ui.theme.Success
 import com.example.mrp_pc.ui.theme.SuccessSoft
+import com.example.mrp_pc.ui.theme.MrppcTheme
 import com.example.mrp_pc.ui.theme.Warning
 import com.example.mrp_pc.ui.theme.WarningSoft
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun StockScreen(
@@ -159,6 +161,74 @@ private fun StockItemCard(item: ComponentStock) {
             "Cần ${item.requiredQty} ${item.unit ?: ""}  ·  Tồn ${item.onHandQty}  ·  BOM ${item.bomQtyPerUnit}/máy",
             color = MutedText,
             fontSize = 12.sp,
+        )
+    }
+}
+
+private val previewStockResult = StockCheckResult(
+    orderId = 1,
+    configName = "PC Văn phòng",
+    quantityRequested = 2,
+    allEnough = true,
+    items = listOf(
+        ComponentStock(1, "CPU Intel i5-13400", "cái", 1, 2, 10, 0, true),
+        ComponentStock(2, "RAM Kingston 16GB", "thanh", 2, 4, 20, 0, true),
+    ),
+)
+
+@Preview(showBackground = true, name = "Stock - đủ")
+@Composable
+private fun StockEnoughPreview() {
+    MrppcTheme {
+        StockScreen(
+            state = StockUiState(isLoading = false, result = previewStockResult),
+            onBack = {},
+            onRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Stock - thiếu")
+@Composable
+private fun StockMissingPreview() {
+    MrppcTheme {
+        StockScreen(
+            state = StockUiState(
+                isLoading = false,
+                result = previewStockResult.copy(
+                    allEnough = false,
+                    items = listOf(
+                        ComponentStock(1, "CPU Intel i5-13400", "cái", 1, 2, 1, 1, false),
+                        ComponentStock(2, "RAM Kingston 16GB", "thanh", 2, 4, 20, 0, true),
+                    ),
+                ),
+            ),
+            onBack = {},
+            onRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Stock - loading")
+@Composable
+private fun StockLoadingPreview() {
+    MrppcTheme {
+        StockScreen(
+            state = StockUiState(isLoading = true),
+            onBack = {},
+            onRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Stock - lỗi")
+@Composable
+private fun StockErrorPreview() {
+    MrppcTheme {
+        StockScreen(
+            state = StockUiState(isLoading = false, errorMessage = "Không thể kiểm tra tồn kho"),
+            onBack = {},
+            onRetry = {},
         )
     }
 }

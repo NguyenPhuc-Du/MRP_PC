@@ -152,7 +152,7 @@ fun SessionLoadingScreen() {
 private fun formatDateTime(raw: String): String =
     raw.replace("T", " ").take(16).ifBlank { raw }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "OrderList")
 @Composable
 private fun OrderListPreview() {
     MrppcTheme {
@@ -160,11 +160,49 @@ private fun OrderListPreview() {
             orders = listOf(
                 ProductionOrder(1, "PC Văn phòng", "Cấu hình cơ bản", 2, "pending", "2026-09-18T08:30:00.000Z"),
                 ProductionOrder(2, "PC Gaming", "RTX 4060 + i5", 1, "in_progress", "2026-09-17T14:20:00.000Z"),
+                ProductionOrder(3, "PC Đồ họa", "Ryzen 7 + 32GB", 1, "done", "2026-09-16T09:00:00.000Z"),
             ),
             isLoading = false,
             onLogout = {},
             onRetry = {},
             onOrderClick = {},
         )
+    }
+}
+
+@Preview(showBackground = true, name = "OrderList - trống")
+@Composable
+private fun OrderListEmptyPreview() {
+    MrppcTheme {
+        OrderListScreen(
+            orders = emptyList(),
+            isLoading = false,
+            onLogout = {},
+            onRetry = {},
+            onOrderClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "OrderList - lỗi")
+@Composable
+private fun OrderListErrorPreview() {
+    MrppcTheme {
+        OrderListScreen(
+            orders = emptyList(),
+            isLoading = false,
+            errorMessage = "Không thể tải danh sách lệnh",
+            onLogout = {},
+            onRetry = {},
+            onOrderClick = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Session loading")
+@Composable
+private fun SessionLoadingPreview() {
+    MrppcTheme {
+        SessionLoadingScreen()
     }
 }
