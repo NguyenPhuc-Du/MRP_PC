@@ -13,9 +13,10 @@ block main
                 .bom-eyebrow CÔNG THỨC SẢN PHẨM
                 h1.bom-title BOM / Cấu hình PC
                 p.bom-desc Định nghĩa linh kiện và số lượng để lắp từng cấu hình máy.
-            a.bom-btn-primary(href=`${prefixAdmin}/bom/create`)
-                i.bi.bi-plus-lg
-                span Thêm cấu hình
+            if user && user.permissions && user.permissions.includes('bom_create')
+                a.bom-btn-primary(href=`${prefixAdmin}/bom/create`)
+                    i.bi.bi-plus-lg
+                    span Thêm cấu hình
 
         .bom-card
             .bom-toolbar
@@ -41,7 +42,8 @@ block main
                             th GIÁ VỐN
                             th GIÁ BÁN CUỐI
                             th TRẠNG THÁI
-                            th
+                            if user && user.permissions && user.permissions.includes('bom_view')
+                                th
                     tbody
                         if configs && configs.length
                             each config in configs
@@ -52,7 +54,10 @@ block main
                                         else
                                             span.bom-thumb.is-empty
                                     td
-                                        a.bom-name(href=`${prefixAdmin}/bom/detail/${config.id}`)= config.name
+                                        if user && user.permissions && user.permissions.includes('bom_view')
+                                            a.bom-name(href=`${prefixAdmin}/bom/detail/${config.id}`)= config.name
+                                        else
+                                            span.bom-name.fw-bold= config.name
                                     td
                                         span.bom-code= config.code
                                     td= config.version
@@ -67,12 +72,16 @@ block main
                                         span.bom-status(class=`is-${config.status}`)
                                             span.bom-status-dot
                                             | #{config.statusLabel}
-                                    td
-                                        a.bom-more(href=`${prefixAdmin}/bom/detail/${config.id}` title="Xem BOM")
-                                            i.bi.bi-arrow-right
+                                    if user && user.permissions && user.permissions.includes('bom_view')
+                                        td
+                                            a.bom-more(href=`${prefixAdmin}/bom/detail/${config.id}` title="Xem BOM")
+                                                i.bi.bi-arrow-right
                         else
                             tr
-                                td(colspan="9") Chưa có cấu hình BOM. Bấm “Thêm cấu hình” để tạo mới.
+                                - const canView = user && user.permissions && user.permissions.includes('bom_view');
+                                - const canCreate = user && user.permissions && user.permissions.includes('bom_create');
+                                td.text-center.py-4(colspan=canView ? "9" : "8")
+                                    | Chưa có cấu hình BOM. #{canCreate ? 'Bấm “Thêm cấu hình” để tạo mới.' : ''}
 
             .d-flex.justify-content-between.align-items-center.mt-4
                 .text-secondary.small

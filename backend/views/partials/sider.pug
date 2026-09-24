@@ -1,50 +1,54 @@
 aside.sider
-    .section-label VẬN HÀNH
+    if(user.permissions.includes('dashboard_view') || user.permissions.includes('components_view') || user.permissions.includes('importOrders_view') || user.permissions.includes('exportOrders_view') || user.permissions.includes('bom_view'))
+        .section-label VẬN HÀNH
+        nav.side-nav
+            if(user.permissions.includes('dashboard_view'))
+                a.nav-item(href="/admin/dashboard")
+                    i.bi.bi-grid-fill
+                    span.nav-label Dashboard
 
-    nav.side-nav
-        a.nav-item(href="/admin/dashboard")
-            i.bi.bi-grid-fill
-            span.nav-label Dashboard
+            if(user.permissions.includes('components_view'))
+                a.nav-item(href=`${prefixAdmin}/components`)
+                    i.bi.bi-diagram-3
+                    span.nav-label Linh kiện
 
-        a.nav-item(href=`${prefixAdmin}/components`)
-            i.bi.bi-diagram-3
-            span.nav-label Linh kiện
+            a.nav-item(href="/admin/kho")
+                i.bi.bi-building
+                span.nav-label Kho
 
-        a.nav-item(href="/admin/kho")
-            i.bi.bi-building
-            span.nav-label Kho
+            if(user.permissions.includes('importOrders_view'))
+                a.nav-item(href=`${prefixAdmin}/importOrders`)
+                    i.bi.bi-box-arrow-in-down-left
+                    span.nav-label Phiếu nhập
 
-        a.nav-item(href=`${prefixAdmin}/importOrders`)
-            i.bi.bi-box-arrow-in-down-left
-            span.nav-label Phiếu nhập
+            if(user.permissions.includes('exportOrders_view'))
+                a.nav-item(href=`${prefixAdmin}/exportOrders`)
+                    i.bi.bi-box-arrow-up-right
+                    span.nav-label Phiếu xuất
 
-        a.nav-item(href=`${prefixAdmin}/exportOrders`)
-            i.bi.bi-box-arrow-up-right
-            span.nav-label Phiếu xuất
+            if(user.permissions.includes('bom_view'))
+                a.nav-item(href="/admin/bom")
+                    i.bi.bi-clipboard-data
+                    span.nav-label BOM / Cấu hình PC
 
-        a.nav-item(href="/admin/bom")
-            i.bi.bi-clipboard-data
-            span.nav-label BOM / Cấu hình PC
+            a.nav-item(href="/admin/san-xuat")
+                i.bi.bi-tools
+                span.nav-label Sản xuất
 
-        a.nav-item(href="/admin/san-xuat")
-            i.bi.bi-tools
-            span.nav-label Sản xuất
+            a.nav-item(href="/admin/bao-cao")
+                i.bi.bi-activity
+                span.nav-label Báo cáo
 
-        a.nav-item(href="/admin/bao-cao")
-            i.bi.bi-activity
-            span.nav-label Báo cáo
+    if(user.permissions.includes('account_view') || user.permissions.includes('roles_view'))
+        .section-label HỆ THỐNG
 
-    .section-label HỆ THỐNG
+        nav.side-nav
+            if(user.permissions.includes('account_view'))
+                a.nav-item(href=`${prefixAdmin}/accounts`)
+                    i.bi.bi-people
+                    span.nav-label Người dùng
 
-    nav.side-nav
-        a.nav-item(href=`${prefixAdmin}/accounts`)
-            i.bi.bi-people
-            span.nav-label Người dùng
-
-        a.nav-item(href=`${prefixAdmin}/permissions`)
-            i.bi.bi-shield-check
-            span.nav-label Phân quyền
-
-    a.settings-row(href="/admin/cai-dat")
-        i.bi.bi-gear
-        span Cài đặt
+            if(user.permissions.includes('roles_view'))
+                a.nav-item(href=`${prefixAdmin}/permissions`)
+                    i.bi.bi-shield-check
+                    span.nav-label Phân quyền
