@@ -10,17 +10,8 @@ header.topbar
             | Northline PC /
             strong  #{pageTitle || 'Dashboard'}
 
-    .topbar-center
-        .input-group.topbar-search-wrap
-            span.input-group-text
-                i.bi.bi-search
-            input.form-control.topbar-search(type="text" placeholder="Tìm linh kiện, phiếu, BOM...")
-
-    .topbar-right
-        button.topbar-icon-btn(type="button")
-            i.bi.bi-bell
-            span.dot
-
+    // Thêm class ms-auto vào topbar-right
+    .topbar-right.ms-auto
         .dropdown
             a.topbar-user(href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false")
                 .topbar-user-avatar #{user.fullName ? user.fullName.trim().charAt(0).toUpperCase() : 'U'}
@@ -49,5 +40,3 @@ header.topbar
                         button.dropdown-item.text-danger(type="submit")
                             i.bi.bi-box-arrow-right.me-2
                             | Đăng xuất
-        
-

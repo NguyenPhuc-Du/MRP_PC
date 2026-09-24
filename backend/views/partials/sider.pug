@@ -1,54 +1,37 @@
 aside.sider
-    if(user.permissions.includes('dashboard_view') || user.permissions.includes('components_view') || user.permissions.includes('importOrders_view') || user.permissions.includes('exportOrders_view') || user.permissions.includes('bom_view'))
+    - const perms = user && user.permissions ? user.permissions : []
+    if perms.includes('components_view') || perms.includes('importOrders_view') || perms.includes('exportOrders_view') || perms.includes('bom_view')
         .section-label VẬN HÀNH
         nav.side-nav
-            if(user.permissions.includes('dashboard_view'))
-                a.nav-item(href="/admin/dashboard")
-                    i.bi.bi-grid-fill
-                    span.nav-label Dashboard
-
-            if(user.permissions.includes('components_view'))
+            if perms.includes('components_view')
                 a.nav-item(href=`${prefixAdmin}/components`)
                     i.bi.bi-diagram-3
                     span.nav-label Linh kiện
 
-            a.nav-item(href="/admin/kho")
-                i.bi.bi-building
-                span.nav-label Kho
-
-            if(user.permissions.includes('importOrders_view'))
+            if perms.includes('importOrders_view')
                 a.nav-item(href=`${prefixAdmin}/importOrders`)
                     i.bi.bi-box-arrow-in-down-left
                     span.nav-label Phiếu nhập
 
-            if(user.permissions.includes('exportOrders_view'))
+            if perms.includes('exportOrders_view')
                 a.nav-item(href=`${prefixAdmin}/exportOrders`)
                     i.bi.bi-box-arrow-up-right
                     span.nav-label Phiếu xuất
 
-            if(user.permissions.includes('bom_view'))
-                a.nav-item(href="/admin/bom")
+            if perms.includes('bom_view')
+                a.nav-item(href=`${prefixAdmin}/bom`)
                     i.bi.bi-clipboard-data
                     span.nav-label BOM / Cấu hình PC
 
-            a.nav-item(href="/admin/san-xuat")
-                i.bi.bi-tools
-                span.nav-label Sản xuất
-
-            a.nav-item(href="/admin/bao-cao")
-                i.bi.bi-activity
-                span.nav-label Báo cáo
-
-    if(user.permissions.includes('account_view') || user.permissions.includes('roles_view'))
+    if perms.includes('account_view') || perms.includes('roles_view')
         .section-label HỆ THỐNG
-
         nav.side-nav
-            if(user.permissions.includes('account_view'))
+            if perms.includes('account_view')
                 a.nav-item(href=`${prefixAdmin}/accounts`)
                     i.bi.bi-people
                     span.nav-label Người dùng
 
-            if(user.permissions.includes('roles_view'))
+            if perms.includes('roles_view')
                 a.nav-item(href=`${prefixAdmin}/permissions`)
                     i.bi.bi-shield-check
                     span.nav-label Phân quyền
