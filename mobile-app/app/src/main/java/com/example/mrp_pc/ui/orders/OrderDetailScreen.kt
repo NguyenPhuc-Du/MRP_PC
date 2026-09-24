@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,7 +130,7 @@ private fun OrderDetailContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(SuccessSoft)
                     .padding(16.dp),
             ) {
@@ -164,7 +166,7 @@ private fun StepRow(number: String, title: String, subtitle: String) {
 private fun formatDetailDateTime(raw: String): String =
     raw.replace("T", " ").take(16).ifBlank { raw }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "OrderDetail")
 @Composable
 private fun OrderDetailPreview() {
     MrppcTheme {
@@ -179,6 +181,55 @@ private fun OrderDetailPreview() {
                     status = "pending",
                     createdAt = "2026-09-18T08:30:00.000Z",
                 ),
+            ),
+            onBack = {},
+            onRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "OrderDetail - xong")
+@Composable
+private fun OrderDetailDonePreview() {
+    MrppcTheme {
+        OrderDetailScreen(
+            state = OrderDetailUiState(
+                isLoading = false,
+                order = ProductionOrder(
+                    id = 3,
+                    configName = "PC Văn phòng",
+                    description = "Đã lắp xong",
+                    quantity = 1,
+                    status = "done",
+                    createdAt = "2026-09-16T09:00:00.000Z",
+                ),
+            ),
+            onBack = {},
+            onRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "OrderDetail - loading")
+@Composable
+private fun OrderDetailLoadingPreview() {
+    MrppcTheme {
+        OrderDetailScreen(
+            state = OrderDetailUiState(isLoading = true),
+            onBack = {},
+            onRetry = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "OrderDetail - lỗi")
+@Composable
+private fun OrderDetailErrorPreview() {
+    MrppcTheme {
+        OrderDetailScreen(
+            state = OrderDetailUiState(
+                isLoading = false,
+                errorMessage = "Không thể tải chi tiết lệnh",
             ),
             onBack = {},
             onRetry = {},

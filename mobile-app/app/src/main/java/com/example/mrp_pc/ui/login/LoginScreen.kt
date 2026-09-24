@@ -209,8 +209,24 @@ private fun loginFieldColors() = OutlinedTextFieldDefaults.colors(
 
 @Preview(showBackground = true, name = "Login")
 @Composable
-private fun LoginScreenPreview() {
+private fun LoginPreview() {
+    MrppcTheme {
+        LoginScreen()
+    }
+}
+
+@Preview(showBackground = true, name = "Login - lỗi")
+@Composable
+private fun LoginErrorPreview() {
     MrppcTheme {
         LoginScreen(errorMessage = "Sai tài khoản hoặc mật khẩu")
+    }
+}
+
+@Preview(showBackground = true, name = "Login - loading")
+@Composable
+private fun LoginLoadingPreview() {
+    MrppcTheme {
+        LoginScreen(isLoading = true)
     }
 }
