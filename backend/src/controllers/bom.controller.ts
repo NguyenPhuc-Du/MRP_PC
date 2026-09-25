@@ -88,6 +88,7 @@ const emptyConfig = {
 };
 
 export const index = async (req: Request, res: Response): Promise<void> => {
+  const sort = String(req.query.sort || "").trim();
   const totalConfigs = await bomService.countAllConfigs();
 
   const objectPagination = {
@@ -98,13 +99,14 @@ export const index = async (req: Request, res: Response): Promise<void> => {
   };
 
   const pagination = paginationHelper(req.query, objectPagination, totalConfigs);
-  const rows = await bomService.getAllConfigs(pagination.skipPage, pagination.limit);
+  const rows = await bomService.getAllConfigs(pagination.skipPage, pagination.limit, sort);
 
   res.render("pages/bom/index", {
     pageTitle: "BOM / Cấu hình PC",
     configs: rows.map(bomService.mapListConfig),
     totalConfigs,
     objectPagination: pagination,
+    sort,
   });
 };
 

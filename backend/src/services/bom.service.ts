@@ -1,5 +1,6 @@
 import { prisma } from "../config/database";
 import { Prisma } from "../generated/prisma";
+
 import { BomItemInput, CreateBomDto, UpdateBomDto } from "../dtos/bom.dto";
 
 const bomInclude = {
@@ -50,14 +51,6 @@ const CATEGORY_CODE: Record<string, string> = {
 
 const toNumber = (value: Prisma.Decimal | number | string): number => Number(value);
 
-const normalizeImageUrl = (value?: string): string | null => {
-  const url = (value || "").trim();
-  if (!url) {
-    return null;
-  }
-  return url.slice(0, 500);
-};
-
 const formatVnd = (value: number): string => {
   return `${new Intl.NumberFormat("vi-VN").format(value)} đ`;
 };
@@ -92,18 +85,25 @@ const totalsOf = (config: BomConfigRow) => {
   return { itemCount, groupCount, totalCost, salePrice, suggestedSale, margin };
 };
 
-export const getAllConfigs = async (skip : number, take: number): Promise<BomConfigRow[]> => {
+export const getAllConfigs = async (skip : number, take: number, sort?: string): Promise<BomConfigRow[]> => {
+  const orderBy = sort === "price_asc"
+   ? { salePrice: "asc" as const} 
+   : sort === "price_desc" 
+      ? { salePrice: "desc" as const} 
+      : { createdAt: "desc" as const};
+  
   return prisma.pcConfig.findMany({
     skip: skip,
     take: take,
     include: bomInclude,
-    orderBy: { createdAt: "desc" },
+    orderBy,
   });
 };
 
 export const countAllConfigs = async () => {
   return await prisma.pcConfig.count();
 };
+
 
 export const getConfigById = async (id: number): Promise<BomConfigRow> => {
   if (!Number.isInteger(id) || id <= 0) {
@@ -136,7 +136,6 @@ export const mapListConfig = (config: BomConfigRow) => {
     totalCostText: formatVnd(totalCost),
     salePriceText: salePrice > 0 ? formatVnd(salePrice) : "Chưa chốt",
     saleLocked: salePrice > 0,
-    imageUrl: config.imageUrl || "",
     status: isActive ? "approved" : "draft",
     statusLabel: isActive ? "Hoạt động" : "Ngưng",
     updatedAt: formatDate(config.createdAt),
@@ -191,7 +190,6 @@ export const mapDetailConfig = (config: BomConfigRow) => {
     statusDb: config.status,
     statusLabel: isActive ? "Hoạt động" : "Ngưng",
     salePrice: salePrice > 0 ? salePrice : "",
-    imageUrl: config.imageUrl || "",
     itemCount,
     groupCount,
     totalCost,
@@ -306,14 +304,12 @@ export const createConfig = async (dto: CreateBomDto): Promise<BomConfigRow> => 
 
   const items = await validateItems(dto.items);
   const salePrice = dto.salePrice && dto.salePrice > 0 ? dto.salePrice : 0;
-  const imageUrl = normalizeImageUrl(dto.imageUrl);
 
   return prisma.pcConfig.create({
     data: {
       name,
       description: dto.description?.trim() || null,
       salePrice,
-      imageUrl,
       status: dto.status ?? "active",
       bomItems: {
         create: items,
@@ -347,7 +343,6 @@ export const updateConfig = async (id: number, dto: UpdateBomDto): Promise<BomCo
         ...(name ? { name } : {}),
         ...(dto.description !== undefined ? { description: dto.description.trim() || null } : {}),
         ...(dto.salePrice !== undefined ? { salePrice: dto.salePrice } : {}),
-        ...(dto.imageUrl !== undefined ? { imageUrl: normalizeImageUrl(dto.imageUrl) } : {}),
         ...(dto.status ? { status: dto.status } : {}),
         ...(items ? { bomItems: { create: items } } : {}),
       },

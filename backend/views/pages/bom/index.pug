@@ -19,16 +19,35 @@ block main
                     span Thêm cấu hình
 
         .bom-card
-            .bom-toolbar
+            form.bom-toolbar(method="GET" action=`${prefixAdmin}/bom`)
                 .bom-search
                     i.bi.bi-search
                     input(type="text" placeholder="Tìm theo tên cấu hình hoặc mã BOM...")
                 .bom-toolbar-actions
-                    button.bom-btn-ghost(type="button")
-                        i.bi.bi-funnel
-                        span Bộ lọc
-                    //- button.bom-btn-icon(type="button")
-                    //-     i.bi.bi-download
+                    .dropdown
+                        button.bom-btn-ghost.dropdown-toggle(
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                        )
+                            i.bi.bi-funnel
+                            span Bộ lọc
+                        ul.dropdown-menu.dropdown-menu-end
+                            li
+                                a.dropdown-item(
+                                    class=(!sort ? "active" : "")
+                                    href=`${prefixAdmin}/bom`
+                                ) Mặc định
+                            li
+                                a.dropdown-item(
+                                    class=(sort === "price_asc" ? "active" : "")
+                                    href=`${prefixAdmin}/bom?sort=price_asc`
+                                ) Giá tăng dần
+                            li
+                                a.dropdown-item(
+                                    class=(sort === "price_desc" ? "active" : "")
+                                    href=`${prefixAdmin}/bom?sort=price_desc`
+                                ) Giá giảm dần
 
             .table-responsive
                 table.bom-table
