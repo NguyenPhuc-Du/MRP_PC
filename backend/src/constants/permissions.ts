@@ -82,6 +82,7 @@ export type RolePermissionPayload = {
 };
 
 export const ADMIN_PERMISSIONS: PermissionKey[] = [
+  "dashboard_view",
   "account_view",
   "account_create",
   "account_edit",
@@ -121,6 +122,7 @@ export const WAREHOUSE_MANAGER_PERMISSIONS: PermissionKey[] = [
 
 /** Chỉ các *_view đã có route admin + requirePermission. Thứ tự = sidebar. */
 export const VIEW_LANDING: Array<{ key: PermissionKey; path: string }> = [
+  { key: "dashboard_view", path: "/dashboard" },
   { key: "components_view", path: "/components" },
   { key: "importOrders_view", path: "/importOrders" },
   { key: "exportOrders_view", path: "/exportOrders" },

@@ -1,8 +1,13 @@
 aside.sider
     - const perms = user && user.permissions ? user.permissions : []
-    if perms.includes('components_view') || perms.includes('importOrders_view') || perms.includes('exportOrders_view') || perms.includes('bom_view')
+    if perms.includes('dashboard_view') || perms.includes('components_view') || perms.includes('importOrders_view') || perms.includes('exportOrders_view') || perms.includes('bom_view')
         .section-label VẬN HÀNH
         nav.side-nav
+            if perms.includes('dashboard_view')
+                a.nav-item(href=`${prefixAdmin}/dashboard`)
+                    i.bi.bi-grid-1x2
+                    span.nav-label Dashboard
+
             if perms.includes('components_view')
                 a.nav-item(href=`${prefixAdmin}/components`)
                     i.bi.bi-diagram-3

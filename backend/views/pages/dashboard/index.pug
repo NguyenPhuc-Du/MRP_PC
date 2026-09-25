@@ -1,0 +1,161 @@
+extends ../../layouts/admin-layout.pug
+
+block main
+  link(rel="stylesheet" href="/css/dashboard.css")
+
+  if !dashboard
+    .dash-page
+      .dash-empty Không tải được dữ liệu dashboard.
+  else
+    .dash-page
+      .dash-head
+        div
+          .dash-date= dashboard.dateLabel
+          h2.dash-title Xưởng lắp ráp · Tổng quan
+          p.dash-desc Theo dõi kho và sản xuất theo thời gian thực.
+        .dash-actions
+          button.dash-btn-ghost(type="button" disabled title="Chưa có trang báo cáo")
+            i.bi.bi-download
+            span Xuất báo cáo
+          button.dash-btn-primary(type="button" disabled title="Chưa có trang lệnh sản xuất")
+            i.bi.bi-plus-lg
+            span Lệnh sản xuất
+
+      .dash-kpis
+        .dash-kpi
+          .dash-kpi-label
+            span Tổng linh kiện
+            if dashboard.metrics.components.mock
+              span.dash-mock Mẫu
+          .dash-kpi-value= dashboard.metrics.components.value
+          .dash-kpi-hint.is-up= dashboard.metrics.components.hint
+        .dash-kpi
+          .dash-kpi-label
+            span Giá trị tồn kho
+            if dashboard.metrics.stockValue.mock
+              span.dash-mock Mẫu
+          .dash-kpi-value= dashboard.metrics.stockValue.value
+          .dash-kpi-hint.is-up= dashboard.metrics.stockValue.hint
+        .dash-kpi
+          .dash-kpi-label
+            span Phiếu nhập hôm nay
+            if dashboard.metrics.importToday.mock
+              span.dash-mock Mẫu
+          .dash-kpi-value= dashboard.metrics.importToday.value
+          .dash-kpi-hint= dashboard.metrics.importToday.hint
+        .dash-kpi
+          .dash-kpi-label
+            span Xuất chờ duyệt
+            if dashboard.metrics.exportPending.mock
+              span.dash-mock Mẫu
+          .dash-kpi-value= dashboard.metrics.exportPending.value
+          .dash-kpi-hint.is-warn= dashboard.metrics.exportPending.hint
+        .dash-kpi
+          .dash-kpi-label
+            span Yêu cầu sản xuất
+            if dashboard.metrics.production.mock
+              span.dash-mock Mẫu
+          .dash-kpi-value= dashboard.metrics.production.value
+          .dash-kpi-hint.is-up= dashboard.metrics.production.hint
+        .dash-kpi
+          .dash-kpi-label
+            span PC đang lắp ráp
+            if dashboard.metrics.assembling.mock
+              span.dash-mock Mẫu
+          .dash-kpi-value= dashboard.metrics.assembling.value
+          .dash-kpi-hint= dashboard.metrics.assembling.hint
+        .dash-kpi
+          .dash-kpi-label
+            span Thành phẩm
+            if dashboard.metrics.finished.mock
+              span.dash-mock Mẫu
+          .dash-kpi-value= dashboard.metrics.finished.value
+          .dash-kpi-hint.is-up= dashboard.metrics.finished.hint
+        .dash-kpi
+          .dash-kpi-label
+            span Sắp hết
+            if dashboard.metrics.lowStock.mock
+              span.dash-mock Mẫu
+          .dash-kpi-value= dashboard.metrics.lowStock.value
+          .dash-kpi-hint.is-warn= dashboard.metrics.lowStock.hint
+
+      .dash-mid
+        .dash-card.dash-chart-card
+          .dash-card-head
+            div
+              .dash-card-title Nhập / xuất linh kiện
+              .dash-card-sub 6 ngày gần nhất
+                if dashboard.chart.mock
+                  span.dash-mock Mẫu
+            .dash-legend
+              span.dash-dot.is-in Nhập
+              span.dash-dot.is-out Xuất
+          .dash-chart-wrap
+            canvas#dash-chart
+          script#dashboard-chart-data(type="application/json")!= JSON.stringify(dashboard.chart)
+
+        .dash-card
+          .dash-card-head
+            .dash-card-title Cảnh báo tồn kho
+            if dashboard.alertsMock
+              span.dash-mock Mẫu
+            else
+              span.dash-pill Sắp hết · #{dashboard.alerts.length}
+          if dashboard.alerts.length
+            each alert in dashboard.alerts
+              .dash-alert
+                div
+                  .dash-alert-name= alert.name
+                  .dash-alert-meta= alert.meta
+                span.dash-alert-qty= alert.qty
+          else
+            .dash-empty-sm Không có linh kiện dưới ngưỡng.
+
+      .dash-bot
+        .dash-card
+          .dash-card-head
+            div
+              .dash-card-title Top linh kiện sử dụng nhiều
+              .dash-card-sub= dashboard.topCaption
+                if dashboard.topMock
+                  span.dash-mock Mẫu
+          .table-responsive
+            table.dash-table
+              thead
+                tr
+                  th Linh kiện
+                  th Nhóm
+                  th Đã dùng
+                  th Tồn kho
+                  th Trạng thái
+              tbody
+                each item in dashboard.topItems
+                  tr
+                    td.dash-name= item.name
+                    td= item.group
+                    td= item.used
+                    td= item.stock
+                    td
+                      span.dash-stock(class=`is-${item.stockKey}`)
+                        span.dash-stock-dot
+                        | #{item.stockLabel}
+
+        .dash-card
+          .dash-card-head
+            .dash-card-title Hoạt động gần đây
+            if dashboard.activityMock
+              span.dash-mock Mẫu
+          if dashboard.activity.length
+            each item in dashboard.activity
+              .dash-act(class=`is-${item.tone}`)
+                span.dash-act-dot
+                div
+                  .dash-act-title= item.title
+                  .dash-act-detail= item.detail
+          else
+            .dash-empty-sm Chưa có hoạt động.
+
+block script
+  script(src="/js/script.js")
+  script(src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js")
+  script(src="/js/dashboard.js")
