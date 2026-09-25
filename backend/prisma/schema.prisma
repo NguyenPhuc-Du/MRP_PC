@@ -73,6 +73,7 @@ model Account {
   status       AccountStatus @default(active)
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime?     @updatedAt @map("updated_at")
+  lastLoginAt  DateTime?     @map("last_login_at")
 
   importOrdersCreated      ImportOrder[]      @relation("ImportOrderCreatedBy")
   exportOrdersRequested    ExportOrder[]      @relation("ExportOrderRequestedBy")

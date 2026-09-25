@@ -28,6 +28,11 @@ aside.sider
                     i.bi.bi-clipboard-data
                     span.nav-label BOM / Cấu hình PC
 
+            if perms.includes('production_view')
+                a.nav-item(href=`${prefixAdmin}/production`)
+                    i.bi.bi-wrench-adjustable
+                    span.nav-label Sản xuất
+
     if perms.includes('account_view') || perms.includes('roles_view')
         .section-label HỆ THỐNG
         nav.side-nav
