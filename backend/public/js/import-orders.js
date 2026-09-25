@@ -156,6 +156,7 @@
     var index = qsa(".io-item-row").length;
     var row = document.createElement("div");
     row.className = "io-item-row";
+    row.dataset.supplierId = data.supplierId || "";
     row.innerHTML =
       '<input type="hidden" name="items[' + index + '][componentId]" value="' + data.id + '">' +
       '<div class="io-item-info"><div class="io-item-code">' + data.code + '</div><div class="io-item-name">' +
@@ -171,6 +172,11 @@
 
   if (addBtn) {
     addBtn.addEventListener("click", function () {
+      var supplierSelect = qs("#supplierId");
+      if (!supplierSelect || !supplierSelect.value) {
+        alert("Chọn nhà cung cấp trước khi chọn linh kiện");
+        return;
+      }
       applyPickerFilters();
       openEl(pickerOverlay);
       openEl(picker);
@@ -197,29 +203,31 @@
       });
     });
   }
-  var brandFilter = qs("#io-brand-filter");
-  var brandChipText = qs("#io-brand-chip-text");
-  function syncBrandChip() {
-    if (!brandChipText || !brandFilter) return;
-    var opt = brandFilter.options[brandFilter.selectedIndex];
-    brandChipText.textContent = opt && opt.value ? opt.text : "Tất cả thương hiệu";
-  }
+  var supplierSelect = qs("#supplierId");
   function applyPickerFilters() {
-    var brandId = brandFilter ? String(brandFilter.value) : "";
+    var supplierId = supplierSelect ? String(supplierSelect.value) : "";
     var q = pickerQ ? pickerQ.value.toLowerCase() : "";
     qsa(".io-picker-item").forEach(function (item) {
-      var matchBrand = !brandId || String(item.dataset.brandId) === brandId;
-      var hay = (item.dataset.code + " " + item.dataset.name).toLowerCase();
+      var matchSupplier = supplierId && String(item.dataset.supplierId) === supplierId;
+      var hay = ((item.dataset.code || "") + " " + (item.dataset.name || "")).toLowerCase();
       var matchQ = !q || hay.indexOf(q) !== -1;
-      item.style.display = matchBrand && matchQ ? "" : "none";
+      item.style.display = matchSupplier && matchQ ? "" : "none";
     });
   }
-  if (brandFilter) {
-    brandFilter.addEventListener("change", function () {
-      syncBrandChip();
+  function dropRowsOutsideSupplier() {
+    var supplierId = supplierSelect ? String(supplierSelect.value) : "";
+    qsa(".io-item-row").forEach(function (row) {
+      if (String(row.dataset.supplierId || "") !== supplierId) {
+        row.remove();
+      }
+    });
+    reindexItems();
+  }
+  if (supplierSelect) {
+    supplierSelect.addEventListener("change", function () {
+      dropRowsOutsideSupplier();
       applyPickerFilters();
     });
-    syncBrandChip();
   }
   if (pickerQ) pickerQ.addEventListener("input", applyPickerFilters);
   if (itemList) {
@@ -246,8 +254,6 @@
   }
 
   var confirmModal = qs("#io-confirm-modal");
-  var supplierModal = qs("#io-supplier-modal");
-  var brandModal = qs("#io-brand-modal");
   var modalOverlay = qs(".io-overlay.is-modal");
 
   function openModal(el, focusSel) {
@@ -260,8 +266,6 @@
   }
   function closeModals() {
     closeEl(confirmModal);
-    closeEl(supplierModal);
-    closeEl(brandModal);
     closeEl(modalOverlay);
   }
   if (qs("#io-open-confirm")) {
@@ -269,17 +273,7 @@
       openModal(confirmModal);
     });
   }
-  if (qs("#io-open-supplier")) {
-    qs("#io-open-supplier").addEventListener("click", function () {
-      openModal(supplierModal, "#new-supplier-name");
-    });
-  }
-  if (qs("#io-open-brand")) {
-    qs("#io-open-brand").addEventListener("click", function () {
-      openModal(brandModal, "#new-brand-name");
-    });
-  }
-  qsa(".js-close-modal, .js-close-supplier, .js-close-brand").forEach(function (btn) {
+  qsa(".js-close-modal").forEach(function (btn) {
     btn.addEventListener("click", closeModals);
   });
   if (modalOverlay) modalOverlay.addEventListener("click", closeModals);
