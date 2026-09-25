@@ -12,7 +12,9 @@ block main
   - const supplierList = typeof suppliers !== "undefined" && suppliers ? suppliers : []
   - const brandList = typeof brands !== "undefined" && brands ? brands : []
   - const returnTo = mode === "edit" ? `${prefixAdmin}/importOrders/${order.id}/edit` : `${prefixAdmin}/importOrders/create`
-  - const selectedSupplierId = (order && order.supplierId) ? Number(order.supplierId) : Number(typeof addedSupplierId !== "undefined" ? addedSupplierId : 0)
+  - const suggested = (typeof suggestedSupplierId !== "undefined" && suggestedSupplierId) ? Number(suggestedSupplierId) : 0
+  - const added = (typeof addedSupplierId !== "undefined" && addedSupplierId) ? Number(addedSupplierId) : 0
+  - const selectedSupplierId = (order && order.supplierId) ? Number(order.supplierId) : (suggested || added)
   - const selectedBrandId = Number(typeof addedBrandId !== "undefined" ? addedBrandId : 0)
   - const selectedBrand = brandList.find((b) => Number(b.id) === selectedBrandId)
 

@@ -83,7 +83,7 @@ export const index = async (req: Request, res: Response): Promise<void> => {
   const page = Number(req.query.page || 1);
   const limit = Number(req.query.limit || 20);
 
-  const [list, stats, accounts, shortages] = await Promise.all([
+  const [list, stats, accounts, shortageGroups] = await Promise.all([
     importOrderService.listOrders({
       q,
       status: status as "draft" | "confirmed" | "",
@@ -95,7 +95,7 @@ export const index = async (req: Request, res: Response): Promise<void> => {
     }),
     importOrderService.getStats(),
     importOrderService.getAccounts(),
-    importOrderService.getShortageComponents(),
+    importOrderService.getShortageGroups(),
   ]);
 
   res.render("pages/importOders/index", {
@@ -103,7 +103,7 @@ export const index = async (req: Request, res: Response): Promise<void> => {
     ...list,
     stats,
     accounts,
-    shortages,
+    shortageGroups,
     filters: { q, status, createdBy: createdBy || "", from, to, limit },
   });
 };
@@ -140,6 +140,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       components,
       order: null,
       initialItems,
+      suggestedSupplierId: Number(req.query.supplierId || 0) || null,
       addedSupplierId: Number(req.query.addedSupplier || 0) || null,
       addedBrandId: Number(req.query.addedBrand || 0) || null,
     });

@@ -1,0 +1,88 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+  link(rel="stylesheet" href="/css/import-orders.css")
+  +alert-success(4000)
+  +alert-error(6000)
+
+  -
+    const canApprove = user && user.permissions && user.permissions.includes("exportOrders_approve")
+
+  .io-page
+    a.io-back(href=`${prefixAdmin}/exportOrders`)
+      i.bi.bi-arrow-left
+      | Danh sách phiếu xuất
+    .io-head
+      div
+        p.io-kicker= order.typeLabel
+        .io-title-row
+          h1.io-title= order.code
+          if order.status === "approved"
+            span.io-badge.is-ok= order.statusLabel
+          else if order.status === "rejected"
+            span.io-badge.is-bad= order.statusLabel
+          else
+            span.io-badge.is-draft= order.statusLabel
+        p.io-desc= order.productionLabel
+    .io-card.io-detail-meta
+      .io-kv
+        span Người gửi
+        strong= order.requesterName
+      .io-kv
+        span Ngày gửi
+        strong= order.createdAtLabel
+      .io-kv
+        span Người duyệt
+        strong= order.approverName
+      .io-kv
+        span Thời điểm duyệt
+        strong= order.approvedAtLabel
+      if order.note
+        .io-kv
+          span Ghi chú
+          strong= order.note
+
+    if order.status === "pending" && order.shortGroups.length
+      .io-alert
+        .io-alert-head
+          i.bi.bi-exclamation-triangle
+          strong Không đủ tồn để duyệt
+        each group in order.shortGroups
+          .io-shortage-group
+            p= group.supplierName
+            - const supplierQuery = group.supplierId ? `&supplierId=${group.supplierId}` : ""
+            a.io-btn-primary(href=`${prefixAdmin}/importOrders/create?ids=${group.ids.join(",")}${supplierQuery}`)
+              | Lập phiếu nhập · #{group.supplierName}
+
+    .io-card
+      .table-responsive
+        table.io-table
+          thead
+            tr
+              th Mặt hàng
+              th.text-end Số xuất
+              th.text-end Tồn hiện tại
+              th.text-end Tồn sau xuất
+              th Kho
+          tbody
+            each line in order.lines
+              tr
+                td= line.name
+                td.text-end.io-num #{line.quantity} #{line.unit}
+                td.text-end.io-num= line.onHand === null ? "—" : line.onHand
+                td.text-end.io-num= line.after === null ? "—" : line.after
+                td
+                  if line.kind === "product"
+                    span —
+                  else if line.enough
+                    span.io-badge.is-ok Đủ
+                  else
+                    span.io-badge.is-bad Thiếu
+
+    if canApprove && order.status === "pending"
+      .io-head-actions
+        form(method="POST" action=`${prefixAdmin}/exportOrders/${order.id}/approve`)
+          button.io-btn-primary(type="submit" disabled=!order.canApprove) Duyệt và trừ kho
+        form(method="POST" action=`${prefixAdmin}/exportOrders/${order.id}/reject` onsubmit="return confirm('Từ chối phiếu này?')")
+          button.io-btn-ghost(type="submit") Từ chối
