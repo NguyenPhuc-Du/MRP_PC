@@ -6,6 +6,7 @@ import { systemConfig } from "../config/system";
 import { comparePassword, hashPassword } from "../utils/password.util";
 import { Account, AccountRole, Prisma } from "../generated/prisma";
 import { ChangePasswordDto, UpdateProfileDto } from "../dtos/profile.dto";
+import { firstViewPath } from "../constants/permissions";
 
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
@@ -92,11 +93,26 @@ export async function login(
     fullName: account.fullName,
     role: account.role,
   };
-  if (account.role === "warehouse_manager") {
-    res.redirect(`${systemConfig.prefixAdmin}/importOrders`); // đổi dashboard → importOrders
+
+  const role = await prisma.role.findUnique({
+    where: { id: account.role },
+    select: { permissions: true },
+  });
+
+  const home = firstViewPath(role?.permissions, systemConfig.prefixAdmin);
+
+  if (!home) {
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+    req.flash("error", "Tài khoản chưa được cấp quyền xem bất kỳ trang nào");
+    res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
     return;
   }
-  res.redirect(`${systemConfig.prefixAdmin}/components`);
+
+  res.redirect(home);
 }
 
 

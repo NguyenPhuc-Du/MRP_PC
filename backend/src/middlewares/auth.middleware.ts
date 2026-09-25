@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../config/database";
 import { systemConfig } from "../config/system";
+import { firstViewPath } from "../constants/permissions";
 
 interface AccessTokenPayload extends JwtPayload {
   username?: string;
@@ -185,7 +186,12 @@ export const requirePermission = (permissionKey: string) => {
       return next();
     }
 
-    const backUrl = req.get("Referrer") || `${systemConfig.prefixAdmin}/dashboard`;
+    const home = firstViewPath(permissions, systemConfig.prefixAdmin);
+    const referrer = req.get("Referrer");
+    const backUrl =
+      referrer && !referrer.includes("/auth/login")
+        ? referrer
+        : home ?? `${systemConfig.prefixAdmin}/auth/login`;
     return res.redirect(backUrl);
   }
 }

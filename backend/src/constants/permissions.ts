@@ -119,6 +119,25 @@ export const WAREHOUSE_MANAGER_PERMISSIONS: PermissionKey[] = [
   "reports_view",
 ];
 
+/** Chỉ các *_view đã có route admin + requirePermission. Thứ tự = sidebar. */
+export const VIEW_LANDING: Array<{ key: PermissionKey; path: string }> = [
+  { key: "components_view", path: "/components" },
+  { key: "importOrders_view", path: "/importOrders" },
+  { key: "exportOrders_view", path: "/exportOrders" },
+  { key: "bom_view", path: "/bom" },
+  { key: "account_view", path: "/accounts" },
+  { key: "roles_view", path: "/permissions" },
+];
+
+export const firstViewPath = (
+  permissions: string[] | undefined,
+  prefix: string,
+): string | null => {
+  const keys = Array.isArray(permissions) ? permissions : [];
+  const hit = VIEW_LANDING.find((item) => keys.includes(item.key));
+  return hit ? `${prefix}${hit.path}` : null;
+};
+
 export const DEFAULT_ROLES: Array<{
   id: AccountRole;
   permissions: string[];
