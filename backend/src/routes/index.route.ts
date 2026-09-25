@@ -1,5 +1,6 @@
 import { Express } from "express";
 import { systemConfig } from "../config/system";
+import { dashboardRoutes } from "./dashboard.route";
 import { componentRoutes } from "./components.route";
 import { accountRoutes } from "./account.route";
 import { importOrderRoutes } from "./import_orders.route";
@@ -15,6 +16,8 @@ const adminRoutes = (app: Express): void => {
   app.use(`${PATH_ADMIN}/auth`, authRoutes);
 
   app.use(PATH_ADMIN, requireAuth);
+
+  app.use(`${PATH_ADMIN}/dashboard`, dashboardRoutes);
 
   app.use(`${PATH_ADMIN}/components`, componentRoutes);
 
