@@ -511,68 +511,92 @@ export const confirmOrder = async (id: number, accountId: number) => {
     });
   });
 };
-/** Linh kiện cần nhập: tồn <= ngưỡng tối thiểu, còn kinh doanh */
-/** Linh kiện cần nhập: tồn thấp hơn ngưỡng tối thiểu, còn kinh doanh */
-/** Linh kiện thiếu để lắp: cộng BOM của lệnh sản xuất chưa xong, trừ tồn kho */
-export const getShortageComponents = async () => {
-  const orders = await prisma.productionOrder.findMany({
-    where: {
-      status: { in: ["pending", "in_progress"] },
-    },
-    select: {
-      quantityRequested: true,
-      pcConfig: {
-        select: {
-          bomItems: {
-            select: {
-              quantity: true,
-              component: {
-                select: {
-                  id: true,
-                  name: true,
-                  unit: true,
-                  unitPrice: true,
-                  supplierId: true,
-                  status: true,
-                  deleted: true,
-                  brand: { select: { name: true } },
-                  supplier: { select: { name: true } },
-                  category: { select: { name: true } },
-                  inventory: { select: { quantityOnHand: true } },
+type ShortageRow = {
+  id: number;
+  name: string;
+  category: string;
+  brand: string;
+  supplier: string;
+  supplierId: number | null;
+  onHand: number;
+  incoming: number;
+  reserved: number;
+  required: number;
+  need: number;
+  unit: string;
+  unitPrice: number;
+};
+
+const sumByComponent = (
+  rows: { componentId: number | null; _sum: { quantity: number | null } }[],
+) => {
+  const map = new Map<number, number>();
+  for (const row of rows) {
+    if (row.componentId == null) continue;
+    map.set(row.componentId, row._sum.quantity ?? 0);
+  }
+  return map;
+};
+
+/** Thiếu = nhu cầu lệnh lắp − tồn − phiếu nhập nháp + phiếu xuất linh kiện đang chờ. */
+export const getShortageComponents = async (): Promise<ShortageRow[]> => {
+  const [orders, incomingRows, reservedRows] = await Promise.all([
+    prisma.productionOrder.findMany({
+      where: { status: { in: ["pending", "in_progress"] } },
+      select: {
+        quantityRequested: true,
+        pcConfig: {
+          select: {
+            bomItems: {
+              select: {
+                quantity: true,
+                component: {
+                  select: {
+                    id: true,
+                    name: true,
+                    unit: true,
+                    unitPrice: true,
+                    supplierId: true,
+                    status: true,
+                    deleted: true,
+                    brand: { select: { name: true } },
+                    supplier: { select: { name: true } },
+                    category: { select: { name: true } },
+                    inventory: { select: { quantityOnHand: true } },
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-  });
+    }),
+    prisma.importOrderItem.groupBy({
+      by: ["componentId"],
+      where: { importOrder: { status: "draft" } },
+      _sum: { quantity: true },
+    }),
+    prisma.exportOrderItem.groupBy({
+      by: ["componentId"],
+      where: {
+        componentId: { not: null },
+        exportOrder: { type: "material", status: "pending" },
+      },
+      _sum: { quantity: true },
+    }),
+  ]);
 
-  type Row = {
-    id: number;
-    name: string;
-    category: string;
-    brand: string;
-    supplier: string;
-    supplierId: number | null;
-    onHand: number;
-    required: number;
-    unit: string;
-    unitPrice: number;
-  };
-
-  const map = new Map<number, Row>();
+  const incomingMap = sumByComponent(incomingRows);
+  const reservedMap = sumByComponent(reservedRows);
+  const map = new Map<number, Omit<ShortageRow, "need">>();
 
   for (const order of orders) {
     for (const bom of order.pcConfig.bomItems) {
       const c = bom.component;
-      if (c.status !== "active" || c.deleted) {
-        continue;
-      }
+      if (c.status !== "active" || c.deleted) continue;
 
       const addQty = bom.quantity * order.quantityRequested;
       const current = map.get(c.id);
-
       if (current) {
         current.required += addQty;
         continue;
@@ -586,6 +610,8 @@ export const getShortageComponents = async () => {
         supplier: c.supplier?.name ?? "Chưa gán NCC",
         supplierId: c.supplierId,
         onHand: c.inventory?.quantityOnHand ?? 0,
+        incoming: incomingMap.get(c.id) ?? 0,
+        reserved: reservedMap.get(c.id) ?? 0,
         required: addQty,
         unit: c.unit ?? "cái",
         unitPrice: Number(c.unitPrice),
@@ -594,15 +620,35 @@ export const getShortageComponents = async () => {
   }
 
   return [...map.values()]
-    .map((row) => {
-      const need = row.required - row.onHand;
-      return {
-        ...row,
-        min: row.required,
-        need,
-      };
-    })
+    .map((row) => ({
+      ...row,
+      need: row.required - row.onHand - row.incoming + row.reserved,
+    }))
     .filter((row) => row.need > 0);
+};
+
+export const getShortageGroups = async () => {
+  const items = await getShortageComponents();
+  const groups = new Map<
+    string,
+    { supplierId: number | null; supplierName: string; items: ShortageRow[] }
+  >();
+
+  for (const item of items) {
+    const key = item.supplierId == null ? "none" : String(item.supplierId);
+    const current = groups.get(key);
+    if (current) {
+      current.items.push(item);
+      continue;
+    }
+    groups.set(key, {
+      supplierId: item.supplierId,
+      supplierName: item.supplier,
+      items: [item],
+    });
+  }
+
+  return [...groups.values()];
 };
 export const getSuppliers = () =>
   prisma.supplier.findMany({ orderBy: { name: "asc" } });
