@@ -1,0 +1,166 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+include ../../mixins/pagination.pug
+
+block main
+  link(rel="stylesheet", href="/css/production.css")
+  +alert-success(4000)
+  +alert-error(6000)
+  .comp-page
+
+    //- ---------- Header của trang ----------
+    .d-flex.align-items-start.justify-content-between.flex-wrap.gap-3.mb-4
+      div
+        h2.fw-bold.mb-1 Điều phối sản xuất
+        p.text-muted.mb-0 #{totalOrders} yêu cầu đang hoạt động trên #{stages.length} công đoạn.
+
+      .d-flex.gap-2
+        .dropdown
+          button.comp-btn.comp-btn-light.dropdown-toggle(type="button" data-bs-toggle="dropdown")
+            i.bi.bi-sliders
+            | Bộ lọc
+          ul.dropdown-menu.dropdown-menu-end.p-2
+            li
+              a.dropdown-item.rounded-2(href="#" data-filter-stage="all") Tất cả công đoạn
+            li: hr.dropdown-divider
+            each stage in stages
+              li
+                a.dropdown-item.rounded-2(href="#" data-filter-stage=stage.key)
+                  span.comp-dot(class=`comp-dot-${stage.variant}`)
+                  | #{stage.label}
+                  span.ms-auto.comp-muted #{stage.count}
+
+        a.comp-btn.comp-btn-primary(href=`${prefixAdmin}/production/create`)
+          i.bi.bi-plus-lg
+          | Tạo yêu cầu
+
+    //- ---------- Khối bảng ----------
+    .comp-card
+
+      //- Thanh tìm kiếm + chip lọc theo công đoạn (thay cho việc chia cột)
+      .d-flex.align-items-center.flex-wrap.gap-3.mb-3
+        .comp-search.d-flex.align-items-center.flex-grow-1
+          span.input-group-text
+            i.bi.bi-search
+          input.form-control#soSearch(type="text" placeholder="Tìm mã yêu cầu, sản phẩm, BOM...")
+
+        .stage-filters.d-flex.flex-wrap.gap-2
+          button.stage-chip.active(type="button" data-filter-stage="all")
+            | Tất cả
+            span.stage-chip-count #{totalOrders}
+          each stage in stages
+            button.stage-chip(type="button" data-filter-stage=stage.key)
+              span.comp-dot(class=`comp-dot-${stage.variant}`)
+              | #{stage.label}
+              span.stage-chip-count #{stage.count}
+
+      .comp-table-wrap
+        table.table.comp-table#tblSanXuat
+          thead
+            tr
+              th Mã yêu cầu
+              th Sản phẩm
+              th SL
+              th Công đoạn
+              th Phụ trách
+              th
+
+          tbody
+            each order in orders
+              tr(data-stage=order.stageKey)
+                td
+                  a.comp-code(href=`${prefixAdmin}/production/${order.id}`) ##{order.code}
+
+                td
+                  .comp-name-cell
+                    img.comp-thumb(src=order.image, alt=order.name)
+                    div
+                      a.comp-name(href=`${prefixAdmin}/production/${order.id}`) #{order.name}
+
+                td
+                  span.comp-stock #{order.qty}
+
+                td
+                  span.comp-status(class=`comp-status-${order.stageVariant}`)
+                    span.comp-dot
+                    | #{order.stageLabel}
+
+                td
+                  if order.owner
+                    span.fw-semibold #{order.owner}
+                  else
+                    span.comp-muted Chưa phân công
+
+                td.text-end
+                  .dropdown
+                    button.comp-btn-icon(type="button" data-bs-toggle="dropdown")
+                      i.bi.bi-three-dots
+                    ul.dropdown-menu.dropdown-menu-end
+                      li: a.dropdown-item(href=`${prefixAdmin}/production/${order.id}`) Xem chi tiết
+                      li: hr.dropdown-divider
+                      li: a.dropdown-item.text-danger(href="#") Huỷ yêu cầu
+
+          tr#emptyRow.d-none
+            td.text-center.text-muted.py-4(colspan="6") Không có yêu cầu nào khớp với bộ lọc.
+
+      //- Phân trang ----------
+      .d-flex.align-items-center.justify-content-between.mt-3
+        span.comp-muted.small
+          if totalOrders
+            | Hiển thị #{objectPagination.skipPage + 1}-#{objectPagination.skipPage + orders.length} trong #{totalOrders}
+          else
+            | Không có dữ liệu
+        if objectPagination
+          nav
+            +pagination(objectPagination)
+
+block script
+  script(src="/js/script.js")
+  script.
+    // Lọc bảng theo công đoạn (chip + dropdown dùng chung 1 hàm)
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest('[data-filter-stage]');
+      if (!trigger) return;
+      e.preventDefault();
+
+      var stage = trigger.getAttribute('data-filter-stage');
+
+      document.querySelectorAll('.stage-chip').forEach(function (btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-filter-stage') === stage);
+      });
+
+      var rows = document.querySelectorAll('#tblSanXuat tbody tr[data-stage]');
+      var visibleCount = 0;
+      rows.forEach(function (row) {
+        var match = stage === 'all' || row.getAttribute('data-stage') === stage;
+        row.classList.toggle('d-none', !match);
+        if (match) visibleCount++;
+      });
+
+      document.getElementById('emptyRow').classList.toggle('d-none', visibleCount !== 0);
+    });
+
+    document.querySelectorAll('[pagination-button]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var url = new URL(window.location.href);
+        var page = button.getAttribute('data-page');
+        if (page) {
+          url.searchParams.set('page', page);
+        } else {
+          url.searchParams.delete('page');
+        }
+        window.location.href = url.toString();
+      });
+    });
+
+    // Tìm kiếm theo mã / tên sản phẩm
+    var searchInput = document.getElementById('soSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        var q = this.value.trim().toLowerCase();
+        document.querySelectorAll('#tblSanXuat tbody tr[data-stage]').forEach(function (row) {
+          var text = row.innerText.toLowerCase();
+          row.classList.toggle('d-none', q && !text.includes(q));
+        });
+      });
+    }

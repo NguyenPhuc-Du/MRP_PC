@@ -9,6 +9,7 @@ import { bomRoutes } from "./bom.route";
 import { permissionRoutes } from "./permissions.route";
 import { authRoutes } from "./auth.route";
 import { requireAuth } from "../middlewares/auth.middleware";
+import { productionRoutes } from "./production.route";
 
 const adminRoutes = (app: Express): void => {
   const PATH_ADMIN = `${systemConfig.prefixAdmin}`;
@@ -30,6 +31,8 @@ const adminRoutes = (app: Express): void => {
   app.use(`${PATH_ADMIN}/bom`, bomRoutes);
 
   app.use(`${PATH_ADMIN}/permissions`, permissionRoutes);
+
+  app.use(`${PATH_ADMIN}/production`, productionRoutes);
 
 };
 

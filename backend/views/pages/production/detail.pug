@@ -1,0 +1,127 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+  link(rel="stylesheet", href="/css/production.css")
+  +alert-success(4000)
+  +alert-error(6000)
+  .comp-page
+    .d-flex.align-items-center.gap-2.mb-2
+      a.comp-muted(href=`${prefixAdmin}/production`) Sản xuất
+      i.bi.bi-chevron-right.comp-muted.small
+      span.fw-semibold Chi tiết
+
+    .d-flex.align-items-start.justify-content-between.flex-wrap.gap-3.mb-4
+      div
+        .comp-eyebrow YÊU CẦU ##{order.code}
+        h2.fw-bold.mb-1= order.pcConfig.name
+        p.text-muted.mb-0
+          | #{order.pcConfig.sku}
+          if order.pcConfig.description
+            |  · #{order.pcConfig.description}
+      .d-flex.align-items-center.gap-2
+        span.comp-status(class=`comp-status-${order.stageVariant}`)
+          span.comp-dot
+          | #{order.stageLabel}
+        a.comp-btn.comp-btn-light(href=`${prefixAdmin}/production`)
+          i.bi.bi-arrow-left
+          | Quay lại
+
+    .row.g-4.mb-4
+      .col-lg-7
+        .comp-card
+          .comp-eyebrow.mb-3 THÔNG TIN YÊU CẦU
+          .d-flex.align-items-center.gap-3.mb-3
+            if order.pcConfig.image
+              img.comp-thumb(src=order.pcConfig.image alt=order.pcConfig.name style="width:64px;height:64px;")
+            else
+              span.owner-avatar(style="width:64px;height:64px;font-size:18px;") PC
+            div
+              .comp-name= order.pcConfig.name
+              .comp-muted.small SKU: #{order.pcConfig.sku}
+
+          hr.dropdown-divider
+
+          .d-flex.justify-content-between.mb-2
+            span.comp-muted Số lượng
+            span.fw-semibold #{order.quantityRequested}
+          .d-flex.justify-content-between.mb-2
+            span.comp-muted Người tạo
+            span.fw-semibold= order.creatorName
+          .d-flex.justify-content-between.mb-2
+            span.comp-muted Ngày tạo
+            span.fw-semibold= formatDate(order.createdAt)
+          .d-flex.justify-content-between
+            span.comp-muted Ngày hoàn thành
+            span.fw-semibold= formatDate(order.completedAt)
+
+      .col-lg-5
+        .comp-card.mb-4
+          .comp-eyebrow.mb-3 NGƯỜI PHỤ TRÁCH
+          if order.assignee
+            .d-flex.align-items-center.gap-3
+              span.owner-avatar= order.assignee.initials
+              div
+                .fw-semibold= order.assignee.name
+                .comp-muted.small Nhân viên lắp ráp
+          else
+            p.comp-muted.mb-0 Chưa phân công
+
+        .comp-card
+          .comp-eyebrow.mb-3 PHIẾU XUẤT LIÊN QUAN
+          .d-flex.justify-content-between.align-items-center.mb-2
+            span.comp-muted Xuất linh kiện
+            if order.materialExport
+              if user.permissions && user.permissions.includes("exportOrders_view")
+                a.fw-semibold(href=`${prefixAdmin}/exportOrders/${order.materialExport.id}`)
+                  | #{order.materialExport.code} · #{order.materialExport.statusLabel}
+              else
+                span.fw-semibold #{order.materialExport.code} · #{order.materialExport.statusLabel}
+            else
+              span.comp-muted Chưa có
+          .d-flex.justify-content-between.align-items-center
+            span.comp-muted Xuất thành phẩm
+            if order.productExport
+              if user.permissions && user.permissions.includes("exportOrders_view")
+                a.fw-semibold(href=`${prefixAdmin}/exportOrders/${order.productExport.id}`)
+                  | #{order.productExport.code} · #{order.productExport.statusLabel}
+              else
+                span.fw-semibold #{order.productExport.code} · #{order.productExport.statusLabel}
+            else
+              span.comp-muted Chưa có
+
+    .comp-card
+      .d-flex.align-items-center.justify-content-between.mb-3
+        .comp-eyebrow.mb-0 LINH KIỆN BOM
+        if order.items.length
+          if order.allEnough
+            span.comp-muted.small Đủ tồn cho yêu cầu này
+          else
+            span.text-danger.small Thiếu linh kiện
+
+      if order.items.length
+        .comp-table-wrap
+          table.table.comp-table.mb-0
+            thead
+              tr
+                th Linh kiện
+                th.text-end Định mức
+                th.text-end Cần
+                th.text-end Tồn
+                th.text-end
+            tbody
+              each item in order.items
+                tr
+                  td
+                    span.fw-semibold= item.name
+                    span.comp-muted.small.ms-1 #{item.unit}
+                  td.text-end #{item.bomQty}
+                  td.text-end #{item.requiredQty}
+                  td.text-end #{item.onHandQty}
+                  td.text-end
+                    if item.isEnough
+                      span.po-stock.is-ok Đủ
+                    else
+                      span.po-stock.is-bad Thiếu #{item.missingQty}
+      else
+        p.comp-muted.mb-0 Cấu hình này chưa có BOM.
