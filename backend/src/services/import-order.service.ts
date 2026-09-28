@@ -159,6 +159,7 @@ export const mapDetailOrder = async (order: OrderWithRelations) => {
         brand: component?.brand?.name ?? "—",
         supplier: component?.supplier?.name ?? "—",
         brandName: component?.brand?.name ?? "—",
+        supplierId: component?.supplierId ?? null,
         supplierName: component?.supplier?.name ?? "—",
         unit: component?.unit || "cái",
         quantity: item.quantity,
@@ -380,11 +381,31 @@ const normalizeItems = (
   return [...map.values()];
 };
 
+const assertItemsBelongToSupplier = async (
+  supplierId: number,
+  componentIds: number[],
+) => {
+  const rows = await prisma.component.findMany({
+    where: { id: { in: componentIds }, deleted: false, status: "active" },
+    select: { id: true, supplierId: true },
+  });
+  const sameSupplier =
+    rows.length === componentIds.length &&
+    rows.every((row) => row.supplierId === supplierId);
+  if (!sameSupplier) {
+    throw new Error("SUPPLIER_MISMATCH");
+  }
+};
+
 export const createOrder = async (data: SaveImportOrderDto) => {
   const items = normalizeItems(data.items);
   if (!items.length) {
     throw new Error("NO_ITEMS");
   }
+  await assertItemsBelongToSupplier(
+    data.supplierId,
+    items.map((item) => item.componentId),
+  );
 
   const code =
     data.code &&
@@ -435,6 +456,10 @@ export const updateDraft = async (id: number, data: SaveImportOrderDto) => {
   if (!items.length) {
     throw new Error("NO_ITEMS");
   }
+  await assertItemsBelongToSupplier(
+    data.supplierId,
+    items.map((item) => item.componentId),
+  );
 
   const order = await prisma.$transaction(async (tx) => {
     await tx.importOrderItem.deleteMany({ where: { importOrderId: id } });
@@ -653,29 +678,6 @@ export const getShortageGroups = async () => {
 export const getSuppliers = () =>
   prisma.supplier.findMany({ orderBy: { name: "asc" } });
 
-export const getBrands = () =>
-  prisma.brand.findMany({ orderBy: { name: "asc" } });
-
-export const upsertSupplierByName = async (rawName: string) => {
-  const name = rawName.trim();
-  if (!name) throw new Error("NO_SUPPLIER_NAME");
-  return prisma.supplier.upsert({
-    where: { name },
-    update: {},
-    create: { name },
-  });
-};
-
-export const upsertBrandByName = async (rawName: string) => {
-  const name = rawName.trim();
-  if (!name) throw new Error("NO_BRAND_NAME");
-  return prisma.brand.upsert({
-    where: { name },
-    update: {},
-    create: { name },
-  });
-};
-
 export const getPrefillItemsByIds = async (ids: number[]) => {
   if (!ids.length) return [];
 
@@ -695,6 +697,7 @@ export const getPrefillItemsByIds = async (ids: number[]) => {
         name: item.name,
         category: item.category,
         brandName: item.brand,
+        supplierId: item.supplierId,
         supplierName: item.supplier,
         stockAfter: item.onHand,
         quantity: item.need,

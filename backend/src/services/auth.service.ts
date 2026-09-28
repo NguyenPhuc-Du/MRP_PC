@@ -16,6 +16,13 @@ function getJwtSecret(): string {
   return secret;
 }
 
+async function markLastLogin(accountId: number): Promise<void> {
+  await prisma.account.update({
+    where: { id: accountId },
+    data: { lastLoginAt: new Date() },
+  });
+}
+
 function createAccessToken(account: {
   id: number;
   username: string;
@@ -51,6 +58,7 @@ export async function loginForApi(username: string, password: string) {
   }
 
   const accessToken = createAccessToken(account);
+  await markLastLogin(account.id);
 
   return {
     accessToken,
@@ -112,6 +120,7 @@ export async function login(
     return;
   }
 
+  await markLastLogin(account.id);
   res.redirect(home);
 }
 

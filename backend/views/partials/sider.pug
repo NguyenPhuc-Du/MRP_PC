@@ -28,7 +28,12 @@ aside.sider
                     i.bi.bi-clipboard-data
                     span.nav-label BOM / Cấu hình PC
 
-    if perms.includes('account_view') || perms.includes('roles_view')
+            if perms.includes('production_view')
+                a.nav-item(href=`${prefixAdmin}/production`)
+                    i.bi.bi-wrench-adjustable
+                    span.nav-label Sản xuất
+
+    if perms.includes('account_view') || perms.includes('roles_view') || perms.includes('backup_view')
         .section-label HỆ THỐNG
         nav.side-nav
             if perms.includes('account_view')
@@ -40,3 +45,8 @@ aside.sider
                 a.nav-item(href=`${prefixAdmin}/permissions`)
                     i.bi.bi-shield-check
                     span.nav-label Phân quyền
+
+            if perms.includes('backup_view')
+                a.nav-item(href=`${prefixAdmin}/backup`)
+                    i.bi.bi-cloud-arrow-down
+                    span.nav-label Sao lưu

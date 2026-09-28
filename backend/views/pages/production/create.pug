@@ -1,0 +1,256 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+  link(rel="stylesheet", href="/css/production.css")
+  +alert-success(4000)
+  +alert-error(6000)
+  .comp-page
+
+    //- ---------- Breadcrumb + tiêu đề ----------
+    .d-flex.align-items-center.gap-2.mb-2
+      a.comp-muted(href=`${prefixAdmin}/production`) Sản xuất
+      i.bi.bi-chevron-right.comp-muted.small
+      span.fw-semibold Tạo yêu cầu
+
+
+    form#formTaoYeuCau(method="POST" action=`${prefixAdmin}/production/create`)
+      .row.g-4
+
+        //- ================= CỘT TRÁI: FORM ================= --
+        .col-lg-7
+          .comp-card.mb-4
+
+            //- ---- Chọn cấu hình PC (pcConfigId) ----
+            .mb-4
+              label.form-label.fw-semibold.small.mb-2(for="pcConfigId") Cấu hình PC
+              select.form-select.py-2#pcConfigId(name="pcConfigId" required)
+                option(value="" selected disabled) -- Chọn cấu hình / BOM --
+                each pc in pcConfigs
+                  option(
+                    value=pc.id
+                    data-image=pc.image
+                    data-sku=pc.sku
+                    data-stock=pc.availableStock
+                  )= pc.name
+              .form-text.comp-muted Danh sách lấy từ BOM / Cấu hình PC đã tạo.
+
+            //- ---- Số lượng yêu cầu: luôn 1 ----
+            .mb-4
+              label.form-label.fw-semibold.small.mb-2 Số lượng yêu cầu
+              span.fw-semibold 1
+              span.comp-muted.small.ms-2 (cố định)
+
+            //- ---- Người phụ trách (assignedTo) — optional ----
+            .mb-4
+              label.form-label.fw-semibold.small.mb-2(for="assignedTo") Giao cho
+              select.visually-hidden#assignedTo(name="assignedTo")
+                option(value="") -- Chưa phân công --
+                each acc in accounts
+                  option(
+                    value=acc.id
+                    data-name=acc.name
+                    data-role=acc.role
+                    data-initials=acc.initials
+                  )= `${acc.name} · ${acc.role}`
+              .staff-pick#staffPick
+                button.staff-pick-item.active(type="button" data-id="")
+                  span.owner-avatar —
+                  span
+                    span.staff-pick-name Chưa phân công
+                    span.staff-pick-role Có thể gán sau khi tạo
+                each acc in accounts
+                  button.staff-pick-item(
+                    type="button"
+                    data-id=acc.id
+                    data-name=acc.name
+                    data-role=acc.role
+                    data-initials=acc.initials
+                  )
+                    span.owner-avatar= acc.initials
+                    span
+                      span.staff-pick-name= acc.name
+                      span.staff-pick-role= acc.role
+
+            //- ---- Trạng thái khởi tạo (status = pending, chỉ hiển thị) ----
+            .mb-0
+              label.form-label.fw-semibold.small.mb-2 Trạng thái khởi tạo
+              span.comp-status.comp-status-wait
+                span.comp-dot
+                | Chờ sản xuất
+              span.comp-muted.small.ms-2 (mặc định)
+
+          //- ---- Nút hành động ----
+          .d-flex.justify-content-end.gap-2
+            a.comp-btn.comp-btn-light(href=`${prefixAdmin}/production`) Huỷ
+            button.comp-btn.comp-btn-primary(type="submit")
+              i.bi.bi-check2
+              | Tạo yêu cầu
+
+        //- ================= CỘT PHẢI: PREVIEW ================= --
+        .col-lg-5
+          .comp-card#previewCard
+            .comp-eyebrow.mb-3 XEM TRƯỚC YÊU CẦU
+
+            .d-none.text-center.text-muted.py-5#previewEmpty
+              i.bi.bi-box-seam.fs-1.d-block.mb-2
+              | Chọn cấu hình PC để xem trước
+
+            .d-flex.align-items-center.gap-3.mb-3#previewInfo
+              img.comp-thumb(id="previewImage" src="" style="width:64px;height:64px;")
+              div
+                .comp-name#previewName --
+                .comp-muted.small SKU: #[span#previewSku --]
+
+            hr.dropdown-divider
+
+            .d-flex.justify-content-between.mb-2
+              span.comp-muted Số lượng yêu cầu
+              span.fw-semibold#previewQty 1
+
+            .d-flex.justify-content-between.mb-2
+              span.comp-muted Tồn kho khả dụng
+              span.fw-semibold#previewStock --
+
+            .d-flex.justify-content-between.align-items-center.mb-2
+              span.comp-muted Người phụ trách
+              #previewAssigneeCard.preview-assignee.is-empty
+                span#previewAssigneeEmpty.preview-assignee-empty Chưa phân công
+                .d-none#previewAssigneeFilled.preview-assignee-filled
+                  span.owner-avatar#previewAssigneeInitials
+                  span
+                    span.fw-semibold.d-block#previewAssigneeName
+                    span.comp-muted.small#previewAssigneeRole
+
+            .d-flex.justify-content-between
+              span.comp-muted Ngày tạo
+              span.fw-semibold #{today}
+
+block script
+  script(src="/js/script.js")
+  script.
+    var pcSelect       = document.getElementById('pcConfigId');
+    var assigneeSelect = document.getElementById('assignedTo');
+    var staffPick      = document.getElementById('staffPick');
+
+    var previewEmpty   = document.getElementById('previewEmpty');
+    var previewInfo    = document.getElementById('previewInfo');
+    var previewImage   = document.getElementById('previewImage');
+    var previewName    = document.getElementById('previewName');
+    var previewSku     = document.getElementById('previewSku');
+    var previewQty     = document.getElementById('previewQty');
+    var previewStock   = document.getElementById('previewStock');
+    var stockWarning   = document.getElementById('stockWarning');
+
+    var previewAssigneeCard     = document.getElementById('previewAssigneeCard');
+    var previewAssigneeEmpty    = document.getElementById('previewAssigneeEmpty');
+    var previewAssigneeFilled   = document.getElementById('previewAssigneeFilled');
+    var previewAssigneeName     = document.getElementById('previewAssigneeName');
+    var previewAssigneeRole     = document.getElementById('previewAssigneeRole');
+    var previewAssigneeInitials = document.getElementById('previewAssigneeInitials');
+
+    function currentStock() {
+      var opt = pcSelect.options[pcSelect.selectedIndex];
+      return opt ? Number(opt.getAttribute('data-stock') || 0) : 0;
+    }
+
+    function renderPreview() {
+      var opt = pcSelect.options[pcSelect.selectedIndex];
+      var hasSelection = opt && opt.value;
+
+      previewEmpty.classList.toggle('d-none', !!hasSelection);
+      previewInfo.classList.toggle('d-none', !hasSelection);
+      if (!hasSelection) return;
+
+      previewImage.src = opt.getAttribute('data-image') || '';
+      previewName.textContent = opt.textContent;
+      previewSku.textContent = opt.getAttribute('data-sku') || '--';
+      previewStock.textContent = currentStock();
+
+      checkStock();
+    }
+
+    function checkStock() {
+      if (!stockWarning) return;
+
+      var stock = currentStock();
+
+      if (!pcSelect.value) {
+        stockWarning.classList.add('d-none');
+        return;
+      }
+
+      if (stock < 1) {
+        stockWarning.className = 'form-text mt-2 text-danger';
+        stockWarning.classList.remove('d-none');
+        stockWarning.textContent = 'Không đủ linh kiện tồn kho cho yêu cầu này.';
+      } else if (stock <= 2) {
+        stockWarning.className = 'form-text mt-2 text-warning';
+        stockWarning.classList.remove('d-none');
+        stockWarning.textContent = 'Linh kiện sắp hết sau khi trừ cho yêu cầu này.';
+      } else {
+        stockWarning.classList.add('d-none');
+      }
+    }
+
+    function toInitials(name) {
+      var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return '?';
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function setAssigneePreview(id, name, role, initials, animate) {
+      assigneeSelect.value = id || '';
+
+      document.querySelectorAll('.staff-pick-item').forEach(function (btn) {
+        btn.classList.toggle('active', String(btn.getAttribute('data-id') || '') === String(id || ''));
+      });
+
+      var has = !!id;
+      previewAssigneeEmpty.classList.toggle('d-none', has);
+      previewAssigneeFilled.classList.toggle('d-none', !has);
+      previewAssigneeCard.classList.toggle('is-empty', !has);
+
+      if (has) {
+        previewAssigneeName.textContent = name || '';
+        previewAssigneeRole.textContent = role || '';
+        previewAssigneeInitials.textContent = initials || toInitials(name);
+      }
+
+      if (animate) {
+        previewAssigneeCard.classList.remove('is-flash');
+        void previewAssigneeCard.offsetWidth;
+        previewAssigneeCard.classList.add('is-flash');
+      }
+    }
+
+    pcSelect.addEventListener('change', renderPreview);
+
+    if (staffPick) {
+      staffPick.addEventListener('click', function (e) {
+        var btn = e.target.closest('.staff-pick-item');
+        if (!btn) return;
+        setAssigneePreview(
+          btn.getAttribute('data-id'),
+          btn.getAttribute('data-name'),
+          btn.getAttribute('data-role'),
+          btn.getAttribute('data-initials'),
+          true
+        );
+      });
+    }
+
+    assigneeSelect.addEventListener('change', function () {
+      var opt = assigneeSelect.options[assigneeSelect.selectedIndex];
+      setAssigneePreview(
+        opt && opt.value,
+        opt && opt.getAttribute('data-name'),
+        opt && opt.getAttribute('data-role'),
+        opt && opt.getAttribute('data-initials'),
+        true
+      );
+    });
+
+    renderPreview();
+    setAssigneePreview('', '', '', '', false);

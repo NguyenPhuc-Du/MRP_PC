@@ -27,10 +27,8 @@ const errorMessage = (error: unknown): string => {
       return "Số lượng linh kiện phải lớn hơn 0 trước khi xác nhận";
     case "NO_ACCOUNT":
       return "Chưa có tài khoản trong hệ thống để tạo phiếu";
-    case "NO_SUPPLIER_NAME":
-      return "Nhập tên nhà cung cấp";
-    case "NO_BRAND_NAME":
-      return "Nhập tên thương hiệu";
+    case "SUPPLIER_MISMATCH":
+      return "Chỉ nhập linh kiện thuộc nhà cung cấp của phiếu";
     default:
       return "Thao tác thất bại";
   }
@@ -121,14 +119,12 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       .map((s) => Number(s.trim()))
       .filter((id) => Number.isInteger(id) && id > 0);
 
-    const [suppliers, brands, components, initialItems, code] =
-      await Promise.all([
-        importOrderService.getSuppliers(),
-        importOrderService.getBrands(),
-        importOrderService.getComponentOptions(),
-        importOrderService.getPrefillItemsByIds(ids),
-        importOrderService.generateCode(),
-      ]);
+    const [suppliers, components, initialItems, code] = await Promise.all([
+      importOrderService.getSuppliers(),
+      importOrderService.getComponentOptions(),
+      importOrderService.getPrefillItemsByIds(ids),
+      importOrderService.generateCode(),
+    ]);
 
     res.render("pages/importOders/form", {
       pageTitle: "Tạo phiếu nhập kho",
@@ -136,13 +132,10 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       code,
       creator: account,
       suppliers,
-      brands,
       components,
       order: null,
       initialItems,
       suggestedSupplierId: Number(req.query.supplierId || 0) || null,
-      addedSupplierId: Number(req.query.addedSupplier || 0) || null,
-      addedBrandId: Number(req.query.addedBrand || 0) || null,
     });
   } catch (error) {
     console.error(error);
@@ -238,10 +231,9 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const [components, suppliers, brands] = await Promise.all([
+    const [components, suppliers] = await Promise.all([
       importOrderService.getComponentOptions(),
       importOrderService.getSuppliers(),
-      importOrderService.getBrands(),
     ]);
     res.render("pages/importOders/form", {
       pageTitle: `Sửa ${order.code}`,
@@ -249,11 +241,8 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
       code: order.code,
       creator: order.creator,
       suppliers,
-      brands,
       components,
       order: await importOrderService.mapDetailOrder(order),
-      addedSupplierId: Number(req.query.addedSupplier || 0) || null,
-      addedBrandId: Number(req.query.addedBrand || 0) || null,
     });
   } catch (error) {
     console.error(error);
@@ -357,51 +346,4 @@ export const exportOrderPdf = async (req: Request, res: Response): Promise<void>
     req.flash("error", errorMessage(error));
     res.redirect(BASE());
   }
-};
-export const createSupplierPost = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const fallback = `${BASE()}/create`;
-  const rawReturnTo = String(req.body.returnTo || fallback);
-  const returnTo = rawReturnTo.startsWith(`${systemConfig.prefixAdmin}/importOrders`)
-    ? rawReturnTo
-    : fallback;
-  try {
-    const created = await importOrderService.upsertSupplierByName(
-      String(req.body.name || ""),
-    );
-    req.flash("success", "Đã thêm nhà cung cấp");
-    const joiner = returnTo.includes("?") ? "&" : "?";
-    res.redirect(`${returnTo}${joiner}addedSupplier=${created.id}`);
-    return;
-  } catch (error) {
-    console.error(error);
-    req.flash("error", errorMessage(error));
-  }
-  res.redirect(returnTo);
-};
-
-export const createBrandPost = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const fallback = `${BASE()}/create`;
-  const rawReturnTo = String(req.body.returnTo || fallback);
-  const returnTo = rawReturnTo.startsWith(`${systemConfig.prefixAdmin}/importOrders`)
-    ? rawReturnTo
-    : fallback;
-  try {
-    const created = await importOrderService.upsertBrandByName(
-      String(req.body.name || ""),
-    );
-    req.flash("success", "Đã thêm thương hiệu");
-    const joiner = returnTo.includes("?") ? "&" : "?";
-    res.redirect(`${returnTo}${joiner}addedBrand=${created.id}`);
-    return;
-  } catch (error) {
-    console.error(error);
-    req.flash("error", errorMessage(error));
-  }
-  res.redirect(returnTo);
 };

@@ -343,3 +343,346 @@ export async function requestProductExport(accountId: number, orderId: number) {
     },
   });
 }
+
+const buildableQty = (
+  items: Array<{ quantity: number; component: { inventory: { quantityOnHand: number } | null } }>,
+): number => {
+  if (!items.length) {
+    return 0;
+  }
+
+  return items.reduce((min, item) => {
+    const onHand = item.component.inventory?.quantityOnHand ?? 0;
+    const perUnit = item.quantity > 0 ? item.quantity : 1;
+    const canBuild = Math.floor(onHand / perUnit);
+    return Math.min(min, canBuild);
+  }, Number.POSITIVE_INFINITY);
+};
+
+const staffInitials = (name: string): string => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+};
+
+export async function getCreateFormData() {
+  const [configs, staffAccounts] = await Promise.all([
+    prisma.pcConfig.findMany({
+      where: { status: "active" },
+      select: {
+        id: true,
+        name: true,
+        imageUrl: true,
+        bomItems: {
+          select: {
+            quantity: true,
+            component: {
+              select: {
+                inventory: {
+                  select: { quantityOnHand: true },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { name: "asc" },
+    }),
+    prisma.account.findMany({
+      where: {
+        role: "staff",
+        status: "active",
+      },
+      select: {
+        id: true,
+        fullName: true,
+        username: true,
+        role: true,
+      },
+      orderBy: { fullName: "asc" },
+    }),
+  ]);
+
+  return {
+    pcConfigs: configs.map((config) => ({
+      id: config.id,
+      name: config.name,
+      image: config.imageUrl ?? "",
+      sku: `CFG-${String(config.id).padStart(3, "0")}`,
+      availableStock: buildableQty(config.bomItems),
+    })),
+    accounts: staffAccounts.map((account) => {
+      const name = account.fullName || account.username;
+      return {
+        id: account.id,
+        name,
+        role: "Nhân viên lắp ráp",
+        initials: staffInitials(name),
+      };
+    }),
+  };
+}
+
+export type CreateProductionOrderInput = {
+  createdBy: number;
+  pcConfigId: number;
+  quantityRequested: number;
+  assignedTo?: number;
+};
+
+export async function createProductionOrder(input: CreateProductionOrderInput) {
+  const quantityRequested = Math.floor(input.quantityRequested);
+  if (!Number.isInteger(quantityRequested) || quantityRequested < 1) {
+    throw new Error("INVALID_QUANTITY");
+  }
+
+  const config = await prisma.pcConfig.findUnique({
+    where: { id: input.pcConfigId },
+    select: { id: true, name: true, status: true },
+  });
+
+  if (!config) {
+    throw new Error("CONFIG_NOT_FOUND");
+  }
+
+  if (config.status !== "active") {
+    throw new Error("CONFIG_INACTIVE");
+  }
+
+  let assignedTo: number | null = null;
+  if (input.assignedTo) {
+    const staff = await prisma.account.findFirst({
+      where: {
+        id: input.assignedTo,
+        role: "staff",
+        status: "active",
+      },
+      select: { id: true },
+    });
+
+    if (!staff) {
+      throw new Error("STAFF_INVALID");
+    }
+
+    assignedTo = staff.id;
+  }
+
+  return prisma.productionOrder.create({
+    data: {
+      pcConfigId: config.id,
+      quantityRequested,
+      assignedTo,
+      createdBy: input.createdBy,
+      status: "pending",
+    },
+    select: {
+      id: true,
+      quantityRequested: true,
+      status: true,
+      assignedTo: true,
+      pcConfig: {
+        select: { name: true },
+      },
+      assignee: {
+        select: {
+          fullName: true,
+          username: true,
+        },
+      },
+    },
+  });
+}
+
+const INDEX_STAGES = [
+  { key: "wait", status: "pending" as const, variant: "wait", label: "Chờ sản xuất", progress: 0 },
+  { key: "assembly", status: "in_progress" as const, variant: "assembly", label: "Đang lắp ráp", progress: 50 },
+  { key: "done", status: "done" as const, variant: "done", label: "Hoàn thành", progress: 100 },
+];
+
+export async function countAllOrders() {
+  return prisma.productionOrder.count();
+}
+
+export async function getStageCounts() {
+  const grouped = await prisma.productionOrder.groupBy({
+    by: ["status"],
+    _count: { _all: true },
+  });
+
+  const countByStatus = Object.fromEntries(
+    grouped.map((row) => [row.status, row._count._all]),
+  );
+
+  return INDEX_STAGES.map((stage) => ({
+    key: stage.key,
+    variant: stage.variant,
+    label: stage.label,
+    count: countByStatus[stage.status] ?? 0,
+  }));
+}
+
+export async function getIndexData(skip: number, take: number) {
+  const rows = await prisma.productionOrder.findMany({
+    skip,
+    take,
+    select: {
+      id: true,
+      quantityRequested: true,
+      status: true,
+      createdAt: true,
+      pcConfig: {
+        select: {
+          name: true,
+          imageUrl: true,
+        },
+      },
+      assignee: {
+        select: {
+          fullName: true,
+          username: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const orders = rows.map((row) => {
+    const stage = INDEX_STAGES.find((item) => item.status === row.status) ?? INDEX_STAGES[0];
+    const ownerName = row.assignee?.fullName || row.assignee?.username || "";
+
+    return {
+      id: row.id,
+      code: String(row.id).padStart(3, "0"),
+      name: row.pcConfig.name,
+      image: row.pcConfig.imageUrl ?? "",
+      bom: row.pcConfig.name,
+      qty: row.quantityRequested,
+      stageKey: stage.key,
+      stageVariant: stage.variant,
+      stageLabel: stage.label,
+      owner: ownerName,
+    };
+  });
+
+  return { orders };
+}
+
+const EXPORT_STATUS_LABEL: Record<string, string> = {
+  pending: "Chờ duyệt",
+  approved: "Đã duyệt",
+  rejected: "Từ chối",
+};
+
+export async function getOrderDetail(orderId: number) {
+  if (!Number.isInteger(orderId) || orderId <= 0) {
+    return null;
+  }
+
+  const order = await prisma.productionOrder.findUnique({
+    where: { id: orderId },
+    select: {
+      id: true,
+      quantityRequested: true,
+      status: true,
+      createdAt: true,
+      completedAt: true,
+      pcConfig: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          imageUrl: true,
+          bomItems: {
+            select: {
+              quantity: true,
+              component: {
+                select: {
+                  id: true,
+                  name: true,
+                  unit: true,
+                  inventory: {
+                    select: { quantityOnHand: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      assignee: {
+        select: {
+          fullName: true,
+          username: true,
+        },
+      },
+      creator: {
+        select: {
+          fullName: true,
+          username: true,
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    return null;
+  }
+
+  const [materialExport, productExport] = await Promise.all([
+    findLatestExport(order.id, "material"),
+    findLatestExport(order.id, "finished_product"),
+  ]);
+
+  const stage = INDEX_STAGES.find((item) => item.status === order.status) ?? INDEX_STAGES[0];
+  const items = order.pcConfig.bomItems.map((bom) => {
+    const requiredQty = bom.quantity * order.quantityRequested;
+    const onHandQty = bom.component.inventory?.quantityOnHand ?? 0;
+
+    return {
+      componentId: bom.component.id,
+      name: bom.component.name,
+      unit: bom.component.unit,
+      bomQty: bom.quantity,
+      requiredQty,
+      onHandQty,
+      missingQty: Math.max(0, requiredQty - onHandQty),
+      isEnough: onHandQty >= requiredQty,
+    };
+  });
+
+  const assigneeName = order.assignee?.fullName || order.assignee?.username || "";
+  const mapExport = (row: Awaited<ReturnType<typeof findLatestExport>>) => {
+    if (!row) return null;
+    return {
+      ...mapExportSummary(row),
+      statusLabel: EXPORT_STATUS_LABEL[row.status] ?? row.status,
+    };
+  };
+
+  return {
+    id: order.id,
+    code: String(order.id).padStart(3, "0"),
+    quantityRequested: order.quantityRequested,
+    status: order.status,
+    stageVariant: stage.variant,
+    stageLabel: stage.label,
+    createdAt: order.createdAt,
+    completedAt: order.completedAt,
+    pcConfig: {
+      id: order.pcConfig.id,
+      name: order.pcConfig.name,
+      description: order.pcConfig.description ?? "",
+      image: order.pcConfig.imageUrl ?? "",
+      sku: `CFG-${String(order.pcConfig.id).padStart(3, "0")}`,
+    },
+    assignee: assigneeName
+      ? { name: assigneeName, initials: staffInitials(assigneeName) }
+      : null,
+    creatorName: order.creator.fullName || order.creator.username,
+    items,
+    allEnough: items.length > 0 && items.every((item) => item.isEnough),
+    materialExport: mapExport(materialExport),
+    productExport: mapExport(productExport),
+  };
+}

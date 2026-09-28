@@ -2,6 +2,8 @@
 node_modules
 backend/dist
 backend/src/generated
+backups/*
+!backups/.gitkeep
 
 *.iml
 .gradle
