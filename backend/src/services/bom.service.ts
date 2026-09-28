@@ -35,6 +35,8 @@ export const REQUIRED_SLOTS = [
 ] as const;
 
 const EXTRA_CATEGORIES = ["GPU", "SSD", "HDD", "Fan", "Ram", "RAM"];
+const SINGLE_QTY_ONE = ["CPU", "Mainboard", "PSU", "Case"];
+const RAM_CATS = ["Ram", "RAM"];
 
 const CATEGORY_CODE: Record<string, string> = {
   CPU: "CP",
@@ -213,7 +215,9 @@ const normalizeItems = (items: BomItemInput[]): BomItemInput[] => {
     .filter((item) => Number.isInteger(item.componentId) && item.componentId > 0);
 };
 
-const validateItems = async (items: BomItemInput[]): Promise<BomItemInput[]> => {
+const validateItems = async (
+  items: BomItemInput[],
+): Promise<{ items: BomItemInput[]; cost: number }> => {
   const normalized = normalizeItems(items);
 
   if (normalized.length === 0) {
@@ -231,7 +235,7 @@ const validateItems = async (items: BomItemInput[]): Promise<BomItemInput[]> => 
 
   const components = await prisma.component.findMany({
     where: { id: { in: ids } },
-    select: { id: true, status: true, category: { select: { name: true } } },
+    select: { id: true, status: true, unitPrice: true, category: { select: { name: true } } },
   });
 
   if (components.length !== ids.length) {
@@ -254,7 +258,39 @@ const validateItems = async (items: BomItemInput[]): Promise<BomItemInput[]> => 
     }
   }
 
-  return normalized;
+  const countByCat: Record<string, { rows: number; qty: number }> = {};
+  for (const item of normalized) {
+    const cat = byId.get(item.componentId)?.category.name || "";
+    if (!countByCat[cat]) countByCat[cat] = { rows: 0, qty: 0 };
+    countByCat[cat].rows += 1;
+    countByCat[cat].qty += item.quantity;
+  }
+
+  const rowsOf = (...cats: string[]) =>
+    cats.reduce((n, c) => n + (countByCat[c]?.rows || 0), 0);
+  const qtyOf = (...cats: string[]) =>
+    cats.reduce((n, c) => n + (countByCat[c]?.qty || 0), 0);
+
+  for (const cat of SINGLE_QTY_ONE) {
+    if (rowsOf(cat) !== 1 || qtyOf(cat) !== 1) {
+      throw new Error("SLOT_SINGLE_ONLY");
+    }
+  }
+
+  if (qtyOf(...RAM_CATS) < 1 || qtyOf(...RAM_CATS) > 4) {
+    throw new Error("INVALID_RAM");
+  }
+
+  if (rowsOf("GPU") > 1 || qtyOf("GPU") > 1) {
+    throw new Error("GPU_SINGLE_ONLY");
+  }
+
+  const cost = normalized.reduce((sum, item) => {
+    const price = toNumber(byId.get(item.componentId)?.unitPrice ?? 0);
+    return sum + price * item.quantity;
+  }, 0);
+
+  return { items: normalized, cost };
 };
 
 export const getComponentOptions = async () => {
@@ -302,14 +338,18 @@ export const createConfig = async (dto: CreateBomDto): Promise<BomConfigRow> => 
     throw new Error("NAME_REQUIRED");
   }
 
-  const items = await validateItems(dto.items);
+  const { items, cost } = await validateItems(dto.items);
   const salePrice = dto.salePrice && dto.salePrice > 0 ? dto.salePrice : 0;
+  if (salePrice > 0 && salePrice < cost) {
+    throw new Error("SALE_BELOW_COST");
+  }
 
   return prisma.pcConfig.create({
     data: {
       name,
       description: dto.description?.trim() || null,
       salePrice,
+      imageUrl: dto.imageUrl?.trim() || null,
       status: dto.status ?? "active",
       bomItems: {
         create: items,
@@ -330,10 +370,18 @@ export const updateConfig = async (id: number, dto: UpdateBomDto): Promise<BomCo
     throw new Error("INVALID_PRICE");
   }
 
-  const items = dto.items ? await validateItems(dto.items) : undefined;
+  const validated = dto.items ? await validateItems(dto.items) : undefined;
+  const salePrice = dto.salePrice;
+  let cost = validated?.cost;
+  if (salePrice && salePrice > 0 && cost === undefined) {
+    cost = totalsOf(await getConfigById(id)).totalCost;
+  }
+  if (salePrice && salePrice > 0 && cost !== undefined && salePrice < cost) {
+    throw new Error("SALE_BELOW_COST");
+  }
 
   return prisma.$transaction(async (tx) => {
-    if (items) {
+    if (validated) {
       await tx.bomItem.deleteMany({ where: { pcConfigId: id } });
     }
 
@@ -343,8 +391,9 @@ export const updateConfig = async (id: number, dto: UpdateBomDto): Promise<BomCo
         ...(name ? { name } : {}),
         ...(dto.description !== undefined ? { description: dto.description.trim() || null } : {}),
         ...(dto.salePrice !== undefined ? { salePrice: dto.salePrice } : {}),
+        ...(dto.imageUrl !== undefined ? { imageUrl: dto.imageUrl.trim() || null } : {}),
         ...(dto.status ? { status: dto.status } : {}),
-        ...(items ? { bomItems: { create: items } } : {}),
+        ...(validated ? { bomItems: { create: validated.items } } : {}),
       },
       include: bomInclude,
     });

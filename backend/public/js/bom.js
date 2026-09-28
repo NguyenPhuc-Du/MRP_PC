@@ -86,6 +86,7 @@ paginationButton.forEach(button => {
     if (suggestText) suggestText.textContent = formatVnd(suggested);
     if (saleText) saleText.textContent = hasSale ? formatVnd(sale) : "Chưa chốt";
     if (marginText) marginText.textContent = margin.toFixed(1).replace(".", ",") + "%";
+    form.setAttribute("data-bom-cost", String(total));
   }
 
   if (addBtn && template && list) {
