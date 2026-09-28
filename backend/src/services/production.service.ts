@@ -373,7 +373,6 @@ export async function getCreateFormData() {
       select: {
         id: true,
         name: true,
-        imageUrl: true,
         bomItems: {
           select: {
             quantity: true,
@@ -408,7 +407,6 @@ export async function getCreateFormData() {
     pcConfigs: configs.map((config) => ({
       id: config.id,
       name: config.name,
-      image: config.imageUrl ?? "",
       sku: `CFG-${String(config.id).padStart(3, "0")}`,
       availableStock: buildableQty(config.bomItems),
     })),
@@ -534,7 +532,6 @@ export async function getIndexData(skip: number, take: number) {
       pcConfig: {
         select: {
           name: true,
-          imageUrl: true,
         },
       },
       assignee: {
@@ -555,7 +552,6 @@ export async function getIndexData(skip: number, take: number) {
       id: row.id,
       code: String(row.id).padStart(3, "0"),
       name: row.pcConfig.name,
-      image: row.pcConfig.imageUrl ?? "",
       bom: row.pcConfig.name,
       qty: row.quantityRequested,
       stageKey: stage.key,
@@ -592,7 +588,6 @@ export async function getOrderDetail(orderId: number) {
           id: true,
           name: true,
           description: true,
-          imageUrl: true,
           bomItems: {
             select: {
               quantity: true,
@@ -673,7 +668,6 @@ export async function getOrderDetail(orderId: number) {
       id: order.pcConfig.id,
       name: order.pcConfig.name,
       description: order.pcConfig.description ?? "",
-      image: order.pcConfig.imageUrl ?? "",
       sku: `CFG-${String(order.pcConfig.id).padStart(3, "0")}`,
     },
     assignee: assigneeName

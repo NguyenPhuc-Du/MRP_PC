@@ -32,10 +32,7 @@ block main
         .comp-card
           .comp-eyebrow.mb-3 THÔNG TIN YÊU CẦU
           .d-flex.align-items-center.gap-3.mb-3
-            if order.pcConfig.image
-              img.comp-thumb(src=order.pcConfig.image alt=order.pcConfig.name style="width:64px;height:64px;")
-            else
-              span.owner-avatar(style="width:64px;height:64px;font-size:18px;") PC
+            span.owner-avatar(style="width:64px;height:64px;font-size:18px;") PC
             div
               .comp-name= order.pcConfig.name
               .comp-muted.small SKU: #{order.pcConfig.sku}

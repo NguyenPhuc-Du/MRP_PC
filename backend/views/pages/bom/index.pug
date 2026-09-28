@@ -53,10 +53,8 @@ block main
                 table.bom-table
                     thead
                         tr
-                            th HÌNH ẢNH
                             th TÊN CẤU HÌNH
                             th MÃ BOM
-                            th VERSION
                             th LINH KIỆN
                             th GIÁ VỐN
                             th GIÁ BÁN CUỐI
@@ -68,18 +66,12 @@ block main
                             each config in configs
                                 tr
                                     td
-                                        if config.imageUrl
-                                            img.bom-thumb(src=config.imageUrl alt=config.name)
-                                        else
-                                            span.bom-thumb.is-empty
-                                    td
                                         if user && user.permissions && user.permissions.includes('bom_view')
                                             a.bom-name(href=`${prefixAdmin}/bom/detail/${config.id}`)= config.name
                                         else
                                             span.bom-name.fw-bold= config.name
                                     td
                                         span.bom-code= config.code
-                                    td= config.version
                                     td #{config.itemCount} linh kiện · #{config.groupCount} nhóm
                                     td.bom-money= config.totalCostText
                                     td.bom-money
@@ -99,7 +91,7 @@ block main
                             tr
                                 - const canView = user && user.permissions && user.permissions.includes('bom_view');
                                 - const canCreate = user && user.permissions && user.permissions.includes('bom_create');
-                                td.text-center.py-4(colspan=canView ? "9" : "8")
+                                td.text-center.py-4(colspan=canView ? "7" : "6")
                                     | Chưa có cấu hình BOM. #{canCreate ? 'Bấm “Thêm cấu hình” để tạo mới.' : ''}
 
             .d-flex.justify-content-between.align-items-center.mt-4

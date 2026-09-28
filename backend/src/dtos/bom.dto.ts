@@ -7,7 +7,6 @@ export type CreateBomDto = {
   name: string;
   description?: string;
   salePrice?: number;
-  imageUrl?: string;
   status?: "active" | "inactive";
   items: BomItemInput[];
 };
