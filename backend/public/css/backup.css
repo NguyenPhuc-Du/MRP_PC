@@ -1,0 +1,32 @@
+.btn-gradient.btn-auto{
+  width:auto;
+  min-width:180px;
+}
+
+.backup-hint{
+  padding-bottom:18px;
+}
+
+.backup-hint .form-card-head{
+  margin-bottom:0;
+  padding-bottom:0;
+  border-bottom:none;
+}
+
+.backup-empty{
+  text-align:center;
+  padding:48px 16px;
+  color:var(--text-muted);
+}
+
+.backup-empty i{
+  font-size:40px;
+  display:block;
+  margin-bottom:12px;
+  color:var(--brand-from);
+}
+
+.backup-empty p{
+  margin:0;
+  font-size:14px;
+}

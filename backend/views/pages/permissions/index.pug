@@ -105,6 +105,10 @@ block main
               +permissionRow("roles_delete", "Xóa")
               +permissionRow("roles_permissions", "Phân quyền")
 
+              +permissionGroup("Sao lưu")
+              +permissionRow("backup_view", "Xem / tải về")
+              +permissionRow("backup_create", "Tạo bản sao lưu")
+
       if user.permissions && user.permissions.includes('roles_permissions')
         form#form-change-permissions.d-none(
           action=`${prefixAdmin}/permissions?_method=PATCH`
