@@ -78,10 +78,12 @@ block main
                                         data-price=component.unitPrice
                                         selected=(Number(value.componentId) === component.id)
                                     ) #{component.name}
+                            - const qtyMax = ["cpu", "main", "psu", "case"].includes(slot.key) ? 1 : (slot.key === "ram" ? 4 : undefined)
                             input.bom-input.bom-cost-qty(
                                 type="number"
                                 name=`slots[${slot.key}][quantity]`
                                 min="1"
+                                max=qtyMax
                                 step="1"
                                 required
                                 value=value.quantity || slot.defaultQty

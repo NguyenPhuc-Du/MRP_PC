@@ -30,6 +30,14 @@ const errorMessage = (error: unknown): string => {
       return "Linh kiện không tồn tại";
     case "COMPONENT_INACTIVE":
       return "Không gắn linh kiện đã ngừng kinh doanh";
+    case "SLOT_SINGLE_ONLY":
+      return "CPU, mainboard, nguồn và case: mỗi loại đúng 1 linh kiện, số lượng 1";
+    case "INVALID_RAM":
+      return "RAM phải từ 1 đến 4 thanh";
+    case "GPU_SINGLE_ONLY":
+      return "Chỉ được 1 GPU trong BOM";
+    case "SALE_BELOW_COST":
+      return "Giá chốt không được nhỏ hơn giá vốn";
     default:
       return "Thao tác thất bại";
   }
