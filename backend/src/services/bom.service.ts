@@ -3,7 +3,13 @@ import { Prisma } from "../generated/prisma";
 
 import { BomItemInput, CreateBomDto, UpdateBomDto } from "../dtos/bom.dto";
 
-const bomInclude = {
+const bomSelect = {
+  id: true,
+  name: true,
+  description: true,
+  salePrice: true,
+  status: true,
+  createdAt: true,
   bomItems: {
     include: {
       component: {
@@ -20,7 +26,7 @@ const bomInclude = {
   },
 } as const;
 
-type BomConfigRow = Prisma.PcConfigGetPayload<{ include: typeof bomInclude }>;
+type BomConfigRow = Prisma.PcConfigGetPayload<{ select: typeof bomSelect }>;
 
 const SUGGESTED_MARGIN = 0.15;
 
@@ -97,7 +103,7 @@ export const getAllConfigs = async (skip : number, take: number, sort?: string):
   return prisma.pcConfig.findMany({
     skip: skip,
     take: take,
-    include: bomInclude,
+    select: bomSelect,
     orderBy,
   });
 };
@@ -114,7 +120,7 @@ export const getConfigById = async (id: number): Promise<BomConfigRow> => {
 
   const config = await prisma.pcConfig.findUnique({
     where: { id },
-    include: bomInclude,
+    select: bomSelect,
   });
 
   if (!config) {
@@ -132,7 +138,6 @@ export const mapListConfig = (config: BomConfigRow) => {
     id: config.id,
     name: config.name,
     code: `BOM-PC-${String(config.id).padStart(3, "0")}`,
-    version: "1.0",
     itemCount,
     groupCount,
     totalCostText: formatVnd(totalCost),
@@ -185,7 +190,6 @@ export const mapDetailConfig = (config: BomConfigRow) => {
     id: config.id,
     name: config.name,
     code: `BOM-PC-${String(config.id).padStart(3, "0")}`,
-    version: "1.0",
     subtitle: config.description || "Công thức lắp ráp từ danh mục linh kiện.",
     description: config.description || "",
     status: isActive ? "approved" : "draft",
@@ -215,6 +219,42 @@ const normalizeItems = (items: BomItemInput[]): BomItemInput[] => {
     .filter((item) => Number.isInteger(item.componentId) && item.componentId > 0);
 };
 
+type CompatComponent = {
+  category: { name: string };
+  attributes: { value: string; attributeDefinition: { name: string } }[];
+};
+
+const attrOf = (row: CompatComponent, name: string): string | null => {
+  const raw = row.attributes.find((item) => item.attributeDefinition.name === name)?.value;
+  return raw?.trim().toUpperCase() || null;
+};
+
+const ofCat = (rows: CompatComponent[], ...cats: string[]) =>
+  rows.filter((row) => cats.includes(row.category.name));
+
+const assertSlotCompatibility = (components: CompatComponent[]) => {
+  const cpu = ofCat(components, "CPU")[0];
+  const main = ofCat(components, "Mainboard")[0];
+  const rams = ofCat(components, ...RAM_CATS);
+
+  const cpuSocket = cpu ? attrOf(cpu, "socket") : null;
+  const mainSocket = main ? attrOf(main, "socket") : null;
+  const mainRamType = main ? attrOf(main, "ram_type") : null;
+  const ramTypes = rams.map((ram) => attrOf(ram, "ram_type"));
+
+  if (!cpuSocket || !mainSocket || !mainRamType || ramTypes.some((type) => !type)) {
+    throw new Error("MISSING_SPEC");
+  }
+
+  if (cpuSocket !== mainSocket) {
+    throw new Error("INCOMPATIBLE_SOCKET");
+  }
+
+  if (ramTypes.some((type) => type !== mainRamType)) {
+    throw new Error("INCOMPATIBLE_RAM");
+  }
+};
+
 const validateItems = async (
   items: BomItemInput[],
 ): Promise<{ items: BomItemInput[]; cost: number }> => {
@@ -235,7 +275,18 @@ const validateItems = async (
 
   const components = await prisma.component.findMany({
     where: { id: { in: ids } },
-    select: { id: true, status: true, unitPrice: true, category: { select: { name: true } } },
+    select: {
+      id: true,
+      status: true,
+      unitPrice: true,
+      category: { select: { name: true } },
+      attributes: {
+        select: {
+          value: true,
+          attributeDefinition: { select: { name: true } },
+        },
+      },
+    },
   });
 
   if (components.length !== ids.length) {
@@ -284,6 +335,8 @@ const validateItems = async (
   if (rowsOf("GPU") > 1 || qtyOf("GPU") > 1) {
     throw new Error("GPU_SINGLE_ONLY");
   }
+
+  assertSlotCompatibility(components);
 
   const cost = normalized.reduce((sum, item) => {
     const price = toNumber(byId.get(item.componentId)?.unitPrice ?? 0);
@@ -349,13 +402,12 @@ export const createConfig = async (dto: CreateBomDto): Promise<BomConfigRow> => 
       name,
       description: dto.description?.trim() || null,
       salePrice,
-      imageUrl: dto.imageUrl?.trim() || null,
       status: dto.status ?? "active",
       bomItems: {
         create: items,
       },
     },
-    include: bomInclude,
+    select: bomSelect,
   });
 };
 
@@ -391,11 +443,10 @@ export const updateConfig = async (id: number, dto: UpdateBomDto): Promise<BomCo
         ...(name ? { name } : {}),
         ...(dto.description !== undefined ? { description: dto.description.trim() || null } : {}),
         ...(dto.salePrice !== undefined ? { salePrice: dto.salePrice } : {}),
-        ...(dto.imageUrl !== undefined ? { imageUrl: dto.imageUrl.trim() || null } : {}),
         ...(dto.status ? { status: dto.status } : {}),
         ...(validated ? { bomItems: { create: validated.items } } : {}),
       },
-      include: bomInclude,
+      select: bomSelect,
     });
   });
 };

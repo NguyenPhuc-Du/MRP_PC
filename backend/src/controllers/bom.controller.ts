@@ -38,6 +38,12 @@ const errorMessage = (error: unknown): string => {
       return "Chỉ được 1 GPU trong BOM";
     case "SALE_BELOW_COST":
       return "Giá chốt không được nhỏ hơn giá vốn";
+    case "MISSING_SPEC":
+      return "CPU, mainboard hoặc RAM thiếu socket / loại RAM";
+    case "INCOMPATIBLE_SOCKET":
+      return "Socket CPU không khớp mainboard";
+    case "INCOMPATIBLE_RAM":
+      return "Loại RAM không khớp mainboard";
     default:
       return "Thao tác thất bại";
   }
@@ -69,7 +75,6 @@ const parseBomDto = (req: Request): CreateBomDto => {
     name: String(req.body.name || ""),
     description: String(req.body.description || ""),
     salePrice: Number(req.body.salePrice) || 0,
-    imageUrl: String(req.body.imageUrl || "").trim(),
     status: req.body.status === "inactive" ? "inactive" : "active",
     items: [...slotItems, ...parseNamedItems(req.body.extras)],
   };
@@ -79,14 +84,12 @@ const emptyConfig = {
   id: 0,
   name: "",
   code: "Tự tạo khi lưu",
-  version: "1.0",
   subtitle: "Thêm linh kiện và số lượng để lập công thức lắp ráp.",
   description: "",
   status: "approved",
   statusDb: "active",
   statusLabel: "Hoạt động",
   salePrice: "",
-  imageUrl: "",
   itemCount: 0,
   groupCount: 0,
   totalCostText: "0 đ",

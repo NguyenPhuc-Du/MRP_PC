@@ -10,7 +10,7 @@ block main
                     a(href=`${prefixAdmin}/bom`) BOM / Cấu hình PC
                     span /
                     strong= config.name
-                .bom-code-pill #{config.code} · VERSION #{config.version}
+                .bom-code-pill= config.code
                 h1.bom-title= config.name
                 p.bom-desc= config.subtitle
             .bom-head-actions
@@ -29,9 +29,6 @@ block main
                     input.bom-input(type="text" value=config.code readonly)
                 .bom-field-row
                     label.bom-field
-                        span Version
-                        input.bom-input(type="text" value=config.version)
-                    label.bom-field
                         span Trạng thái
                         .bom-status-select(class=`is-${config.status}`)
                             span.bom-status-dot
@@ -39,9 +36,6 @@ block main
                 label.bom-field
                     span Mô tả
                     textarea.bom-textarea= config.description
-                button.bom-history-btn(type="button")
-                    i.bi.bi-clock-history
-                    span Lịch sử phiên bản
 
             .bom-card
                 .bom-card-head
