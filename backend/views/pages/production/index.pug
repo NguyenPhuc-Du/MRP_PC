@@ -96,8 +96,15 @@ block main
                       i.bi.bi-three-dots
                     ul.dropdown-menu.dropdown-menu-end
                       li: a.dropdown-item(href=`${prefixAdmin}/production/${order.id}`) Xem chi tiết
-                      li: hr.dropdown-divider
-                      li: a.dropdown-item.text-danger(href="#") Huỷ yêu cầu
+                      if user.permissions && user.permissions.includes("production_delete") && order.canDelete
+                        li: hr.dropdown-divider
+                        li
+                          form(
+                            method="POST"
+                            action=`${prefixAdmin}/production/${order.id}/delete`
+                            onsubmit="return confirm('Huỷ yêu cầu này? Nhân viên sẽ không còn thấy lệnh trên app.')"
+                          )
+                            button.dropdown-item.text-danger(type="submit") Huỷ yêu cầu
 
           tr#emptyRow.d-none
             td.text-center.text-muted.py-4(colspan="6") Không có yêu cầu nào khớp với bộ lọc.

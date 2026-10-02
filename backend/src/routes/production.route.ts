@@ -15,6 +15,12 @@ router.post(
   productionController.createPost,
 );
 
+router.post(
+  "/:orderId/delete",
+  requirePermission("production_delete"),
+  productionController.remove,
+);
+
 router.get("/:orderId", requirePermission("production_view"), productionController.detail);
 
 export const productionRoutes = router;

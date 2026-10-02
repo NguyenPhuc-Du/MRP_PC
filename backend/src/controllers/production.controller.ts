@@ -21,8 +21,10 @@ const errorMessage = (error: unknown): string => {
       return "Số lượng phải lớn hơn 0";
     case "ORDER_NOT_FOUND":
       return "Không tìm thấy yêu cầu sản xuất";
+    case "ORDER_ALREADY_STARTED":
+      return "Không huỷ được: nhân viên đã nhận việc hoặc đã đổi trạng thái";
     default:
-      return "Tạo yêu cầu sản xuất thất bại";
+      return "Thao tác thất bại";
   }
 };
 
@@ -112,5 +114,17 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
     console.error(error);
     req.flash("error", errorMessage(error));
     res.redirect(`${BASE()}/create`);
+  }
+};
+
+export const remove = async (req: Request, res: Response): Promise<void> => {
+  try {
+    await productionService.softDeleteProductionOrder(Number(req.params.orderId));
+    req.flash("success", "Đã huỷ yêu cầu sản xuất");
+    res.redirect(BASE());
+  } catch (error) {
+    console.error(error);
+    req.flash("error", errorMessage(error));
+    res.redirect(BASE());
   }
 };

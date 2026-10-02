@@ -567,7 +567,7 @@ const sumByComponent = (
 export const getShortageComponents = async (): Promise<ShortageRow[]> => {
   const [orders, incomingRows, reservedRows] = await Promise.all([
     prisma.productionOrder.findMany({
-      where: { status: { in: ["pending", "in_progress"] } },
+      where: { status: { in: ["pending", "in_progress"] }, deletedAt: null },
       select: {
         quantityRequested: true,
         pcConfig: {
