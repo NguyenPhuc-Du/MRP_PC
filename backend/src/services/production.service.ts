@@ -1,9 +1,12 @@
 import { prisma } from "../config/db";
 
+const notDeleted = { deletedAt: null };
+
 export async function getMyOders(accountId: number) {
     return await prisma.productionOrder.findMany({
         where: {
             assignedTo: accountId,
+            ...notDeleted,
         },
 
         select: {
@@ -32,6 +35,7 @@ export async function getMyOrderById(accountId: number, orderId: number) {
         where: {
             id: orderId,
             assignedTo: accountId,
+            ...notDeleted,
         },
         select: {
             id: true,
@@ -55,6 +59,7 @@ export async function getOrderStockCheck(accountId: number, orderId: number) {
       where: {
         id: orderId,
         assignedTo: accountId,
+        ...notDeleted,
       },
       select: {
         id: true,
@@ -149,7 +154,7 @@ function makeExportCode(kind: "M" | "P"): string {
 
 async function getAssignedOrder(accountId: number, orderId: number) {
   return prisma.productionOrder.findFirst({
-    where: { id: orderId, assignedTo: accountId },
+    where: { id: orderId, assignedTo: accountId, ...notDeleted },
     include: {
       pcConfig: {
         include: {
@@ -499,12 +504,13 @@ const INDEX_STAGES = [
 ];
 
 export async function countAllOrders() {
-  return prisma.productionOrder.count();
+  return prisma.productionOrder.count({ where: notDeleted });
 }
 
 export async function getStageCounts() {
   const grouped = await prisma.productionOrder.groupBy({
     by: ["status"],
+    where: notDeleted,
     _count: { _all: true },
   });
 
@@ -522,6 +528,7 @@ export async function getStageCounts() {
 
 export async function getIndexData(skip: number, take: number) {
   const rows = await prisma.productionOrder.findMany({
+    where: notDeleted,
     skip,
     take,
     select: {
@@ -558,6 +565,7 @@ export async function getIndexData(skip: number, take: number) {
       stageVariant: stage.variant,
       stageLabel: stage.label,
       owner: ownerName,
+      canDelete: row.status === "pending",
     };
   });
 
@@ -575,8 +583,8 @@ export async function getOrderDetail(orderId: number) {
     return null;
   }
 
-  const order = await prisma.productionOrder.findUnique({
-    where: { id: orderId },
+  const order = await prisma.productionOrder.findFirst({
+    where: { id: orderId, ...notDeleted },
     select: {
       id: true,
       quantityRequested: true,
@@ -678,5 +686,30 @@ export async function getOrderDetail(orderId: number) {
     allEnough: items.length > 0 && items.every((item) => item.isEnough),
     materialExport: mapExport(materialExport),
     productExport: mapExport(productExport),
+    canDelete: order.status === "pending",
   };
+}
+
+export async function softDeleteProductionOrder(orderId: number) {
+  if (!Number.isInteger(orderId) || orderId <= 0) {
+    throw new Error("ORDER_NOT_FOUND");
+  }
+
+  const order = await prisma.productionOrder.findFirst({
+    where: { id: orderId, ...notDeleted },
+    select: { id: true, status: true },
+  });
+
+  if (!order) {
+    throw new Error("ORDER_NOT_FOUND");
+  }
+
+  if (order.status !== "pending") {
+    throw new Error("ORDER_ALREADY_STARTED");
+  }
+
+  await prisma.productionOrder.update({
+    where: { id: order.id },
+    data: { deletedAt: new Date() },
+  });
 }

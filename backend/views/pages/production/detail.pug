@@ -26,6 +26,15 @@ block main
         a.comp-btn.comp-btn-light(href=`${prefixAdmin}/production`)
           i.bi.bi-arrow-left
           | Quay lại
+        if user.permissions && user.permissions.includes("production_delete") && order.canDelete
+          form.d-inline(
+            method="POST"
+            action=`${prefixAdmin}/production/${order.id}/delete`
+            onsubmit="return confirm('Huỷ yêu cầu này? Nhân viên sẽ không còn thấy lệnh trên app.')"
+          )
+            button.comp-btn.comp-btn-light.text-danger(type="submit")
+              i.bi.bi-trash
+              | Huỷ yêu cầu
 
     .row.g-4.mb-4
       .col-lg-7

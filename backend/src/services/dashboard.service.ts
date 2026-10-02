@@ -167,9 +167,9 @@ export const getDashboardData = async () => {
     prisma.importOrder.count(),
     prisma.exportOrder.count({ where: { status: "pending" } }),
     prisma.exportOrder.count(),
-    prisma.productionOrder.count(),
-    prisma.productionOrder.count({ where: { status: "in_progress" } }),
-    prisma.productionOrder.count({ where: { status: "pending" } }),
+    prisma.productionOrder.count({ where: { deletedAt: null } }),
+    prisma.productionOrder.count({ where: { status: "in_progress", deletedAt: null } }),
+    prisma.productionOrder.count({ where: { status: "pending", deletedAt: null } }),
     prisma.pcConfig.count(),
     prisma.importOrderItem.findMany({
       where: { importOrder: { createdAt: { gte: chartFrom } } },

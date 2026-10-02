@@ -307,6 +307,7 @@ model ProductionOrder {
   createdBy         Int                   @map("created_by")
   createdAt         DateTime              @default(now()) @map("created_at")
   completedAt       DateTime?             @map("completed_at")
+  deletedAt         DateTime?             @map("deleted_at")
 
   pcConfig PcConfig @relation(fields: [pcConfigId], references: [id], onDelete: Restrict)
   assignee Account? @relation("ProductionOrderAssignedTo", fields: [assignedTo], references: [id], onDelete: Restrict)
