@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MrppcTheme(dynamicColor = false, darkTheme = false) {
+            MrppcTheme(dynamicColor = false) {
                 MrpNavGraph()
             }
         }

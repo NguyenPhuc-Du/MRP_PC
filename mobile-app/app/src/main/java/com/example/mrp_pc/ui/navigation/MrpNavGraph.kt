@@ -1,6 +1,8 @@
 package com.example.mrp_pc.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -9,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mrp_pc.ui.assemble.AssembleScreen
 import com.example.mrp_pc.ui.assemble.AssembleViewModel
+import com.example.mrp_pc.ui.components.navigateSingle
 import com.example.mrp_pc.ui.login.LoginScreen
 import com.example.mrp_pc.ui.login.LoginViewModel
 import com.example.mrp_pc.ui.orders.OrderDetailScreen
@@ -22,7 +25,7 @@ import com.example.mrp_pc.ui.stock.StockViewModel
 @Composable
 fun MrpNavGraph() {
     val loginViewModel: LoginViewModel = viewModel()
-    val state = loginViewModel.uiState
+    val state by loginViewModel.uiState.collectAsState()
 
     when {
         state.isCheckingSession -> {
@@ -38,16 +41,18 @@ fun MrpNavGraph() {
             ) {
                 composable(Routes.ORDERS) {
                     val orderViewModel: OrderViewModel = viewModel()
-                    val orderState = orderViewModel.uiState
+                    val orderState by orderViewModel.uiState.collectAsState()
 
                     OrderListScreen(
                         orders = orderState.orders,
+                        selectedFilter = orderState.selectedFilter,
+                        onFilterChange = orderViewModel::setFilter,
                         isLoading = orderState.isLoading,
                         errorMessage = orderState.errorMessage,
                         onRetry = orderViewModel::loadOrders,
                         onLogout = loginViewModel::logout,
                         onOrderClick = { id ->
-                            navController.navigate(Routes.orderDetail(id))
+                            navController.navigateSingle(Routes.orderDetail(id))
                         },
                     )
                 }
@@ -58,14 +63,14 @@ fun MrpNavGraph() {
                 ) { entry ->
                     val orderId = entry.arguments?.getInt("id") ?: return@composable
                     val detailViewModel: OrderDetailViewModel = viewModel()
-                    val detailState = detailViewModel.uiState
+                    val detailState by detailViewModel.uiState.collectAsState()
 
                     OrderDetailScreen(
                         state = detailState,
                         onBack = { navController.popBackStack() },
                         onRetry = detailViewModel::load,
-                        onCheckStock = { navController.navigate(Routes.stock(orderId)) },
-                        onAssemble = { navController.navigate(Routes.assemble(orderId)) },
+                        onCheckStock = { navController.navigateSingle(Routes.stock(orderId)) },
+                        onAssemble = { navController.navigateSingle(Routes.assemble(orderId)) },
                     )
                 }
 
@@ -75,13 +80,13 @@ fun MrpNavGraph() {
                 ) { entry ->
                     val orderId = entry.arguments?.getInt("id") ?: return@composable
                     val stockViewModel: StockViewModel = viewModel()
-                    val stockState = stockViewModel.uiState
+                    val stockState by stockViewModel.uiState.collectAsState()
 
                     StockScreen(
                         state = stockState,
                         onBack = { navController.popBackStack() },
                         onRetry = stockViewModel::load,
-                        onContinueAssemble = { navController.navigate(Routes.assemble(orderId)) },
+                        onContinueAssemble = { navController.navigateSingle(Routes.assemble(orderId)) },
                     )
                 }
 
@@ -90,7 +95,7 @@ fun MrpNavGraph() {
                     arguments = listOf(navArgument("id") { type = NavType.IntType }),
                 ) {
                     val assembleViewModel: AssembleViewModel = viewModel()
-                    val assembleState = assembleViewModel.uiState
+                    val assembleState by assembleViewModel.uiState.collectAsState()
 
                     AssembleScreen(
                         state = assembleState,
