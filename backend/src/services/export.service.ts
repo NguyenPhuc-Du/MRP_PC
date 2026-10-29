@@ -2,6 +2,10 @@ import { prisma } from "../config/database";
 import { Prisma } from "../generated/prisma";
 import { ExportOrderFilter } from "../dtos/export-order.dto";
 import { formatDate } from "../utils/date.util";
+import {
+  decrementComponentStock,
+  decrementProductStock,
+} from "./stock.service";
 
 const STATUS_LABEL = {
   pending: "Chờ duyệt",
@@ -29,7 +33,13 @@ const orderInclude = {
           inventory: { select: { quantityOnHand: true } },
         },
       },
-      pcConfig: { select: { id: true, name: true } },
+      pcConfig: {
+        select: {
+          id: true,
+          name: true,
+          productInventory: { select: { quantityOnHand: true } },
+        },
+      },
     },
   },
 } satisfies Prisma.ExportOrderInclude;
@@ -47,12 +57,50 @@ const productionLabel = (note: string | null) => {
   return `Lệnh #${match[1]}`;
 };
 
+// const mapLines = (order: OrderRow) => {
+//   const issued = order.status === "approved" && order.type === "material";
+//   return order.items.map((item) => {
+//     if (item.component) {
+//       const onHand = item.component.inventory?.quantityOnHand ?? 0;
+//       const enough = issued || onHand >= item.quantity;
+//       return {
+//         kind: "component" as const,
+//         componentId: item.component.id,
+//         supplierId: item.component.supplierId,
+//         supplierName: item.component.supplier?.name ?? "Chưa gán NCC",
+//         name: item.component.name,
+//         unit: item.component.unit || "cái",
+//         quantity: item.quantity,
+//         onHand,
+//         after: issued ? onHand : onHand - item.quantity,
+//         enough,
+//       };
+//     }
+//     return {
+//       kind: "product" as const,
+//       componentId: null,
+//       supplierId: null,
+//       supplierName: "",
+//       name: item.pcConfig?.name || "Thành phẩm",
+//       unit: "máy",
+//       quantity: item.quantity,
+//       onHand: null as number | null,
+//       after: null as number | null,
+//       enough: true,
+//     };
+//   });
+// };
+
 const mapLines = (order: OrderRow) => {
-  const issued = order.status === "approved" && order.type === "material";
+  const materialIssued =
+    order.status === "approved" && order.type === "material";
+  const productIssued =
+    order.status === "approved" && order.type === "finished_product";
+
   return order.items.map((item) => {
     if (item.component) {
       const onHand = item.component.inventory?.quantityOnHand ?? 0;
-      const enough = issued || onHand >= item.quantity;
+      const enough = materialIssued || onHand >= item.quantity;
       return {
         kind: "component" as const,
         componentId: item.component.id,
@@ -62,10 +110,13 @@ const mapLines = (order: OrderRow) => {
         unit: item.component.unit || "cái",
         quantity: item.quantity,
         onHand,
-        after: issued ? onHand : onHand - item.quantity,
+        after: materialIssued ? onHand : onHand - item.quantity,
         enough,
       };
     }
+
+    const onHand = item.pcConfig?.productInventory?.quantityOnHand ?? 0;
+    const enough = productIssued || onHand >= item.quantity;
     return {
       kind: "product" as const,
       componentId: null,
@@ -74,9 +125,9 @@ const mapLines = (order: OrderRow) => {
       name: item.pcConfig?.name || "Thành phẩm",
       unit: "máy",
       quantity: item.quantity,
-      onHand: null as number | null,
-      after: null as number | null,
-      enough: true,
+      onHand,
+      after: productIssued ? onHand : onHand - item.quantity,
+      enough,
     };
   });
 };
@@ -132,34 +183,99 @@ const whereFromFilter = (
   return where;
 };
 
+// export const getStats = async () => {
+//   const [pending, approved, rejected, pendingMaterial] = await Promise.all([
+//     prisma.exportOrder.count({ where: { status: "pending" } }),
+//     prisma.exportOrder.count({ where: { status: "approved" } }),
+//     prisma.exportOrder.count({ where: { status: "rejected" } }),
+//     prisma.exportOrder.findMany({
+//       where: { status: "pending", type: "material" },
+//       select: {
+//         items: {
+//           select: {
+//             quantity: true,
+//             component: {
+//               select: { inventory: { select: { quantityOnHand: true } } },
+//             },
+//           },
+//         },
+//       },
+//     }),
+//   ]);
+
+//   const shortPending = pendingMaterial.filter((order) =>
+//     order.items.some(
+//       (item) =>
+//         item.quantity > (item.component?.inventory?.quantityOnHand ?? 0),
+//     ),
+//   ).length;
+
+//   return { pending, approved, rejected, shortPending };
+// };
+
 export const getStats = async () => {
-  const [pending, approved, rejected, pendingMaterial] = await Promise.all([
-    prisma.exportOrder.count({ where: { status: "pending" } }),
-    prisma.exportOrder.count({ where: { status: "approved" } }),
-    prisma.exportOrder.count({ where: { status: "rejected" } }),
-    prisma.exportOrder.findMany({
-      where: { status: "pending", type: "material" },
-      select: {
-        items: {
-          select: {
-            quantity: true,
-            component: {
-              select: { inventory: { select: { quantityOnHand: true } } },
+  const [pending, approved, rejected, pendingMaterial, pendingProduct] =
+    await Promise.all([
+      prisma.exportOrder.count({ where: { status: "pending" } }),
+      prisma.exportOrder.count({ where: { status: "approved" } }),
+      prisma.exportOrder.count({ where: { status: "rejected" } }),
+      prisma.exportOrder.findMany({
+        where: { status: "pending", type: "material" },
+        select: {
+          items: {
+            select: {
+              quantity: true,
+              component: {
+                select: { inventory: { select: { quantityOnHand: true } } },
+              },
             },
           },
         },
-      },
-    }),
-  ]);
+      }),
+      prisma.exportOrder.findMany({
+        where: { status: "pending", type: "finished_product" },
+        select: {
+          items: {
+            select: {
+              quantity: true,
+              pcConfig: {
+                select: {
+                  productInventory: { select: { quantityOnHand: true } },
+                },
+              },
+            },
+          },
+        },
+      }),
+    ]);
 
-  const shortPending = pendingMaterial.filter((order) =>
-    order.items.some(
-      (item) =>
-        item.quantity > (item.component?.inventory?.quantityOnHand ?? 0),
+  const isShort = (items: Array<{ quantity: number; onHand: number }>) =>
+    items.some((item) => item.quantity > item.onHand);
+
+  const shortMaterial = pendingMaterial.filter((order) =>
+    isShort(
+      order.items.map((item) => ({
+        quantity: item.quantity,
+        onHand: item.component?.inventory?.quantityOnHand ?? 0,
+      })),
     ),
   ).length;
 
-  return { pending, approved, rejected, shortPending };
+  const shortProduct = pendingProduct.filter((order) =>
+    isShort(
+      order.items.map((item) => ({
+        quantity: item.quantity,
+        onHand: item.pcConfig?.productInventory?.quantityOnHand ?? 0,
+      })),
+    ),
+  ).length;
+
+  return {
+    pending,
+    approved,
+    rejected,
+    shortPending: shortMaterial + shortProduct,
+  };
 };
 
 export const listOrders = async (filter: ExportOrderFilter) => {
@@ -219,28 +335,86 @@ export const getDetail = async (id: number) => {
   return { ...mapped, shortGroups: [...groups.values()] };
 };
 
+// export const approve = async (id: number, accountId: number) => {
+//   await prisma.$transaction(async (tx) => {
+//     const order = await tx.exportOrder.findUnique({
+//       where: { id },
+//       include: {
+//         items: { include: { component: { include: { inventory: true } } } },
+//       },
+//     });
+//     if (!order) throw new Error("NOT_FOUND");
+//     if (order.status !== "pending") throw new Error("NOT_PENDING");
+
+//     if (order.type === "material") {
+//       for (const item of order.items) {
+//         if (!item.componentId) throw new Error("INVALID_LINE");
+//         const onHand = item.component?.inventory?.quantityOnHand ?? 0;
+//         if (onHand < item.quantity) throw new Error("STOCK_NOT_ENOUGH");
+//       }
+//       for (const item of order.items) {
+//         await tx.inventory.update({
+//           where: { componentId: item.componentId! },
+//           data: { quantityOnHand: { decrement: item.quantity } },
+//         });
+//       }
+//     }
+
+//     const updated = await tx.exportOrder.updateMany({
+//       where: { id, status: "pending" },
+//       data: {
+//         status: "approved",
+//         approvedBy: accountId,
+//         approvedAt: new Date(),
+//       },
+//     });
+//     if (updated.count !== 1) throw new Error("NOT_PENDING");
+
+//     await tx.auditLog.create({
+//       data: {
+//         accountId,
+//         action: "approve_export_order",
+//         targetTable: "export_orders",
+//         targetId: id,
+//         detail:
+//           order.type === "material"
+//             ? "Duyệt phiếu xuất linh kiện và trừ tồn"
+//             : "Duyệt phiếu xuất thành phẩm",
+//       },
+//     });
+//   });
+// };
+
 export const approve = async (id: number, accountId: number) => {
   await prisma.$transaction(async (tx) => {
     const order = await tx.exportOrder.findUnique({
       where: { id },
-      include: {
-        items: { include: { component: { include: { inventory: true } } } },
+      select: {
+        id: true,
+        type: true,
+        status: true,
+        items: {
+          select: {
+            componentId: true,
+            pcConfigId: true,
+            quantity: true,
+          },
+        },
       },
     });
+
     if (!order) throw new Error("NOT_FOUND");
     if (order.status !== "pending") throw new Error("NOT_PENDING");
 
     if (order.type === "material") {
       for (const item of order.items) {
         if (!item.componentId) throw new Error("INVALID_LINE");
-        const onHand = item.component?.inventory?.quantityOnHand ?? 0;
-        if (onHand < item.quantity) throw new Error("STOCK_NOT_ENOUGH");
+        await decrementComponentStock(tx, item.componentId, item.quantity);
       }
+    } else {
       for (const item of order.items) {
-        await tx.inventory.update({
-          where: { componentId: item.componentId! },
-          data: { quantityOnHand: { decrement: item.quantity } },
-        });
+        if (!item.pcConfigId) throw new Error("INVALID_LINE");
+        await decrementProductStock(tx, item.pcConfigId, item.quantity);
       }
     }
 
@@ -263,7 +437,7 @@ export const approve = async (id: number, accountId: number) => {
         detail:
           order.type === "material"
             ? "Duyệt phiếu xuất linh kiện và trừ tồn"
-            : "Duyệt phiếu xuất thành phẩm",
+            : "Duyệt phiếu xuất thành phẩm và trừ tồn",
       },
     });
   });

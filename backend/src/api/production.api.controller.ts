@@ -115,9 +115,12 @@ const ASSEMBLE_ERRORS: Record<string, { status: number; message: string }> = {
     MATERIAL_EXPORT_EXISTS: { status: 400, message: "Đã có phiếu xuất linh kiện đang chờ hoặc đã duyệt" },
     PRODUCT_EXPORT_EXISTS: { status: 400, message: "Đã có phiếu xuất thành phẩm đang chờ hoặc đã duyệt" },
     NO_BOM: { status: 400, message: "Cấu hình PC chưa có BOM" },
-    STOCK_NOT_ENOUGH: { status: 400, message: "Không đủ linh kiện trong kho" },
+    STOCK_NOT_ENOUGH: { status: 400, message: "Không đủ linh kiện để lắp" },
+    STOCK_ALREADY_ENOUGH: { status: 400, message: "Kho đã đủ linh kiện. Hãy xác nhận lắp, không lập phiếu xuất" },
+    MATERIAL_EXPORT_PENDING: { status: 400, message: "Phiếu xuất linh kiện đang chờ duyệt" },
     ORDER_NOT_DONE: { status: 400, message: "Cần xác nhận lắp xong trước khi xuất thành phẩm" },
 };
+
 
 function getAccountAndOrderId(req: Request): { accountId?: number; orderId: number } {
     return {
