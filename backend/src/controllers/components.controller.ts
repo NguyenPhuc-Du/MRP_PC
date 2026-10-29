@@ -1,11 +1,35 @@
 import { Request, Response } from "express";
-import * as componentService from "../services/components.service";
-import { paginationHelper } from '../utils/pagination.utils';
-import { formsearchHelper } from '../utils/formsearch.utils';
-import { systemConfig } from "../config/system";
+import { matchedData } from "express-validator";
+import { randomUUID } from "crypto";
 import path from "path";
+import * as componentService from "../services/components.service";
+import { paginationHelper } from "../utils/pagination.utils";
+import { formsearchHelper } from "../utils/formsearch.utils";
+import { systemConfig } from "../config/system";
+import { redisClient } from "../config/redis";
 import { uploadPublicImage, componentImageKey, R2_COMPONENT_FOLDERS } from "../config/r2";
-type StockStatusKey = "ok" | "low" | "out"; //định dạng type mặc định chỉ được đưa 3 gt này vô
+import {
+  COMPONENT_UNITS,
+  DEFAULT_COMPONENT_UNIT,
+} from "../constants/component-units";
+
+type StockStatusKey = "ok" | "low" | "out";
+type ListStatus = "all" | "active" | "discontinued" | "out_of_stock";
+
+const LIST_STATUSES = new Set<ListStatus>([
+  "all",
+  "active",
+  "discontinued",
+  "out_of_stock",
+]);
+const listUrl = () => `${systemConfig.prefixAdmin}/components`;
+
+const parseListStatus = (value: unknown): ListStatus => {
+  const status = String(value ?? "all");
+  return LIST_STATUSES.has(status as ListStatus)
+    ? (status as ListStatus)
+    : "all";
+};
 
 const optionalFkId = (value: unknown): number | null => {
   if (value === undefined || value === null || value === "") {
@@ -40,9 +64,9 @@ const stockStatusOf = (
     return { key: "low", label: "Sắp hết" };
   }
   return { key: "ok", label: "Còn hàng" };
-};//định dạng return của hàm stockStatusOf là 1 object có 2 thuộc tính key và label
+};
 
-const formatVnd = (value: unknown): string => { //khôg biết giá trị của value là gì nên dùng unknown nhưng đầu ra bắt buộc là string
+const formatVnd = (value: unknown): string => {
   const amount = Number(value);
   if (Number.isNaN(amount)) {
     return "—";
@@ -53,8 +77,10 @@ const formatVnd = (value: unknown): string => { //khôg biết giá trị của 
 export const index = async (req: Request, res: Response): Promise<void> => {
   try {
     const objectSearch = formsearchHelper(req.query);
+    const status = parseListStatus(req.query.status);
     const countComponents = await componentService.countAllComponents(
       objectSearch.keyword,
+      status,
     );
 
     const objectPagination = {
@@ -68,7 +94,6 @@ export const index = async (req: Request, res: Response): Promise<void> => {
       objectPagination,
       countComponents,
     );
-    const status = req.query.status || "all";
     const rows = await componentService.getAllComponents(
       pagination.skipPage,
       pagination.limit,
@@ -102,11 +127,11 @@ export const index = async (req: Request, res: Response): Promise<void> => {
 
     res.render("pages/components/index", {
       pageTitle: "Danh sách linh kiện",
-      components:components,
+      components,
       totalComponents: countComponents,
-      objectPagination:pagination,
+      objectPagination: pagination,
       keyword: objectSearch.keyword,
-      status:status
+      status,
     });
   } catch (error) {
     console.error(error);
@@ -114,30 +139,43 @@ export const index = async (req: Request, res: Response): Promise<void> => {
       pageTitle: "Danh sách linh kiện",
       components: [],
       totalComponents: 0,
-      objectPagination: { currentPage: 1, countPage: 1  ,    limit:10,
-        skipPage:0, },
-        keyword: "",
+      objectPagination: {
+        currentPage: 1,
+        countPage: 1,
+        limit: 10,
+        skipPage: 0,
+      },
+      keyword: "",
+      status: "all",
     });
   }
 };
-export const deleteComponent = async (req: Request, res: Response): Promise<void> => {
-try{
-if(req.params.id){
-  const component= await componentService.deleteComponent(Number(req.params.id));
-  req.flash("success", "Xoá linh kiện thành công");
-  res.redirect(req.get("referer") );
-}
-}
-catch(error){
-  req.flash("error", "Xoá linh kiện thất bại");
-  res.send("NO");
-}
+
+export const deleteComponent = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    if (req.params.id) {
+      await componentService.deleteComponent(Number(req.params.id));
+      req.flash("success", "Xoá linh kiện thành công");
+    }
+    res.redirect(listUrl());
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Xoá linh kiện thất bại");
+    res.redirect(listUrl());
+  }
 };
-export const editComponent = async (req: Request, res: Response): Promise<void> => {
+
+export const editComponent = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) {
-      res.redirect(`${systemConfig.prefixAdmin}/components`);
+      res.redirect(listUrl());
       return;
     }
 
@@ -147,7 +185,7 @@ export const editComponent = async (req: Request, res: Response): Promise<void> 
     ]);
 
     if (!row || row.deleted) {
-      res.redirect(`${systemConfig.prefixAdmin}/components`);
+      res.redirect(listUrl());
       return;
     }
 
@@ -184,19 +222,23 @@ export const editComponent = async (req: Request, res: Response): Promise<void> 
       categories: lookups.categories,
       brands: lookups.brands,
       suppliers: lookups.suppliers,
+      units: [...COMPONENT_UNITS],
     });
   } catch (error) {
     console.error(error);
-    res.redirect(`${systemConfig.prefixAdmin}/components`);
+    res.redirect(listUrl());
   }
 };
-export const editComponentPatch = async (req: Request, res: Response): Promise<void> => {
-  const id = Number(req.params.id);
-  const listUrl = `${systemConfig.prefixAdmin}/components`;
 
+export const editComponentPatch = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const id = Number(req.params.id);
+  const redirectList = listUrl();
 
   if (!Number.isInteger(id) || id <= 0) {
-    res.redirect(listUrl);
+    res.redirect(redirectList);
     return;
   }
 
@@ -204,12 +246,13 @@ export const editComponentPatch = async (req: Request, res: Response): Promise<v
     const existing = await componentService.getComponentById(id);
     if (!existing || existing.deleted) {
       req.flash("error", "Không tìm thấy linh kiện");
-      res.redirect(listUrl);
+      res.redirect(redirectList);
       return;
     }
 
+    const data = matchedData(req, { locations: ["body"] });
     const lookups = await componentService.getComponentEditLookups();
-    const categoryId = Number(req.body.categoryId);
+    const categoryId = Number(data.categoryId);
     const category = lookups.categories.find((item) => item.id === categoryId);
 
     let imageUrl = "";
@@ -222,26 +265,30 @@ export const editComponentPatch = async (req: Request, res: Response): Promise<v
     }
 
     await componentService.updateComponent(id, {
-      name: req.body.name,
-      unit: req.body.unit,
-      unitPrice: req.body.unitPrice,
-      minStockThreshold: Number(req.body.minStockThreshold),
-      status: req.body.status,
+      name: data.name,
+      unit: data.unit || DEFAULT_COMPONENT_UNIT,
+      unitPrice: data.unitPrice,
+      minStockThreshold: data.minStockThreshold ?? existing.minStockThreshold,
+      status: data.status || existing.status,
       categoryId,
-      brandId: optionalFkId(req.body.brandId),
-      supplierId: optionalFkId(req.body.supplierId),
+      brandId: optionalFkId(data.brandId),
+      supplierId: optionalFkId(data.supplierId),
       ...(imageUrl ? { imageUrl } : {}),
     });
 
     req.flash("success", "Cập nhật linh kiện thành công");
-    res.redirect(listUrl);
+    res.redirect(redirectList);
   } catch (error) {
     console.error(error);
     req.flash("error", "Cập nhật linh kiện thất bại");
-    res.redirect(listUrl);
+    res.redirect(redirectList);
   }
 };
-export const createComponent = async (req: Request, res: Response): Promise<void> => {
+
+export const createComponent = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const lookups = await componentService.getComponentEditLookups();
     res.render("pages/components/create", {
@@ -249,32 +296,51 @@ export const createComponent = async (req: Request, res: Response): Promise<void
       categories: lookups.categories,
       brands: lookups.brands,
       suppliers: lookups.suppliers,
+      units: [...COMPONENT_UNITS],
+      defaultUnit: DEFAULT_COMPONENT_UNIT,
+      idempotencyKey: randomUUID(),
     });
   } catch (error) {
     console.error(error);
     req.flash("error", "Không tải được form thêm linh kiện");
-    res.redirect(`${systemConfig.prefixAdmin}/components`);
+    res.redirect(listUrl());
   }
 };
 
-export const createComponentPost = async (req: Request, res: Response): Promise<void> => {
-  const listUrl = `${systemConfig.prefixAdmin}/components`;
-  const createUrl = `${listUrl}/create`;
+export const createComponentPost = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const redirectList = listUrl();
+  const createUrl = `${redirectList}/create`;
+  const data = matchedData(req, { locations: ["body"] });
+  const idempotencyKey = String(data.idempotencyKey || "").trim();
+  const redisKey = `mrp:idem:component:create:${idempotencyKey}`;
 
   try {
+    const locked = await redisClient.set(redisKey, "1", {
+      NX: true,
+      EX: 60 * 10,
+    });
+    if (locked === null) {
+      req.flash("error", "Yêu cầu đã được xử lý hoặc đang xử lý");
+      res.redirect(redirectList);
+      return;
+    }
+
     const lookups = await componentService.getComponentEditLookups();
-    const categoryId = Number(req.body.categoryId);
+    const categoryId = Number(data.categoryId);
     const category = lookups.categories.find((item) => item.id === categoryId);
 
     const created = await componentService.createComponent({
-      name: req.body.name,
-      unit: req.body.unit || null,
-      unitPrice: req.body.unitPrice,
-      minStockThreshold: Number(req.body.minStockThreshold) || 5,
-      status: req.body.status || "active",
+      name: data.name,
+      unit: data.unit || DEFAULT_COMPONENT_UNIT,
+      unitPrice: data.unitPrice,
+      minStockThreshold: data.minStockThreshold ?? 5,
+      status: data.status || "active",
       categoryId,
-      brandId: optionalFkId(req.body.brandId),
-      supplierId: optionalFkId(req.body.supplierId),
+      brandId: optionalFkId(data.brandId),
+      supplierId: optionalFkId(data.supplierId),
     });
 
     const file = req.file;
@@ -287,9 +353,14 @@ export const createComponentPost = async (req: Request, res: Response): Promise<
     }
 
     req.flash("success", "Thêm linh kiện thành công");
-    res.redirect(listUrl);
+    res.redirect(redirectList);
   } catch (error) {
     console.error(error);
+    try {
+      await redisClient.del(redisKey);
+    } catch (redisError) {
+      console.error(redisError);
+    }
     req.flash("error", "Thêm linh kiện thất bại");
     res.redirect(createUrl);
   }

@@ -23,6 +23,7 @@ block main
       method="POST"
       enctype="multipart/form-data"
     )
+      input(type="hidden" name="idempotencyKey" value=idempotencyKey)
       .row.g-4
         .col-lg-8
           .form-card
@@ -67,13 +68,12 @@ block main
                     option(value=supplier.id)= supplier.name
 
               .col-md-4
-                label.form-label-custom(for="unit") Đơn vị tính
-                input#unit.form-control.input-custom(
-                  type="text"
-                  name="unit"
-                  maxlength="20"
-                  placeholder="vd: cái, thanh"
-                )
+                label.form-label-custom(for="unit")
+                  | Đơn vị tính
+                  span.required *
+                select#unit.form-select.input-custom(name="unit" required)
+                  each u in (units || ['cái', 'thanh', 'bộ', 'ổ', 'dây', 'mét', 'cuộn', 'hộp', 'cặp', 'tấm'])
+                    option(value=u selected=(u === (defaultUnit || 'cái')))= u
               .col-md-4
                 label.form-label-custom(for="unitPrice")
                   | Giá nhập (đ)

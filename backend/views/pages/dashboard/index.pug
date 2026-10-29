@@ -25,57 +25,41 @@ block main
         .dash-kpi
           .dash-kpi-label
             span Tổng linh kiện
-            if dashboard.metrics.components.mock
-              span.dash-mock Mẫu
           .dash-kpi-value= dashboard.metrics.components.value
           .dash-kpi-hint.is-up= dashboard.metrics.components.hint
         .dash-kpi
           .dash-kpi-label
             span Giá trị tồn kho
-            if dashboard.metrics.stockValue.mock
-              span.dash-mock Mẫu
           .dash-kpi-value= dashboard.metrics.stockValue.value
           .dash-kpi-hint.is-up= dashboard.metrics.stockValue.hint
         .dash-kpi
           .dash-kpi-label
             span Phiếu nhập hôm nay
-            if dashboard.metrics.importToday.mock
-              span.dash-mock Mẫu
           .dash-kpi-value= dashboard.metrics.importToday.value
           .dash-kpi-hint= dashboard.metrics.importToday.hint
         .dash-kpi
           .dash-kpi-label
             span Xuất chờ duyệt
-            if dashboard.metrics.exportPending.mock
-              span.dash-mock Mẫu
           .dash-kpi-value= dashboard.metrics.exportPending.value
           .dash-kpi-hint.is-warn= dashboard.metrics.exportPending.hint
         .dash-kpi
           .dash-kpi-label
             span Yêu cầu sản xuất
-            if dashboard.metrics.production.mock
-              span.dash-mock Mẫu
           .dash-kpi-value= dashboard.metrics.production.value
           .dash-kpi-hint.is-up= dashboard.metrics.production.hint
         .dash-kpi
           .dash-kpi-label
             span PC đang lắp ráp
-            if dashboard.metrics.assembling.mock
-              span.dash-mock Mẫu
           .dash-kpi-value= dashboard.metrics.assembling.value
           .dash-kpi-hint= dashboard.metrics.assembling.hint
         .dash-kpi
           .dash-kpi-label
             span Thành phẩm
-            if dashboard.metrics.finished.mock
-              span.dash-mock Mẫu
           .dash-kpi-value= dashboard.metrics.finished.value
           .dash-kpi-hint.is-up= dashboard.metrics.finished.hint
         .dash-kpi
           .dash-kpi-label
             span Sắp hết
-            if dashboard.metrics.lowStock.mock
-              span.dash-mock Mẫu
           .dash-kpi-value= dashboard.metrics.lowStock.value
           .dash-kpi-hint.is-warn= dashboard.metrics.lowStock.hint
 
@@ -84,9 +68,7 @@ block main
           .dash-card-head
             div
               .dash-card-title Nhập / xuất linh kiện
-              .dash-card-sub 6 ngày gần nhất
-                if dashboard.chart.mock
-                  span.dash-mock Mẫu
+              .dash-card-sub 6 ngày gần nhất, số lượng trên phiếu
             .dash-legend
               span.dash-dot.is-in Nhập
               span.dash-dot.is-out Xuất
@@ -97,9 +79,7 @@ block main
         .dash-card
           .dash-card-head
             .dash-card-title Cảnh báo tồn kho
-            if dashboard.alertsMock
-              span.dash-mock Mẫu
-            else
+            if dashboard.alerts.length
               span.dash-pill Sắp hết · #{dashboard.alerts.length}
           if dashboard.alerts.length
             each alert in dashboard.alerts
@@ -117,8 +97,6 @@ block main
             div
               .dash-card-title Top linh kiện sử dụng nhiều
               .dash-card-sub= dashboard.topCaption
-                if dashboard.topMock
-                  span.dash-mock Mẫu
           .table-responsive
             table.dash-table
               thead
@@ -129,22 +107,25 @@ block main
                   th Tồn kho
                   th Trạng thái
               tbody
-                each item in dashboard.topItems
+                if dashboard.topItems.length
+                  each item in dashboard.topItems
+                    tr
+                      td.dash-name= item.name
+                      td= item.group
+                      td= item.used
+                      td= item.stock
+                      td
+                        span.dash-stock(class=`is-${item.stockKey}`)
+                          span.dash-stock-dot
+                          | #{item.stockLabel}
+                else
                   tr
-                    td.dash-name= item.name
-                    td= item.group
-                    td= item.used
-                    td= item.stock
-                    td
-                      span.dash-stock(class=`is-${item.stockKey}`)
-                        span.dash-stock-dot
-                        | #{item.stockLabel}
+                    td(colspan="5")
+                      .dash-empty-sm Chưa có linh kiện được xuất hoặc lắp.
 
         .dash-card
           .dash-card-head
             .dash-card-title Hoạt động gần đây
-            if dashboard.activityMock
-              span.dash-mock Mẫu
           if dashboard.activity.length
             each item in dashboard.activity
               .dash-act(class=`is-${item.tone}`)
