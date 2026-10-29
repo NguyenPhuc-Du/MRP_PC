@@ -27,6 +27,15 @@ export type DashboardActivity = {
   at: Date;
 };
 
+export type DashboardFinishedSummary = {
+  onHand: number;
+  produced: number;
+  shipped: number;
+  producedThisMonth: number;
+  shippedThisMonth: number;
+  activeConfigs: number;
+};
+
 const weekdayLabel = (date: Date): string => {
   return date.toLocaleDateString("vi-VN", { weekday: "long" }).toUpperCase();
 };
@@ -99,12 +108,6 @@ const exportStatusLabel = (status: string): string => {
   return "Chờ duyệt";
 };
 
-const productionStatusLabel = (status: string): string => {
-  if (status === "done") return "Hoàn thành";
-  if (status === "in_progress") return "Đang lắp";
-  return "Chờ lắp";
-};
-
 export const getDashboardData = async () => {
   const now = new Date();
   const today = startOfDay(now);
@@ -123,12 +126,10 @@ export const getDashboardData = async () => {
     importTodayDone,
     exportPending,
     exportOverdue,
-    productionPending,
-    productionCreatedThisMonth,
-    assemblingAgg,
     finishedAgg,
     finishedThisMonthAgg,
     finishedShippedAgg,
+    finishedShippedThisMonthAgg,
     pcConfigCount,
     importItemsInRange,
     exportItemsInRange,
@@ -137,7 +138,6 @@ export const getDashboardData = async () => {
     productionForUsage,
     recentImports,
     recentExports,
-    recentProduction,
   ] = await Promise.all([
     prisma.component.count({ where: { deleted: false } }),
     prisma.component.count({
@@ -163,13 +163,6 @@ export const getDashboardData = async () => {
     prisma.exportOrder.count({
       where: { status: "pending", createdAt: { lt: overdueBefore } },
     }),
-    prisma.productionOrder.count({ where: { status: "pending" } }),
-    prisma.productionOrder.count({ where: { createdAt: { gte: monthStart } } }),
-    prisma.productionOrder.aggregate({
-      where: { status: "in_progress" },
-      _sum: { quantityRequested: true },
-      _count: true,
-    }),
     prisma.productionOrder.aggregate({
       where: { status: "done" },
       _sum: { quantityRequested: true },
@@ -182,6 +175,17 @@ export const getDashboardData = async () => {
       where: {
         pcConfigId: { not: null },
         exportOrder: { type: "finished_product", status: "approved" },
+      },
+      _sum: { quantity: true },
+    }),
+    prisma.exportOrderItem.aggregate({
+      where: {
+        pcConfigId: { not: null },
+        exportOrder: {
+          type: "finished_product",
+          status: "approved",
+          createdAt: { gte: monthStart },
+        },
       },
       _sum: { quantity: true },
     }),
@@ -260,18 +264,6 @@ export const getDashboardData = async () => {
         requester: { select: { fullName: true, username: true } },
       },
     }),
-    prisma.productionOrder.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        status: true,
-        quantityRequested: true,
-        createdAt: true,
-        completedAt: true,
-        pcConfig: { select: { name: true } },
-      },
-    }),
   ]);
 
   const stockRows = inventoryRows.map((row) => ({
@@ -321,7 +313,10 @@ export const getDashboardData = async () => {
   for (const order of productionForUsage) {
     for (const bom of order.pcConfig.bomItems) {
       const used = bom.quantity * order.quantityRequested;
-      usageFromProduction.set(bom.componentId, (usageFromProduction.get(bom.componentId) ?? 0) + used);
+      usageFromProduction.set(
+        bom.componentId,
+        (usageFromProduction.get(bom.componentId) ?? 0) + used,
+      );
     }
   }
 
@@ -376,7 +371,9 @@ export const getDashboardData = async () => {
     qty: row.quantityOnHand,
   }));
 
-  const actorName = (person: { fullName: string | null; username: string } | null | undefined) => {
+  const actorName = (
+    person: { fullName: string | null; username: string } | null | undefined,
+  ) => {
     return person?.fullName || person?.username || "Hệ thống";
   };
 
@@ -390,14 +387,13 @@ export const getDashboardData = async () => {
     ...recentExports.map((row) => ({
       title: row.type === "finished_product" ? "Xuất thành phẩm" : "Xuất linh kiện",
       detail: `${row.code} · ${exportStatusLabel(row.status)} · ${actorName(row.requester)} · ${shortDate(row.createdAt)}`,
-      tone: row.status === "pending" ? ("warn" as const) : row.status === "approved" ? ("ok" as const) : ("info" as const),
+      tone:
+        row.status === "pending"
+          ? ("warn" as const)
+          : row.status === "approved"
+            ? ("ok" as const)
+            : ("info" as const),
       at: row.createdAt,
-    })),
-    ...recentProduction.map((row) => ({
-      title: "Sản xuất",
-      detail: `Lệnh #${row.id} · ${row.pcConfig.name} · ${formatInt(row.quantityRequested)} máy · ${productionStatusLabel(row.status)}`,
-      tone: row.status === "in_progress" ? ("work" as const) : row.status === "done" ? ("ok" as const) : ("info" as const),
-      at: row.completedAt ?? row.createdAt,
     })),
   ]
     .sort((a, b) => b.at.getTime() - a.at.getTime())
@@ -418,13 +414,33 @@ export const getDashboardData = async () => {
   const shipped = finishedShippedAgg._sum.quantity ?? 0;
   const finishedOnHand = Math.max(0, produced - shipped);
   const finishedThisMonth = finishedThisMonthAgg._sum.quantityRequested ?? 0;
-  const assemblingQty = assemblingAgg._sum.quantityRequested ?? 0;
-  const assemblingOrders = assemblingAgg._count;
+  const shippedThisMonth = finishedShippedThisMonthAgg._sum.quantity ?? 0;
+
+  const finished: DashboardFinishedSummary = {
+    onHand: finishedOnHand,
+    produced,
+    shipped,
+    producedThisMonth: finishedThisMonth,
+    shippedThisMonth,
+    activeConfigs: pcConfigCount,
+  };
+
+  let finishedHint = `${formatInt(pcConfigCount)} cấu hình đang bán`;
+  if (produced > 0 || shipped > 0) {
+    finishedHint = `Còn kho ${formatInt(finishedOnHand)} · đã xuất ${formatInt(shipped)}`;
+  } else if (finishedThisMonth > 0) {
+    finishedHint = `+${formatInt(finishedThisMonth)} tháng này`;
+  } else if (shippedThisMonth > 0) {
+    finishedHint = `Xuất ${formatInt(shippedThisMonth)} máy tháng này`;
+  }
 
   const metrics: Record<string, DashboardMetric> = {
     components: {
       value: formatInt(componentCount),
-      hint: createdThisMonth > 0 ? `+${formatInt(createdThisMonth)} tháng này` : "Không thêm mới tháng này",
+      hint:
+        createdThisMonth > 0
+          ? `+${formatInt(createdThisMonth)} tháng này`
+          : "Không thêm mới tháng này",
     },
     stockValue: {
       value: formatMoneyShort(stockValue),
@@ -432,23 +448,28 @@ export const getDashboardData = async () => {
     },
     importToday: {
       value: formatInt(importToday).padStart(2, "0"),
-      hint: importToday > 0 ? `${formatInt(importTodayDone)} đã xác nhận` : "Chưa có phiếu hôm nay",
+      hint:
+        importToday > 0
+          ? `${formatInt(importTodayDone)} đã xác nhận`
+          : "Chưa có phiếu hôm nay",
     },
     exportPending: {
       value: formatInt(exportPending).padStart(2, "0"),
-      hint: exportOverdue > 0 ? `${formatInt(exportOverdue)} quá 2 ngày` : exportPending > 0 ? "Chờ duyệt" : "Không có phiếu chờ",
+      hint:
+        exportOverdue > 0
+          ? `${formatInt(exportOverdue)} quá 2 ngày`
+          : exportPending > 0
+            ? "Chờ duyệt"
+            : "Không có phiếu chờ",
     },
-    production: {
-      value: formatInt(productionPending),
-      hint: productionCreatedThisMonth > 0 ? `${formatInt(productionCreatedThisMonth)} lệnh tháng này` : "Chưa có lệnh mới",
-    },
-    assembling: {
-      value: formatInt(assemblingQty),
-      hint: assemblingOrders > 0 ? `${formatInt(assemblingOrders)} lệnh đang lắp` : "Không có lệnh đang lắp",
+    pcConfigs: {
+      value: formatInt(pcConfigCount),
+      hint: "BOM / cấu hình PC active",
     },
     finished: {
-      value: formatInt(finishedOnHand),
-      hint: finishedThisMonth > 0 ? `+${formatInt(finishedThisMonth)} hoàn thành tháng này` : `${formatInt(produced)} đã lắp xong`,
+      // Số máy đã lắp xong (production done), không phải tồn thành phẩm sau khi xuất
+      value: formatInt(produced),
+      hint: finishedHint,
     },
     lowStock: {
       value: formatInt(lowCount + criticalCount).padStart(2, "0"),
@@ -462,11 +483,13 @@ export const getDashboardData = async () => {
       : "Theo phiếu xuất linh kiện đã duyệt"
     : topItems.length
       ? "Theo BOM của lệnh đang lắp và đã xong"
-      : "Chưa có phiếu xuất hoặc lệnh sản xuất";
+      : "Chưa có phiếu xuất linh kiện";
 
   return {
     dateLabel: `${weekdayLabel(now)}, ${dayMonthLabel(now)}`,
+    exportedAt: now,
     metrics,
+    finished,
     chart: {
       labels: chartDays.map(weekdayShort),
       imports: importSeries,
@@ -477,5 +500,14 @@ export const getDashboardData = async () => {
     topCaption,
     activity,
     pcConfigCount,
+    summary: {
+      componentCount,
+      stockValue,
+      stockValueLabel: formatMoneyShort(stockValue),
+      importToday,
+      exportPending,
+      lowCount,
+      criticalCount,
+    },
   };
 };
