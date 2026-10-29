@@ -2,10 +2,13 @@
 node_modules
 backend/dist
 backend/src/generated
+backups/*
+!backups/.gitkeep
 
 *.iml
 .gradle
 /local.properties
+mobile-app/local.properties
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml

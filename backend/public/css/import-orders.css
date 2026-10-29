@@ -1204,3 +1204,31 @@ select.io-input {
     flex: 1;
   }
 }
+.io-shortage-group {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0d3a8;
+}
+.io-shortage-group .io-btn-primary {
+  margin-top: 8px;
+}
+.io-badge.is-bad {
+  color: #b42318;
+  background: #fef3f2;
+}
+.io-detail-meta {
+  padding: 18px;
+}
+.io-row-actions,
+.io-inline-form {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+.io-row-actions .io-btn-primary,
+.io-row-actions .io-btn-ghost,
+.io-head-actions .io-btn-primary,
+.io-head-actions .io-btn-ghost {
+  height: 34px;
+  padding: 0 12px;
+}

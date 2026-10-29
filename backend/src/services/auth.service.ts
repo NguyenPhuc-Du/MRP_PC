@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { prisma } from "../config/db";
-import { systemConfig } from "../config/system";
+import { prefixForRole, systemConfig } from "../config/system";
 import { comparePassword, hashPassword } from "../utils/password.util";
 import { Account, AccountRole, Prisma } from "../generated/prisma";
 import { ChangePasswordDto, UpdateProfileDto } from "../dtos/profile.dto";
@@ -14,6 +14,13 @@ function getJwtSecret(): string {
     throw new Error("JWT_SECRET is not configured");
   }
   return secret;
+}
+
+async function markLastLogin(accountId: number): Promise<void> {
+  await prisma.account.update({
+    where: { id: accountId },
+    data: { lastLoginAt: new Date() },
+  });
 }
 
 function createAccessToken(account: {
@@ -51,6 +58,7 @@ export async function loginForApi(username: string, password: string) {
   }
 
   const accessToken = createAccessToken(account);
+  await markLastLogin(account.id);
 
   return {
     accessToken,
@@ -99,7 +107,7 @@ export async function login(
     select: { permissions: true },
   });
 
-  const home = firstViewPath(role?.permissions, systemConfig.prefixAdmin);
+  const home = firstViewPath(role?.permissions, prefixForRole(account.role));
 
   if (!home) {
     res.clearCookie("access_token", {
@@ -112,6 +120,7 @@ export async function login(
     return;
   }
 
+  await markLastLogin(account.id);
   res.redirect(home);
 }
 

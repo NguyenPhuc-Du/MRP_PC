@@ -1,21 +1,32 @@
 package com.example.mrp_pc.ui.login
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Person
@@ -23,11 +34,12 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,25 +49,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mrp_pc.ui.components.BannerType
+import com.example.mrp_pc.ui.components.ModernBanner
 import com.example.mrp_pc.ui.components.PrimaryButton
-import com.example.mrp_pc.ui.theme.BrandBlue
-import com.example.mrp_pc.ui.theme.BrandBlueDark
-import com.example.mrp_pc.ui.theme.BrandBlueSoft
-import com.example.mrp_pc.ui.theme.CardWhite
-import com.example.mrp_pc.ui.theme.Danger
-import com.example.mrp_pc.ui.theme.FieldBorder
-import com.example.mrp_pc.ui.theme.Ink
+import com.example.mrp_pc.ui.components.bounceClick
+import com.example.mrp_pc.ui.components.rememberSingleClick
 import com.example.mrp_pc.ui.theme.MrppcTheme
-import com.example.mrp_pc.ui.theme.MutedText
-import com.example.mrp_pc.ui.theme.PageBg
 
 @Composable
 fun LoginScreen(
@@ -67,166 +78,290 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
 
+    val focusManager = LocalFocusManager.current
+    val debouncedSignIn = rememberSingleClick {
+        focusManager.clearFocus()
+        onSignIn(username.trim(), password)
+    }
+
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(BrandBlueSoft, PageBg, PageBg),
+                    colors = listOf(
+                        primaryColor.copy(alpha = 0.12f),
+                        MaterialTheme.colorScheme.background,
+                        MaterialTheme.colorScheme.background,
+                    ),
                 ),
             )
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = 22.dp),
+            .imePadding(),
         contentAlignment = Alignment.Center,
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = CardWhite),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
-            Column(
+            // Hero Icon / Brand
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(
+                        Brush.linearGradient(
+                            listOf(primaryColor, secondaryColor),
+                        ),
+                    ),
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .background(BrandBlue),
-                    contentAlignment = Alignment.Center,
+                Icon(
+                    Icons.Filled.Memory,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(42.dp),
+                )
+            }
+
+            Spacer(Modifier.height(18.dp))
+            Text(
+                text = "MRP PC Workshop",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(4.dp))
+            Surface(
+                shape = RoundedCornerShape(99.dp),
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Icon(Icons.Filled.Memory, null, tint = Color.White, modifier = Modifier.size(34.dp))
-                }
-
-                Spacer(Modifier.height(16.dp))
-                Text("MRP PC Workshop", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Ink)
-                Text("Ứng dụng nhân viên lắp ráp", fontSize = 13.sp, color = MutedText)
-
-                Spacer(Modifier.height(28.dp))
-                Text(
-                    "Đăng nhập",
-                    modifier = Modifier.fillMaxWidth(),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Ink,
-                )
-                Text(
-                    "Dùng tài khoản staff được cấp từ quản lý",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    fontSize = 13.sp,
-                    color = MutedText,
-                )
-
-                Spacer(Modifier.height(20.dp))
-                FieldLabel("Tên đăng nhập")
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    placeholder = { Text("staff", color = MutedText) },
-                    leadingIcon = { Icon(Icons.Filled.Person, null, tint = BrandBlue) },
-                    shape = RoundedCornerShape(14.dp),
-                    colors = loginFieldColors(),
-                )
-
-                Spacer(Modifier.height(14.dp))
-                FieldLabel("Mật khẩu")
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    placeholder = { Text("••••••••", color = MutedText) },
-                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                    leadingIcon = { Icon(Icons.Filled.Lock, null, tint = BrandBlue) },
-                    trailingIcon = {
-                        IconButton(onClick = { showPassword = !showPassword }) {
-                            Icon(
-                                if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = "Hiện mật khẩu",
-                                tint = MutedText,
-                            )
-                        }
-                    },
-                    shape = RoundedCornerShape(14.dp),
-                    colors = loginFieldColors(),
-                )
-
-                if (!errorMessage.isNullOrBlank()) {
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        errorMessage,
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Danger,
-                        fontSize = 13.sp,
+                    Icon(
+                        Icons.Filled.Build,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp),
                     )
-                }
-
-                Spacer(Modifier.height(24.dp))
-                if (isLoading) {
-                    CircularProgressIndicator(Modifier.size(26.dp), color = BrandBlue, strokeWidth = 2.dp)
-                } else {
-                    PrimaryButton(
-                        text = "Đăng nhập",
-                        onClick = { onSignIn(username.trim(), password) },
-                        enabled = username.isNotBlank() && password.isNotBlank(),
+                    Text(
+                        text = "Ứng dụng kỹ thuật viên lắp ráp",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
+
+            Spacer(Modifier.height(28.dp))
+
+            // Login Card Form
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(26.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                ) {
+                    Text(
+                        text = "Đăng nhập",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "Nhập tài khoản staff để nhận lệnh lắp ráp",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    Spacer(Modifier.height(22.dp))
+
+                    Text(
+                        text = "Tài khoản",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = username,
+                        onValueChange = { username = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                "Ví dụ: staff_assembly",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Filled.Person,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next,
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = loginFieldColors(),
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Text(
+                        text = "Mật khẩu",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        placeholder = {
+                            Text(
+                                "••••••••",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            )
+                        },
+                        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                        leadingIcon = {
+                            Icon(
+                                Icons.Filled.Lock,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        },
+                        trailingIcon = {
+                            IconButton(
+                                onClick = { showPassword = !showPassword },
+                                modifier = Modifier.bounceClick(),
+                            ) {
+                                Icon(
+                                    if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                    contentDescription = if (showPassword) "Ẩn mật khẩu" else "Hiện mật khẩu",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done,
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                if (username.isNotBlank() && password.isNotBlank()) {
+                                    debouncedSignIn()
+                                }
+                            },
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = loginFieldColors(),
+                    )
+
+                    AnimatedVisibility(
+                        visible = !errorMessage.isNullOrBlank(),
+                        enter = fadeIn(),
+                        exit = fadeOut(),
+                    ) {
+                        Column {
+                            Spacer(Modifier.height(14.dp))
+                            ModernBanner(
+                                text = errorMessage.orEmpty(),
+                                type = BannerType.DANGER,
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(24.dp))
+
+                    PrimaryButton(
+                        text = "Đăng nhập xưởng",
+                        onClick = debouncedSignIn,
+                        enabled = username.isNotBlank() && password.isNotBlank(),
+                        isLoading = isLoading,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+            Text(
+                text = "MRP PC Manufacturing System v1.0",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            )
         }
     }
 }
 
 @Composable
-private fun FieldLabel(text: String) {
-    Text(
-        text,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 6.dp),
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Medium,
-        color = Color(0xFF374151),
-    )
-}
-
-@Composable
 private fun loginFieldColors() = OutlinedTextFieldDefaults.colors(
-    unfocusedBorderColor = FieldBorder,
-    focusedBorderColor = BrandBlue,
-    focusedContainerColor = Color.White,
-    unfocusedContainerColor = PageBg,
-    cursorColor = BrandBlueDark,
+    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+    focusedBorderColor = MaterialTheme.colorScheme.primary,
+    focusedContainerColor = MaterialTheme.colorScheme.surface,
+    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+    cursorColor = MaterialTheme.colorScheme.primary,
+    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
 )
 
-@Preview(showBackground = true, name = "Login")
+// -------------------------------------------------------------
+// COMPLETE PREVIEWS FOR LOGIN SCREEN (Light & Dark)
+// -------------------------------------------------------------
+
+@Preview(name = "Login - Default (Light)", showBackground = true)
 @Composable
-private fun LoginPreview() {
-    MrppcTheme {
+private fun LoginDefaultPreview() {
+    MrppcTheme(darkTheme = false) {
         LoginScreen()
     }
 }
 
-@Preview(showBackground = true, name = "Login - lỗi")
+@Preview(name = "Login - Default (Dark)", showBackground = true)
 @Composable
-private fun LoginErrorPreview() {
-    MrppcTheme {
-        LoginScreen(errorMessage = "Sai tài khoản hoặc mật khẩu")
+private fun LoginDarkPreview() {
+    MrppcTheme(darkTheme = true) {
+        LoginScreen()
     }
 }
 
-@Preview(showBackground = true, name = "Login - loading")
+@Preview(name = "Login - Error State", showBackground = true)
+@Composable
+private fun LoginErrorPreview() {
+    MrppcTheme(darkTheme = false) {
+        LoginScreen(errorMessage = "Sai tài khoản, mật khẩu hoặc lỗi kết nối máy chủ")
+    }
+}
+
+@Preview(name = "Login - Loading State", showBackground = true)
 @Composable
 private fun LoginLoadingPreview() {
-    MrppcTheme {
+    MrppcTheme(darkTheme = false) {
         LoginScreen(isLoading = true)
     }
 }

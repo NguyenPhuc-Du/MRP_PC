@@ -35,6 +35,8 @@ export const PERMISSION_KEYS = [
   "roles_edit",
   "roles_delete",
   "roles_permissions",
+  "backup_view",
+  "backup_create",
 ] as const;
 
 export type PermissionKey = (typeof PERMISSION_KEYS)[number];
@@ -92,6 +94,8 @@ export const ADMIN_PERMISSIONS: PermissionKey[] = [
   "roles_edit",
   "roles_delete",
   "roles_permissions",
+  "backup_view",
+  "backup_create",
 ];
 
 export const WAREHOUSE_MANAGER_PERMISSIONS: PermissionKey[] = [
@@ -129,6 +133,7 @@ export const VIEW_LANDING: Array<{ key: PermissionKey; path: string }> = [
   { key: "bom_view", path: "/bom" },
   { key: "account_view", path: "/accounts" },
   { key: "roles_view", path: "/permissions" },
+  { key: "backup_view", path: "/backup" },
 ];
 
 export const firstViewPath = (

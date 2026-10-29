@@ -118,3 +118,6 @@ block main
         .info-item
           .info-label Cập nhật lần cuối
           .info-value= formatDate(account.updatedAt || account.createdAt)
+        .info-item
+          .info-label Đăng nhập lần cuối
+          .info-value= account.lastLoginAt ? formatDate(account.lastLoginAt) : "Chưa đăng nhập"

@@ -60,6 +60,7 @@ const startServer = async () => {
   app.use("/api", apiRoutes);
 
   app.locals.prefixAdmin = systemConfig.prefixAdmin;
+  app.locals.prefixWarehouse = systemConfig.prefixWarehouse;
   app.locals.formatDate = formatDate;
 
   app.get("/health", (_req, res) => {

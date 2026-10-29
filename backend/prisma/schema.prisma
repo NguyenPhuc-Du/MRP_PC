@@ -73,6 +73,7 @@ model Account {
   status       AccountStatus @default(active)
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime?     @updatedAt @map("updated_at")
+  lastLoginAt  DateTime?     @map("last_login_at")
 
   importOrdersCreated      ImportOrder[]      @relation("ImportOrderCreatedBy")
   exportOrdersRequested    ExportOrder[]      @relation("ExportOrderRequestedBy")
@@ -170,7 +171,6 @@ model PcConfig {
   name        String         @db.VarChar(100)
   description String?        @db.Text
   salePrice   Decimal        @map("sale_price") @db.Decimal(12, 2)
-  imageUrl    String?        @map("image_url") @db.VarChar(500)
   status      PcConfigStatus @default(active)
   createdAt   DateTime       @default(now()) @map("created_at")
 
@@ -307,6 +307,7 @@ model ProductionOrder {
   createdBy         Int                   @map("created_by")
   createdAt         DateTime              @default(now()) @map("created_at")
   completedAt       DateTime?             @map("completed_at")
+  deletedAt         DateTime?             @map("deleted_at")
 
   pcConfig PcConfig @relation(fields: [pcConfigId], references: [id], onDelete: Restrict)
   assignee Account? @relation("ProductionOrderAssignedTo", fields: [assignedTo], references: [id], onDelete: Restrict)

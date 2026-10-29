@@ -1,78 +1,158 @@
 extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
 
 block main
-    link(rel="stylesheet" href="/css/orders.css")
+  link(rel="stylesheet" href="/css/import-orders.css")
+  +alert-success(4000)
+  +alert-error(6000)
 
-    .orders-page
-        .orders-head
-            div
-                .orders-eyebrow CHỨNG TỪ KHO
-                h1.orders-title Phiếu xuất
-                p.orders-desc Theo dõi xuất linh kiện và thành phẩm.
-            .orders-head-actions
-                button.btn-export(type="button")
-                    i.bi.bi-download
-                    span Export
-                button.btn-create(type="button")
-                    i.bi.bi-plus-lg
-                    span Tạo phiếu
+  -
+    const canApprove = user && user.permissions && user.permissions.includes("exportOrders_approve")
+    const pageQuery = (pageNo) => {
+      const params = new URLSearchParams()
+      if (filters.q) params.set("q", filters.q)
+      if (filters.type) params.set("type", filters.type)
+      if (filters.status) params.set("status", filters.status)
+      if (filters.from) params.set("from", filters.from)
+      if (filters.to) params.set("to", filters.to)
+      params.set("limit", String(limit))
+      params.set("page", String(pageNo))
+      return params.toString()
+    }
 
-        .orders-card
-            .orders-toolbar
-                .orders-search
-                    i.bi.bi-search
-                    input(type="text" placeholder="Tìm kiếm theo mã hoặc tên...")
-                .orders-toolbar-actions
-                    button.btn-tool(type="button")
-                        i.bi.bi-funnel
-                        span Bộ lọc
-                    button.btn-icon(type="button")
-                        i.bi.bi-layout-three-columns
-                    button.btn-tool(type="button")
-                        i.bi.bi-download
-                        span Xuất
+  .io-page
+    .io-head
+      div
+        p.io-kicker Phiếu xuất kho
+        h1.io-title Danh sách phiếu
+        p.io-desc Duyệt phiếu do nhân viên lắp gửi. Kho không tạo phiếu xuất tay.
+    .io-stats
+      .io-stat
+        .io-stat-label Chờ duyệt
+        .io-stat-row
+          .io-stat-value= stats.pending
+          .io-stat-icon.is-warn
+            i.bi.bi-clock
+      .io-stat
+        .io-stat-label Đã xuất
+        .io-stat-row
+          .io-stat-value= stats.approved
+          .io-stat-icon.is-ok
+            i.bi.bi-check-circle
+      .io-stat
+        .io-stat-label Từ chối
+        .io-stat-row
+          .io-stat-value= stats.rejected
+          .io-stat-icon
+            i.bi.bi-x-circle
+      .io-stat
+        .io-stat-label Chờ duyệt nhưng thiếu kho
+        .io-stat-row
+          .io-stat-value= stats.shortPending
+          .io-stat-icon.is-warn
+            i.bi.bi-exclamation-triangle
 
-            .table-responsive
-                table.orders-table
-                    thead
-                        tr
-                            th MÃ PHIẾU
-                            th MỤC ĐÍCH
-                            th NGÀY
-                            th NGƯỜI TẠO
-                            th MẶT HÀNG
-                            th TỔNG GIÁ TRỊ
-                            th TRẠNG THÁI
-                            th
-                    tbody
-                        each order in orders
-                            tr
-                                td
-                                    a.order-code(href="#")= order.code
-                                td= order.partner
-                                td= order.date
-                                td= order.creator
-                                td= order.itemCount
-                                td= order.total
-                                td
-                                    span.status-pill(class=order.statusClass)
-                                        span.status-dot
-                                        | #{order.status}
-                                td
-                                    button.btn-more(type="button")
-                                        i.bi.bi-three-dots
+    form.io-filters(method="GET" action=`${prefixAdmin}/exportOrders`)
+      input(type="hidden" name="limit" value=limit)
+      .io-filter-search
+        label Tìm kiếm
+        .io-search
+          i.bi.bi-search
+          input(type="text" name="q" value=filters.q placeholder="Tìm mã phiếu xuất...")
+      .io-filter-item
+        label Loại
+        select(name="type")
+          option(value="" selected=!filters.type) Tất cả
+          option(value="material" selected=(filters.type === "material")) Linh kiện
+          option(value="finished_product" selected=(filters.type === "finished_product")) Thành phẩm
+      .io-filter-item
+        label Trạng thái
+        select(name="status")
+          option(value="" selected=!filters.status) Tất cả
+          option(value="pending" selected=(filters.status === "pending")) Chờ duyệt
+          option(value="approved" selected=(filters.status === "approved")) Đã xuất
+          option(value="rejected" selected=(filters.status === "rejected")) Từ chối
+      .io-filter-item
+        label Khoảng thời gian
+        .io-dates
+          input(type="date" name="from" value=filters.from || "")
+          span –
+          input(type="date" name="to" value=filters.to || "")
+      button.io-btn-ghost(type="submit") Lọc
+      a.io-btn-ghost(href=`${prefixAdmin}/exportOrders`) Đặt lại
 
-        .process-card
-            .process-title Quy trình xử lý
-            p.process-flow Tạo phiếu — Chờ duyệt — Đã duyệt — Đã xuất — Hoàn tất
-            .process-steps
-                each step, index in processSteps
-                    if index > 0
-                        .process-line(class=step.state === "done" ? "is-done" : "")
-                    .process-step(class=step.state)
-                        if step.state === "done"
-                            .process-dot
-                                i.bi.bi-check-lg
-                        else
-                            .process-dot= step.number
-                        span.process-label= step.label
+    .io-card
+      .table-responsive
+        table.io-table
+          thead
+            tr
+              th Mã phiếu
+              th Loại
+              th Lệnh lắp
+              th Người gửi
+              th Ngày gửi
+              th.text-end Số dòng
+              th.text-end Tổng SL
+              th Kho
+              th Trạng thái
+              th
+          tbody
+            if orders && orders.length
+              each order in orders
+                tr
+                  td
+                    a.io-code(href=`${prefixAdmin}/exportOrders/${order.id}`)= order.code
+                  td
+                    span.io-badge(class=order.type === "material" ? "is-draft" : "is-ok")= order.typeLabel
+                  td= order.productionLabel
+                  td= order.requesterName
+                  td= order.createdAtLabel
+                  td.text-end.io-num= order.itemCount
+                  td.text-end.io-num= order.totalQty
+                  td
+                    if order.status !== "pending"
+                      span —
+                    else if order.stockOk
+                      span.io-badge.is-ok Đủ kho
+                    else
+                      span.io-badge.is-bad Thiếu kho
+                  td
+                    if order.status === "approved"
+                      span.io-badge.is-ok= order.statusLabel
+                    else if order.status === "rejected"
+                      span.io-badge.is-bad= order.statusLabel
+                    else
+                      span.io-badge.is-draft= order.statusLabel
+                  td
+                    if canApprove && order.status === "pending" && order.stockOk
+                      .io-row-actions
+                        form.io-inline-form(method="POST" action=`${prefixAdmin}/exportOrders/${order.id}/approve`)
+                          button.io-btn-primary(type="submit") Duyệt
+                        form.io-inline-form(method="POST" action=`${prefixAdmin}/exportOrders/${order.id}/reject` onsubmit="return confirm('Từ chối phiếu này?')")
+                          button.io-btn-ghost(type="submit") Từ chối
+                    else if order.status === "pending" && !order.stockOk
+                      a.io-code(href=`${prefixAdmin}/exportOrders/${order.id}`) Mở để nhập thêm
+            else
+              tr
+                td.io-empty(colspan="10")
+                  i.bi.bi-inbox
+                  p Chưa có phiếu xuất. Nhân viên lắp gửi phiếu từ app.
+
+      .io-pager
+        .io-pager-info #{fromIndex}–#{toIndex} / #{total} phiếu
+        .io-pager-controls
+          if page > 1
+            a.io-page-btn(href=`${prefixAdmin}/exportOrders?${pageQuery(page - 1)}`)
+              i.bi.bi-chevron-left
+          else
+            span.io-page-btn.is-disabled
+              i.bi.bi-chevron-left
+          - const pages = [page - 1, page, page + 1].filter((n) => n >= 1 && n <= pageCount)
+          each n in pages
+            a.io-page-btn(class=(n === page ? "is-active" : "") href=`${prefixAdmin}/exportOrders?${pageQuery(n)}`)= n
+          if page < pageCount
+            a.io-page-btn(href=`${prefixAdmin}/exportOrders?${pageQuery(page + 1)}`)
+              i.bi.bi-chevron-right
+          else
+            span.io-page-btn.is-disabled
+              i.bi.bi-chevron-right

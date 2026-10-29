@@ -89,7 +89,10 @@ block main
                 td
                   +statusBadge(account.status)
                 td
-                  span.cell-muted= formatDate(account.updatedAt || account.createdAt)
+                  if account.lastLoginAt
+                    span.cell-muted= formatDate(account.lastLoginAt)
+                  else
+                    span.cell-muted Chưa đăng nhập
                 td.text-end
                   .row-actions
                     a.row-action-btn.action-view(href=`${prefixAdmin}/accounts/${account.id}` title="Chi tiết")

@@ -10,8 +10,6 @@ router.get("/export.xlsx", requirePermission('importOrders_view'), requireWareho
 router.get("/export.pdf", requirePermission('importOrders_view'), requireWarehouse, c.exportPdf);
 router.get("/create", requirePermission('importOrders_create'), requireWarehouse, c.create);
 router.post("/create", requirePermission('importOrders_create'), requireWarehouse, c.createPost);
-router.post("/suppliers", requirePermission('importOrders_create'), requireWarehouse, c.createSupplierPost);
-router.post("/brands", requirePermission('importOrders_create'), requireWarehouse, c.createBrandPost);
 router.get("/:orderId/pdf", requirePermission('importOrders_view'), c.exportOrderPdf);
 router.get("/:orderId/edit", requirePermission('importOrders_edit'), requireWarehouse, c.edit);
 router.post("/:orderId/edit", requirePermission('importOrders_edit'), requireWarehouse, c.editPost);

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../config/database";
-import { systemConfig } from "../config/system";
+import { prefixForRole, systemConfig } from "../config/system";
 import { firstViewPath } from "../constants/permissions";
 
 interface AccessTokenPayload extends JwtPayload {
@@ -75,6 +75,27 @@ export const requireAuth = async (
       role: account.role,
     };
 
+    const wanted = prefixForRole(account.role);
+    res.locals.prefixAdmin = wanted;
+    res.locals.prefixWarehouse = systemConfig.prefixWarehouse;
+
+    const pathOnly = req.originalUrl.split("?")[0];
+    const onWarehouse =
+      pathOnly === systemConfig.prefixWarehouse ||
+      pathOnly.startsWith(`${systemConfig.prefixWarehouse}/`);
+    const current = onWarehouse
+      ? systemConfig.prefixWarehouse
+      : systemConfig.prefixAdmin;
+
+    if (current !== wanted) {
+      const rest = pathOnly.startsWith(current) ? pathOnly.slice(current.length) : "";
+      const query = req.originalUrl.includes("?")
+        ? `?${req.originalUrl.split("?")[1]}`
+        : "";
+      res.redirect(`${wanted}${rest || ""}${query}`);
+      return;
+    }
+
     next();
   } catch {
     res.clearCookie("access_token");
@@ -97,7 +118,7 @@ export const requireWarehouse = (
       "error",
       "Chỉ cho phép quản lý kho được nhập hàng và xác nhận phiếu",
     );
-    res.redirect(`${systemConfig.prefixAdmin}/importOrders`);
+    res.redirect(`${prefixForRole(role)}/importOrders`);
     return;
   }
 
@@ -186,7 +207,10 @@ export const requirePermission = (permissionKey: string) => {
       return next();
     }
 
-    const home = firstViewPath(permissions, systemConfig.prefixAdmin);
+    const home = firstViewPath(
+      permissions,
+      prefixForRole(req.session.account?.role),
+    );
     const referrer = req.get("Referrer");
     const backUrl =
       referrer && !referrer.includes("/auth/login")
