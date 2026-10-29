@@ -3,14 +3,12 @@ import { prisma } from "../config/database";
 export type DashboardMetric = {
   value: string;
   hint: string;
-  mock: boolean;
 };
 
 export type DashboardAlert = {
   name: string;
   meta: string;
   qty: number;
-  mock: boolean;
 };
 
 export type DashboardTopItem = {
@@ -20,42 +18,14 @@ export type DashboardTopItem = {
   stock: number;
   stockKey: "ok" | "low" | "out";
   stockLabel: string;
-  mock: boolean;
 };
 
 export type DashboardActivity = {
   title: string;
   detail: string;
   tone: "ok" | "work" | "warn" | "info";
-  mock: boolean;
+  at: Date;
 };
-
-const MOCK_CHART = {
-  labels: ["T4", "T5", "T6", "T7", "T8", "T9"],
-  imports: [180, 220, 160, 240, 200, 280],
-  exports: [80, 90, 70, 100, 85, 110],
-};
-
-const MOCK_ALERTS: DashboardAlert[] = [
-  { name: "ASUS Dual RTX 4070 Super", meta: "GPU · Tối thiểu 20", qty: 14, mock: true },
-  { name: "WD Black SN770 NVMe 1TB", meta: "SSD · Tối thiểu 18", qty: 12, mock: true },
-  { name: "Corsair RM850x 80+ Gold", meta: "PSU · Tối thiểu 10", qty: 9, mock: true },
-];
-
-const MOCK_TOP: DashboardTopItem[] = [
-  { name: "Intel Core i7-14700K", group: "CPU", used: 163, stock: 128, stockKey: "ok", stockLabel: "Còn hàng", mock: true },
-  { name: "ASUS Dual RTX 4070 Super", group: "GPU", used: 83, stock: 14, stockKey: "low", stockLabel: "Sắp hết", mock: true },
-  { name: "Kingston Fury DDR5 32GB", group: "RAM", used: 243, stock: 216, stockKey: "ok", stockLabel: "Còn hàng", mock: true },
-  { name: "WD Black SN770 NVMe 1TB", group: "SSD", used: 163, stock: 12, stockKey: "low", stockLabel: "Sắp hết", mock: true },
-  { name: "Corsair RM850x 80+ Gold", group: "PSU", used: 133, stock: 0, stockKey: "out", stockLabel: "Hết hàng", mock: true },
-];
-
-const MOCK_ACTIVITY: DashboardActivity[] = [
-  { title: "Nhập kho", detail: "PN-260915-012 đã hoàn tất", tone: "ok", mock: true },
-  { title: "Sản xuất", detail: "PO-2041 bắt đầu lắp ráp", tone: "work", mock: true },
-  { title: "Cảnh báo", detail: "SSD SN770 dưới ngưỡng", tone: "warn", mock: true },
-  { title: "BOM", detail: "PC Creator v3 đã duyệt", tone: "info", mock: true },
-];
 
 const weekdayLabel = (date: Date): string => {
   return date.toLocaleDateString("vi-VN", { weekday: "long" }).toUpperCase();
@@ -68,6 +38,10 @@ const dayMonthLabel = (date: Date): string => {
 const weekdayShort = (date: Date): string => {
   const map = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
   return map[date.getDay()] ?? "T2";
+};
+
+const shortDate = (date: Date): string => {
+  return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
 };
 
 const startOfDay = (date: Date): Date => {
@@ -115,12 +89,29 @@ const lastDays = (count: number): Date[] => {
   });
 };
 
+const importStatusLabel = (status: string): string => {
+  return status === "confirmed" ? "Đã nhập" : "Nháp";
+};
+
+const exportStatusLabel = (status: string): string => {
+  if (status === "approved") return "Đã duyệt";
+  if (status === "rejected") return "Từ chối";
+  return "Chờ duyệt";
+};
+
+const productionStatusLabel = (status: string): string => {
+  if (status === "done") return "Hoàn thành";
+  if (status === "in_progress") return "Đang lắp";
+  return "Chờ lắp";
+};
+
 export const getDashboardData = async () => {
   const now = new Date();
   const today = startOfDay(now);
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
   const monthStart = startOfMonth(now);
+  const overdueBefore = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
   const chartDays = lastDays(6);
   const chartFrom = chartDays[0];
 
@@ -130,29 +121,33 @@ export const getDashboardData = async () => {
     inventoryRows,
     importToday,
     importTodayDone,
-    importTotal,
     exportPending,
-    exportTotal,
-    productionTotal,
-    productionInProgress,
+    exportOverdue,
     productionPending,
+    productionCreatedThisMonth,
+    assemblingAgg,
+    finishedAgg,
+    finishedThisMonthAgg,
+    finishedShippedAgg,
     pcConfigCount,
     importItemsInRange,
     exportItemsInRange,
-    exportUsage,
-    bomUsage,
-    auditRows,
+    exportUsageMonth,
+    exportUsageAll,
+    productionForUsage,
+    recentImports,
+    recentExports,
+    recentProduction,
   ] = await Promise.all([
     prisma.component.count({ where: { deleted: false } }),
     prisma.component.count({
       where: { deleted: false, createdAt: { gte: monthStart } },
     }),
-    prisma.inventory.findMany({
-      where: { component: { deleted: false } },
+    prisma.component.findMany({
+      where: { deleted: false },
       include: {
-        component: {
-          include: { category: { select: { name: true } } },
-        },
+        category: { select: { name: true } },
+        inventory: { select: { quantityOnHand: true } },
       },
     }),
     prisma.importOrder.count({
@@ -164,13 +159,33 @@ export const getDashboardData = async () => {
         createdAt: { gte: today, lt: tomorrow },
       },
     }),
-    prisma.importOrder.count(),
     prisma.exportOrder.count({ where: { status: "pending" } }),
-    prisma.exportOrder.count(),
-    prisma.productionOrder.count({ where: { deletedAt: null } }),
-    prisma.productionOrder.count({ where: { status: "in_progress", deletedAt: null } }),
-    prisma.productionOrder.count({ where: { status: "pending", deletedAt: null } }),
-    prisma.pcConfig.count(),
+    prisma.exportOrder.count({
+      where: { status: "pending", createdAt: { lt: overdueBefore } },
+    }),
+    prisma.productionOrder.count({ where: { status: "pending" } }),
+    prisma.productionOrder.count({ where: { createdAt: { gte: monthStart } } }),
+    prisma.productionOrder.aggregate({
+      where: { status: "in_progress" },
+      _sum: { quantityRequested: true },
+      _count: true,
+    }),
+    prisma.productionOrder.aggregate({
+      where: { status: "done" },
+      _sum: { quantityRequested: true },
+    }),
+    prisma.productionOrder.aggregate({
+      where: { status: "done", completedAt: { gte: monthStart } },
+      _sum: { quantityRequested: true },
+    }),
+    prisma.exportOrderItem.aggregate({
+      where: {
+        pcConfigId: { not: null },
+        exportOrder: { type: "finished_product", status: "approved" },
+      },
+      _sum: { quantity: true },
+    }),
+    prisma.pcConfig.count({ where: { status: "active" } }),
     prisma.importOrderItem.findMany({
       where: { importOrder: { createdAt: { gte: chartFrom } } },
       select: {
@@ -179,7 +194,9 @@ export const getDashboardData = async () => {
       },
     }),
     prisma.exportOrderItem.findMany({
-      where: { exportOrder: { createdAt: { gte: chartFrom } } },
+      where: {
+        exportOrder: { status: "approved", createdAt: { gte: chartFrom } },
+      },
       select: {
         quantity: true,
         exportOrder: { select: { createdAt: true } },
@@ -189,34 +206,88 @@ export const getDashboardData = async () => {
       by: ["componentId"],
       where: {
         componentId: { not: null },
-        exportOrder: { createdAt: { gte: monthStart } },
+        exportOrder: {
+          status: "approved",
+          type: "material",
+          createdAt: { gte: monthStart },
+        },
       },
       _sum: { quantity: true },
       orderBy: { _sum: { quantity: "desc" } },
       take: 5,
     }),
-    prisma.bomItem.groupBy({
+    prisma.exportOrderItem.groupBy({
       by: ["componentId"],
+      where: {
+        componentId: { not: null },
+        exportOrder: { status: "approved", type: "material" },
+      },
       _sum: { quantity: true },
       orderBy: { _sum: { quantity: "desc" } },
       take: 5,
     }),
-    prisma.auditLog.findMany({
+    prisma.productionOrder.findMany({
+      where: { status: { in: ["in_progress", "done"] } },
+      select: {
+        quantityRequested: true,
+        pcConfig: {
+          select: {
+            bomItems: {
+              select: { componentId: true, quantity: true },
+            },
+          },
+        },
+      },
+    }),
+    prisma.importOrder.findMany({
       orderBy: { createdAt: "desc" },
       take: 5,
-      include: { account: { select: { fullName: true, username: true } } },
+      select: {
+        code: true,
+        status: true,
+        createdAt: true,
+        creator: { select: { fullName: true, username: true } },
+      },
+    }),
+    prisma.exportOrder.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        code: true,
+        status: true,
+        type: true,
+        createdAt: true,
+        requester: { select: { fullName: true, username: true } },
+      },
+    }),
+    prisma.productionOrder.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        status: true,
+        quantityRequested: true,
+        createdAt: true,
+        completedAt: true,
+        pcConfig: { select: { name: true } },
+      },
     }),
   ]);
 
-  const stockValue = inventoryRows.reduce((sum, row) => {
+  const stockRows = inventoryRows.map((row) => ({
+    quantityOnHand: row.inventory?.quantityOnHand ?? 0,
+    component: row,
+  }));
+
+  const stockValue = stockRows.reduce((sum, row) => {
     return sum + row.quantityOnHand * Number(row.component.unitPrice);
   }, 0);
 
-  const lowRows = inventoryRows
+  const lowRows = stockRows
     .filter((row) => row.quantityOnHand <= row.component.minStockThreshold)
     .sort((a, b) => a.quantityOnHand - b.quantityOnHand);
 
-  const criticalCount = inventoryRows.filter((row) => row.quantityOnHand <= 0).length;
+  const criticalCount = lowRows.filter((row) => row.quantityOnHand <= 0).length;
   const lowCount = lowRows.filter((row) => row.quantityOnHand > 0).length;
 
   const qtyByDay = (rows: { quantity: number; at: Date }[]) => {
@@ -241,11 +312,30 @@ export const getDashboardData = async () => {
       at: item.exportOrder.createdAt,
     })),
   );
-  const chartEmpty = [...importSeries, ...exportSeries].every((value) => value === 0);
 
-  const usageSource = exportUsage.some((item) => item.componentId)
-    ? exportUsage
-    : bomUsage;
+  const usageFromExport = exportUsageMonth.some((item) => item.componentId)
+    ? exportUsageMonth
+    : exportUsageAll;
+
+  const usageFromProduction = new Map<number, number>();
+  for (const order of productionForUsage) {
+    for (const bom of order.pcConfig.bomItems) {
+      const used = bom.quantity * order.quantityRequested;
+      usageFromProduction.set(bom.componentId, (usageFromProduction.get(bom.componentId) ?? 0) + used);
+    }
+  }
+
+  const usageRanked = [...usageFromProduction.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([componentId, quantity]) => ({
+      componentId,
+      _sum: { quantity },
+    }));
+
+  const usingExports = usageFromExport.some((item) => item.componentId);
+  const usageSource = usingExports ? usageFromExport : usageRanked;
+
   const usageIds = usageSource
     .map((item) => item.componentId)
     .filter((id): id is number => typeof id === "number");
@@ -261,7 +351,7 @@ export const getDashboardData = async () => {
         })
       : [];
 
-  const topReal: DashboardTopItem[] = usageSource
+  const topItems: DashboardTopItem[] = usageSource
     .map((item) => {
       const component = usageComponents.find((row) => row.id === item.componentId);
       if (!component) {
@@ -276,96 +366,116 @@ export const getDashboardData = async () => {
         stock: qty,
         stockKey: stock.key,
         stockLabel: stock.label,
-        mock: false,
       };
     })
     .filter((item): item is DashboardTopItem => item !== null);
 
-  const alertsReal: DashboardAlert[] = lowRows.slice(0, 5).map((row) => ({
+  const alerts: DashboardAlert[] = lowRows.slice(0, 5).map((row) => ({
     name: row.component.name,
     meta: `${row.component.category?.name ?? "LK"} · Tối thiểu ${row.component.minStockThreshold}`,
     qty: row.quantityOnHand,
-    mock: false,
   }));
 
-  const activityReal: DashboardActivity[] = auditRows.map((row) => ({
-    title: row.action,
-    detail: `${row.account.fullName || row.account.username}${row.detail ? ` · ${row.detail}` : ""}`,
-    tone: "info",
-    mock: false,
-  }));
+  const actorName = (person: { fullName: string | null; username: string } | null | undefined) => {
+    return person?.fullName || person?.username || "Hệ thống";
+  };
+
+  const activity: DashboardActivity[] = [
+    ...recentImports.map((row) => ({
+      title: "Nhập kho",
+      detail: `${row.code} · ${importStatusLabel(row.status)} · ${actorName(row.creator)} · ${shortDate(row.createdAt)}`,
+      tone: row.status === "confirmed" ? ("ok" as const) : ("info" as const),
+      at: row.createdAt,
+    })),
+    ...recentExports.map((row) => ({
+      title: row.type === "finished_product" ? "Xuất thành phẩm" : "Xuất linh kiện",
+      detail: `${row.code} · ${exportStatusLabel(row.status)} · ${actorName(row.requester)} · ${shortDate(row.createdAt)}`,
+      tone: row.status === "pending" ? ("warn" as const) : row.status === "approved" ? ("ok" as const) : ("info" as const),
+      at: row.createdAt,
+    })),
+    ...recentProduction.map((row) => ({
+      title: "Sản xuất",
+      detail: `Lệnh #${row.id} · ${row.pcConfig.name} · ${formatInt(row.quantityRequested)} máy · ${productionStatusLabel(row.status)}`,
+      tone: row.status === "in_progress" ? ("work" as const) : row.status === "done" ? ("ok" as const) : ("info" as const),
+      at: row.completedAt ?? row.createdAt,
+    })),
+  ]
+    .sort((a, b) => b.at.getTime() - a.at.getTime())
+    .slice(0, 6);
+
+  if (lowRows[0]) {
+    const row = lowRows[0];
+    activity.unshift({
+      title: "Cảnh báo",
+      detail: `${row.component.name} còn ${formatInt(row.quantityOnHand)} (tối thiểu ${formatInt(row.component.minStockThreshold)})`,
+      tone: "warn",
+      at: now,
+    });
+    activity.splice(6);
+  }
+
+  const produced = finishedAgg._sum.quantityRequested ?? 0;
+  const shipped = finishedShippedAgg._sum.quantity ?? 0;
+  const finishedOnHand = Math.max(0, produced - shipped);
+  const finishedThisMonth = finishedThisMonthAgg._sum.quantityRequested ?? 0;
+  const assemblingQty = assemblingAgg._sum.quantityRequested ?? 0;
+  const assemblingOrders = assemblingAgg._count;
 
   const metrics: Record<string, DashboardMetric> = {
     components: {
       value: formatInt(componentCount),
-      hint: `+${formatInt(createdThisMonth)} tháng này`,
-      mock: false,
+      hint: createdThisMonth > 0 ? `+${formatInt(createdThisMonth)} tháng này` : "Không thêm mới tháng này",
     },
     stockValue: {
       value: formatMoneyShort(stockValue),
       hint: "Theo giá nhập × tồn",
-      mock: false,
     },
-    importToday: importTotal > 0
-      ? {
-          value: formatInt(importToday).padStart(2, "0"),
-          hint: `${formatInt(importTodayDone)} hoàn tất`,
-          mock: false,
-        }
-      : { value: "12", hint: "8 hoàn tất", mock: true },
-    exportPending: exportTotal > 0
-      ? {
-          value: formatInt(exportPending).padStart(2, "0"),
-          hint: "Chờ duyệt",
-          mock: false,
-        }
-      : { value: "07", hint: "3 quá hạn", mock: true },
-    production: productionTotal > 0
-      ? {
-          value: formatInt(productionPending + productionInProgress),
-          hint: `${formatInt(productionInProgress)} đang lắp`,
-          mock: false,
-        }
-      : { value: "24", hint: "+6 tháng này", mock: true },
-    assembling: productionInProgress > 0
-      ? {
-          value: formatInt(productionInProgress),
-          hint: "Lệnh đang lắp",
-          mock: false,
-        }
-      : { value: "42", hint: "64% tiến độ", mock: true },
+    importToday: {
+      value: formatInt(importToday).padStart(2, "0"),
+      hint: importToday > 0 ? `${formatInt(importTodayDone)} đã xác nhận` : "Chưa có phiếu hôm nay",
+    },
+    exportPending: {
+      value: formatInt(exportPending).padStart(2, "0"),
+      hint: exportOverdue > 0 ? `${formatInt(exportOverdue)} quá 2 ngày` : exportPending > 0 ? "Chờ duyệt" : "Không có phiếu chờ",
+    },
+    production: {
+      value: formatInt(productionPending),
+      hint: productionCreatedThisMonth > 0 ? `${formatInt(productionCreatedThisMonth)} lệnh tháng này` : "Chưa có lệnh mới",
+    },
+    assembling: {
+      value: formatInt(assemblingQty),
+      hint: assemblingOrders > 0 ? `${formatInt(assemblingOrders)} lệnh đang lắp` : "Không có lệnh đang lắp",
+    },
     finished: {
-      value: "318",
-      hint: "+8,4%",
-      mock: true,
+      value: formatInt(finishedOnHand),
+      hint: finishedThisMonth > 0 ? `+${formatInt(finishedThisMonth)} hoàn thành tháng này` : `${formatInt(produced)} đã lắp xong`,
     },
     lowStock: {
-      value: formatInt(lowCount).padStart(2, "0"),
-      hint: `${formatInt(criticalCount)} nghiêm trọng`,
-      mock: false,
+      value: formatInt(lowCount + criticalCount).padStart(2, "0"),
+      hint: `${formatInt(criticalCount)} hết hàng`,
     },
   };
+
+  const topCaption = usingExports
+    ? exportUsageMonth.some((item) => item.componentId)
+      ? `Theo phiếu xuất linh kiện đã duyệt, tháng ${now.getMonth() + 1}`
+      : "Theo phiếu xuất linh kiện đã duyệt"
+    : topItems.length
+      ? "Theo BOM của lệnh đang lắp và đã xong"
+      : "Chưa có phiếu xuất hoặc lệnh sản xuất";
 
   return {
     dateLabel: `${weekdayLabel(now)}, ${dayMonthLabel(now)}`,
     metrics,
     chart: {
-      labels: chartEmpty ? MOCK_CHART.labels : chartDays.map(weekdayShort),
-      imports: chartEmpty ? MOCK_CHART.imports : importSeries,
-      exports: chartEmpty ? MOCK_CHART.exports : exportSeries,
-      mock: chartEmpty,
+      labels: chartDays.map(weekdayShort),
+      imports: importSeries,
+      exports: exportSeries,
     },
-    alerts: alertsReal.length ? alertsReal : MOCK_ALERTS,
-    alertsMock: alertsReal.length === 0,
-    topItems: topReal.length ? topReal : MOCK_TOP,
-    topMock: topReal.length === 0,
-    topCaption: topReal.length && exportUsage.some((item) => item.componentId)
-      ? `Theo phiếu xuất tháng ${now.getMonth() + 1}`
-      : topReal.length
-        ? "Theo số lượng trong BOM"
-        : "Theo lệnh sản xuất tháng này",
-    activity: activityReal.length ? activityReal : MOCK_ACTIVITY,
-    activityMock: activityReal.length === 0,
+    alerts,
+    topItems,
+    topCaption,
+    activity,
     pcConfigCount,
   };
 };

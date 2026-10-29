@@ -10,7 +10,6 @@ block main
         .comp-eyebrow DANH MỤC 
         h4.fw-bold.mb-1 Quản lý linh kiện
         .text-secondary.small #{totalComponents} linh kiện thuộc kho cơ sở
-      button.btn.comp-btn.comp-btn-light
     .comp-card
       .d-flex.flex-wrap.align-items-center.gap-2.mb-4
         form#form-search.comp-search.flex-grow-1(method="get" action=`${prefixAdmin}/components`)
@@ -23,12 +22,13 @@ block main
               placeholder="Tìm kiếm theo tên..."
               value=keyword || ""
             )
-            button.btn.btn-success(type="submit") Tìm
+            button.btn.comp-btn.comp-btn-primary(type="submit") Tìm
         div.d-flex.align-items-center.gap-2
-          select.form-select(name="status" id="form-status")
+          select.form-select.comp-filter(name="status" id="form-status")
             option(value="all" selected=status === "all") Tất cả
             option(value="active" selected=status === "active") Đang kinh doanh 
             option(value="discontinued" selected=status === "discontinued") Ngừng kinh doanh 
+            option(value="out_of_stock" selected=status === "out_of_stock") Hết hàng
         if user && user.permissions && user.permissions.includes('components_create')
           a.btn.comp-btn.comp-btn-primary(href=`${prefixAdmin}/components/create`)
             | Thêm linh kiện
@@ -75,12 +75,15 @@ block main
                   if user && user.permissions && (user.permissions.includes('components_edit') || user.permissions.includes('components_delete'))
                     td
                       if user.permissions.includes('components_edit')
-                        a(
+                        a.comp-action.comp-action-edit(
                           href=`${prefixAdmin}/components/edit/${component.id}`
-                          class="btn btn-warning btn-sm"
                           ) Sửa
                       if user.permissions.includes('components_delete')
-                        button(class="btn btn-danger btn-sm ml-1" button-delete data-id=component.id) Xóa 
+                        button.comp-action.comp-action-delete(
+                          type="button"
+                          button-delete
+                          data-id=component.id
+                        ) Xóa 
             else
               tr
                 td.text-center.text-secondary.py-4(colspan="11") Chưa có linh kiện nào.
