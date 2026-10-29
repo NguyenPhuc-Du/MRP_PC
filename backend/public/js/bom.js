@@ -1,7 +1,8 @@
 (function () {
   document.querySelectorAll(".nav-item").forEach(function (item) {
     item.classList.remove("active");
-    if (item.getAttribute("href") === "/admin/bom") {
+    var href = item.getAttribute("href") || "";
+    if (href === "/admin/bom" || href === "/warehouse/bom") {
       item.classList.add("active");
     }
   });

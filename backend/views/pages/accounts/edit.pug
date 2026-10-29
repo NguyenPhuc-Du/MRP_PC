@@ -13,7 +13,7 @@ block main
             h2.page-title Chỉnh sửa tài khoản
             p.page-desc Cập nhật thông tin và phân quyền của người dùng.
         .page-actions
-            a.btn-soft(href="/admin/accounts")
+            a.btn-soft(href=`${prefixAdmin}/accounts`)
                 i.bi.bi-arrow-left
                 span Quay lại
 
@@ -183,7 +183,7 @@ block main
                     button.btn-gradient(type="submit")
                         i.bi.bi-check-lg
                         span Lưu thay đổi
-                    a.btn-soft.w-100(href="/admin/accounts")
+                    a.btn-soft.w-100(href=`${prefixAdmin}/accounts`)
                         i.bi.bi-x-lg
                         span Huỷ
 

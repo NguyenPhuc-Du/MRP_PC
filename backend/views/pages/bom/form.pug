@@ -43,7 +43,7 @@ block main
                             option(value="inactive" selected=(config.statusDb === "inactive")) Ngưng
                     label.bom-field
                         span Giá bán (chốt sau)
-                        input.bom-input#bom-sale-price(type="number" name="salePrice" min="0" step="1000" value=config.salePrice placeholder="Để trống nếu chưa chốt")
+                        input.bom-input#bom-sale-price(type="number" name="salePrice" min="0" max="9999999999" step="1000" value=config.salePrice placeholder="Để trống nếu chưa chốt")
                 label.bom-field
                     span Mô tả
                     textarea.bom-textarea(name="description" placeholder="Mô tả ngắn cho cấu hình")= config.description
@@ -132,5 +132,4 @@ block main
                 i.bi.bi-trash
 
 block script
-    script(src="/js/script.js")
     script(src="/js/bom.js")

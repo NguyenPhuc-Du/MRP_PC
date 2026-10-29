@@ -15,21 +15,6 @@ block main
         p.text-muted.mb-0 #{totalOrders} yêu cầu đang hoạt động trên #{stages.length} công đoạn.
 
       .d-flex.gap-2
-        .dropdown
-          button.comp-btn.comp-btn-light.dropdown-toggle(type="button" data-bs-toggle="dropdown")
-            i.bi.bi-sliders
-            | Bộ lọc
-          ul.dropdown-menu.dropdown-menu-end.p-2
-            li
-              a.dropdown-item.rounded-2(href="#" data-filter-stage="all") Tất cả công đoạn
-            li: hr.dropdown-divider
-            each stage in stages
-              li
-                a.dropdown-item.rounded-2(href="#" data-filter-stage=stage.key)
-                  span.comp-dot(class=`comp-dot-${stage.variant}`)
-                  | #{stage.label}
-                  span.ms-auto.comp-muted #{stage.count}
-
         a.comp-btn.comp-btn-primary(href=`${prefixAdmin}/production/create`)
           i.bi.bi-plus-lg
           | Tạo yêu cầu
@@ -121,7 +106,6 @@ block main
             +pagination(objectPagination)
 
 block script
-  script(src="/js/script.js")
   script.
     // Lọc bảng theo công đoạn (chip + dropdown dùng chung 1 hàm)
     document.addEventListener('click', function (e) {

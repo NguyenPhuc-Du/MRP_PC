@@ -1,7 +1,11 @@
 (function () {
   function hideAlert(el) {
-    el.classList.add('alert-hide');
-    setTimeout(function () { el.remove(); }, 250);
+    el.classList.add('flash-hide');
+    setTimeout(function () {
+      var wrap = el.closest('.flash-wrap');
+      if (wrap) wrap.remove();
+      else el.remove();
+    }, 200);
   }
 
   document.querySelectorAll('[show-alert]').forEach(function (alertEl) {
@@ -18,6 +22,34 @@
         hideAlert(alertEl);
       });
     }
+  });
+})();
+
+(function () {
+  var loader = document.getElementById('page-loader');
+  var isLoading = false;
+
+  function showLoading() {
+    if (isLoading) return;
+    isLoading = true;
+    document.documentElement.classList.add('is-loading');
+    if (loader) loader.hidden = false;
+  }
+
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest && event.target.closest('a[href]');
+    if (!link) return;
+    if (link.target === '_blank' || link.hasAttribute('download')) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    var href = link.getAttribute('href') || '';
+    if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
+    showLoading();
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.hasAttribute('data-no-loading')) return;
+    showLoading();
   });
 })();
 

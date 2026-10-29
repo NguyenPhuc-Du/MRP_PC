@@ -13,11 +13,11 @@ block main
             h2.page-title Tạo tài khoản mới
             p.page-desc Thêm người dùng vào hệ thống và phân quyền truy cập.
         .page-actions
-            a.btn-soft(href="/admin/accounts")
+            a.btn-soft(href=`${prefixAdmin}/accounts`)
                 i.bi.bi-arrow-left
                 span Quay lại
 
-    form#form-create-account(action="/admin/accounts/create" method="POST")
+    form#form-create-account(action=`${prefixAdmin}/accounts/create` method="POST")
         .row.g-4
             .col-lg-8
                 //- --- Thông tin đăng nhập ---
