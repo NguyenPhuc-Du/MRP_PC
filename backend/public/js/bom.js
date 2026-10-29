@@ -1,7 +1,8 @@
 (function () {
   document.querySelectorAll(".nav-item").forEach(function (item) {
     item.classList.remove("active");
-    if (item.getAttribute("href") === "/admin/bom") {
+    var href = item.getAttribute("href") || "";
+    if (href === "/admin/bom" || href === "/warehouse/bom") {
       item.classList.add("active");
     }
   });
@@ -86,6 +87,7 @@ paginationButton.forEach(button => {
     if (suggestText) suggestText.textContent = formatVnd(suggested);
     if (saleText) saleText.textContent = hasSale ? formatVnd(sale) : "Chưa chốt";
     if (marginText) marginText.textContent = margin.toFixed(1).replace(".", ",") + "%";
+    form.setAttribute("data-bom-cost", String(total));
   }
 
   if (addBtn && template && list) {

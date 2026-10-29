@@ -1,53 +1,76 @@
 package com.example.mrp_pc.ui.orders
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mrp_pc.data.repository.ProductionRepositoryImpl
 import com.example.mrp_pc.di.NetworkModule
 import com.example.mrp_pc.domain.model.ProductionOrder
 import com.example.mrp_pc.domain.usecase.GetMyOrdersUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class OrderUiState(
     val isLoading: Boolean = false,
     val orders: List<ProductionOrder> = emptyList(),
+    val selectedFilter: String = "ALL", // "ALL", "pending", "in_progress", "done"
     val errorMessage: String? = null,
-)
+) {
+    val filteredOrders: List<ProductionOrder>
+        get() = if (selectedFilter == "ALL") {
+            orders
+        } else {
+            orders.filter { it.status.equals(selectedFilter, ignoreCase = true) }
+        }
+}
 
-class OrderViewModel: ViewModel() {
+class OrderViewModel : ViewModel() {
     private val getMyOrdersUseCase = GetMyOrdersUseCase(
         ProductionRepositoryImpl(NetworkModule.apiService),
     )
 
-    var uiState by mutableStateOf(OrderUiState())
-        private set
+    private val _uiState = MutableStateFlow(OrderUiState())
+    val uiState: StateFlow<OrderUiState> = _uiState.asStateFlow()
+
+    val state: OrderUiState get() = _uiState.value
 
     init {
         loadOrders()
     }
 
+    fun setFilter(filter: String) {
+        _uiState.update { it.copy(selectedFilter = filter) }
+    }
+
     fun loadOrders() {
+        if (_uiState.value.isLoading) return
+
         viewModelScope.launch {
-            uiState = uiState.copy(
-                isLoading = true,
-                errorMessage = null,
-            )
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null,
+                )
+            }
 
-            try{
+            try {
                 val orders = getMyOrdersUseCase()
-
-                uiState = uiState.copy(
-                    isLoading = false,
-                    orders = orders,
-                )
-            }catch (error: Exception) {
-                uiState = uiState.copy(
-                    isLoading = false,
-                    errorMessage = "Không thể tải danh sách"
-                )
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        orders = orders,
+                        errorMessage = null,
+                    )
+                }
+            } catch (error: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Không thể kết nối đến máy chủ để tải danh sách lệnh",
+                    )
+                }
             }
         }
     }

@@ -1,0 +1,58 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+block main
+  link(rel="stylesheet" href="/css/account.css")
+  link(rel="stylesheet" href="/css/backup.css")
+
+  +alert-success(5000)
+  +alert-error(7000)
+
+  .page-head
+    div
+      .page-eyebrow HỆ THỐNG
+      h1.page-title Sao lưu dữ liệu
+      p.page-desc Chụp toàn bộ PostgreSQL (đơn sản xuất, kho, phiếu, tài khoản) thành file .sql.
+    if user.permissions && user.permissions.includes('backup_create')
+      .page-actions
+        form(action=`${prefixAdmin}/backup` method="POST")
+          button.btn-gradient.btn-auto(type="submit")
+            i.bi.bi-plus-lg
+            | Tạo bản sao lưu
+
+  .form-card.backup-hint
+    .form-card-head
+      .form-card-icon
+        i.bi.bi-info-circle
+      div
+        .form-card-title Đây là backup thủ công (hướng pg_dump)
+        .form-card-sub File nằm thư mục backups trên máy chủ. Nên copy thêm ra USB / Drive. Không đẩy file .sql lên Git.
+
+  .form-card.table-card
+    if files && files.length
+      .table-scroll
+        table.account-table
+          thead
+            tr
+              th TÊN FILE
+              th DUNG LƯỢNG
+              th THỜI ĐIỂM
+              th.text-end THAO TÁC
+          tbody
+            each file in files
+              tr
+                td
+                  .user-info
+                    .user-name= file.filename
+                    .user-username PostgreSQL dump
+                td= file.sizeLabel
+                td
+                  span.cell-muted= formatDate(file.createdAt)
+                td.text-end
+                  a.btn-soft(href=`${prefixAdmin}/backup/download/${file.filename}`)
+                    i.bi.bi-download
+                    | Tải về
+    else
+      .backup-empty
+        i.bi.bi-archive
+        p Chưa có bản sao lưu. Bấm “Tạo bản sao lưu” để chụp database hiện tại.

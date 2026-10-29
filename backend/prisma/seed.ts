@@ -76,6 +76,7 @@ async function main() {
   }
 
   const cpuId = categories.get("CPU")!;
+  const mainId = categories.get("Mainboard")!;
   const ramId = categories.get("RAM")!;
   const psuId = categories.get("PSU")!;
 
@@ -83,6 +84,18 @@ async function main() {
     where: { categoryId_name: { categoryId: cpuId, name: "socket" } },
     update: {},
     create: { categoryId: cpuId, name: "socket", dataType: "text", isRequired: true },
+  });
+
+  await prisma.attributeDefinition.upsert({
+    where: { categoryId_name: { categoryId: mainId, name: "socket" } },
+    update: {},
+    create: { categoryId: mainId, name: "socket", dataType: "text", isRequired: true },
+  });
+
+  await prisma.attributeDefinition.upsert({
+    where: { categoryId_name: { categoryId: mainId, name: "ram_type" } },
+    update: {},
+    create: { categoryId: mainId, name: "ram_type", dataType: "text", isRequired: true },
   });
 
   const cpuWattAttr = await prisma.attributeDefinition.upsert({

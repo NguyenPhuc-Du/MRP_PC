@@ -91,20 +91,26 @@ block main
           input(type="date" name="to" value=filters.to)
       button.io-btn-ghost(type="submit") Lọc
       a.io-btn-ghost(href=`${prefixAdmin}/importOrders`) Đặt lại
-    if shortages && shortages.length
+    if shortageGroups && shortageGroups.length
       .io-alert
         .io-alert-head
           i.bi.bi-exclamation-triangle
-          strong Linh kiện đang ở hoặc dưới ngưỡng tồn tối thiểu
-          span.io-alert-count #{shortages.length} mặt hàng
-        ul.io-alert-list
-          each item in shortages
-            li
-              | #{item.name} · #{item.brand} · cần #{item.required}  · tồn #{item.onHand} · thiếu #{item.need} #{item.unit}
-              |  · NCC: #{item.supplier}
-        if canCreate
-          a.io-btn-primary(href=`${prefixAdmin}/importOrders/create?ids=${shortages.map(s => s.id).join(",")}`)
-            | Tạo phiếu nhập các mặt thiếu 
+          strong Thiếu so với lệnh lắp đang mở
+          span.io-alert-count #{shortageGroups.reduce((sum, group) => sum + group.items.length, 0)} mặt hàng
+        each group in shortageGroups
+          .io-shortage-group
+            .io-alert-head
+              strong= group.supplierName
+            ul.io-alert-list
+              each item in group.items
+                li
+                  | #{item.name} · cần #{item.required} · tồn #{item.onHand} · nhập nháp #{item.incoming} · giữ xuất #{item.reserved} · thiếu #{item.need} #{item.unit}
+            if canCreate && group.supplierId
+              - const ids = group.items.map((item) => item.id).join(",")
+              a.io-btn-primary(href=`${prefixAdmin}/importOrders/create?ids=${ids}&supplierId=${group.supplierId}`)
+                | Tạo phiếu nhập · #{group.supplierName}
+            else if !group.supplierId
+              p Gán nhà cung cấp trên danh mục linh kiện trước khi lập phiếu. 
     .io-card
       .table-responsive
         table.io-table
@@ -114,7 +120,7 @@ block main
               th Ngày tạo
               th Người tạo
               th NCC
-              th.text-end Số mặt
+              th.text-end Số mặt hàng
               th.text-end Tổng SL
               th.text-end Tổng tiền
               th Trạng thái
@@ -219,5 +225,4 @@ block main
         i.bi.bi-chevron-right
 
 block script
-  script(src="/js/script.js")
   script(src="/js/import-orders.js")

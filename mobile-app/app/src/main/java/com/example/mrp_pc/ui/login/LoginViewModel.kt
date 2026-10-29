@@ -1,16 +1,17 @@
 package com.example.mrp_pc.ui.login
 
 import android.app.Application
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mrp_pc.data.local.TokenStore
 import com.example.mrp_pc.data.repository.AuthRepositoryImpl
 import com.example.mrp_pc.di.NetworkModule
 import com.example.mrp_pc.domain.usecase.LoginUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class LoginUiState(
@@ -27,8 +28,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         AuthRepositoryImpl(NetworkModule.apiService),
     )
 
-    var uiState by mutableStateOf(LoginUiState())
-        private set
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+
+    // Convenience property for immediate value access
+    val state: LoginUiState get() = _uiState.value
 
     init {
         checkSavedSession()
@@ -38,35 +42,41 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val token = tokenStore.accessToken.first()
 
-            uiState = LoginUiState(
-                isCheckingSession = false,
-                loggedIn = !token.isNullOrBlank(),
-            )
+            _uiState.update {
+                it.copy(
+                    isCheckingSession = false,
+                    loggedIn = !token.isNullOrBlank(),
+                )
+            }
         }
     }
 
     fun login(username: String, password: String) {
+        // Prevent concurrent double-clicks
+        if (_uiState.value.isLoading) return
+
         if (username.isBlank() || password.isBlank()) {
-            uiState = uiState.copy(
-                errorMessage = "Vui lòng nhập đầy đủ thông tin",
-            )
+            _uiState.update {
+                it.copy(errorMessage = "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu")
+            }
             return
         }
 
         viewModelScope.launch {
-            uiState = uiState.copy(
-                isLoading = true,
-                errorMessage = null,
-            )
+            _uiState.update {
+                it.copy(isLoading = true, errorMessage = null)
+            }
 
             try {
-                val result = loginUseCase(username, password)
+                val result = loginUseCase(username.trim(), password)
 
                 if (result.user.role != "staff") {
-                    uiState = LoginUiState(
-                        isCheckingSession = false,
-                        errorMessage = "Ứng dụng chỉ dành cho nhân viên",
-                    )
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Ứng dụng chỉ dành cho tài khoản nhân viên lắp ráp",
+                        )
+                    }
                     return@launch
                 }
 
@@ -76,15 +86,20 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     fullName = result.user.fullName,
                 )
 
-                uiState = LoginUiState(
-                    isCheckingSession = false,
-                    loggedIn = true,
-                )
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        loggedIn = true,
+                        errorMessage = null,
+                    )
+                }
             } catch (error: Exception) {
-                uiState = LoginUiState(
-                    isCheckingSession = false,
-                    errorMessage = "Sai tài khoản, mật khẩu hoặc lỗi kết nối",
-                )
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Sai tài khoản, mật khẩu hoặc lỗi kết nối máy chủ",
+                    )
+                }
             }
         }
     }
@@ -92,11 +107,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun logout() {
         viewModelScope.launch {
             tokenStore.clearSession()
-
-            uiState = LoginUiState(
-                isCheckingSession = false,
-                loggedIn = false,
-            )
+            _uiState.update {
+                it.copy(
+                    isCheckingSession = false,
+                    loggedIn = false,
+                    errorMessage = null,
+                )
+            }
         }
     }
 }
