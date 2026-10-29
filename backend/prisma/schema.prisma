@@ -177,6 +177,8 @@ model PcConfig {
   bomItems           BomItem[]
   exportOrderItems   ExportOrderItem[]
   productionOrders   ProductionOrder[]
+  productInventory   ProductInventory?
+
 
   @@map("pc_configs")
 }
@@ -208,6 +210,18 @@ model Inventory {
 
   @@map("inventory")
 }
+
+model ProductInventory {
+  id             Int      @id @default(autoincrement())
+  pcConfigId     Int      @unique @map("pc_config_id")
+  quantityOnHand Int      @default(0) @map("quantity_on_hand")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  pcConfig PcConfig @relation(fields: [pcConfigId], references: [id], onDelete: Cascade)
+
+  @@map("product_inventory")
+}
+
 
 model ImportOrder {
   id         Int               @id @default(autoincrement())
