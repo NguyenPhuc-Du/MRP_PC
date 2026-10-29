@@ -1,7 +1,10 @@
 extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
 
 block main
   link(rel="stylesheet" href="/css/dashboard.css")
+  +alert-success(4000)
+  +alert-error(6000)
 
   if !dashboard
     .dash-page
@@ -12,14 +15,18 @@ block main
         div
           .dash-date= dashboard.dateLabel
           h2.dash-title Xưởng lắp ráp · Tổng quan
-          p.dash-desc Theo dõi kho và sản xuất theo thời gian thực.
+          p.dash-desc Theo dõi kho linh kiện và thành phẩm theo thời gian thực.
         .dash-actions
-          button.dash-btn-ghost(type="button" disabled title="Chưa có trang báo cáo")
-            i.bi.bi-download
-            span Xuất báo cáo
-          button.dash-btn-primary(type="button" disabled title="Chưa có trang lệnh sản xuất")
-            i.bi.bi-plus-lg
-            span Lệnh sản xuất
+          .dash-export
+            span.dash-export-label
+              i.bi.bi-download
+              | Xuất báo cáo
+            a.dash-btn-ghost(href=`${prefixAdmin}/dashboard/export.xlsx`)
+              i.bi.bi-file-earmark-excel
+              span Excel
+            a.dash-btn-ghost(href=`${prefixAdmin}/dashboard/export.pdf`)
+              i.bi.bi-file-earmark-pdf
+              span PDF
 
       .dash-kpis
         .dash-kpi
@@ -44,17 +51,12 @@ block main
           .dash-kpi-hint.is-warn= dashboard.metrics.exportPending.hint
         .dash-kpi
           .dash-kpi-label
-            span Yêu cầu sản xuất
-          .dash-kpi-value= dashboard.metrics.production.value
-          .dash-kpi-hint.is-up= dashboard.metrics.production.hint
+            span Cấu hình PC
+          .dash-kpi-value= dashboard.metrics.pcConfigs.value
+          .dash-kpi-hint= dashboard.metrics.pcConfigs.hint
         .dash-kpi
           .dash-kpi-label
-            span PC đang lắp ráp
-          .dash-kpi-value= dashboard.metrics.assembling.value
-          .dash-kpi-hint= dashboard.metrics.assembling.hint
-        .dash-kpi
-          .dash-kpi-label
-            span Thành phẩm
+            span Thành phẩm đã lắp
           .dash-kpi-value= dashboard.metrics.finished.value
           .dash-kpi-hint.is-up= dashboard.metrics.finished.hint
         .dash-kpi
@@ -121,7 +123,7 @@ block main
                 else
                   tr
                     td(colspan="5")
-                      .dash-empty-sm Chưa có linh kiện được xuất hoặc lắp.
+                      .dash-empty-sm Chưa có linh kiện được xuất.
 
         .dash-card
           .dash-card-head
