@@ -40,6 +40,66 @@ export const REQUIRED_SLOTS = [
   { key: "case", label: "Case", categories: ["Case"], defaultQty: 1 },
 ] as const;
 
+export type BomFormDraft = {
+  configId?: number;
+  name: string;
+  description: string;
+  salePrice: string;
+  status: "active" | "inactive";
+  slots: Record<string, { componentId: string; quantity: number }>;
+  extras: Array<{ componentId: number; quantity: number }>;
+};
+
+export const bomFormDraftFromBody = (
+  body: Record<string, unknown>,
+  configId?: number,
+): BomFormDraft => {
+  const slotsRaw =
+    body.slots && typeof body.slots === "object"
+      ? (body.slots as Record<string, { componentId?: string; quantity?: string }>)
+      : {};
+  const slots: BomFormDraft["slots"] = {};
+
+  for (const slot of REQUIRED_SLOTS) {
+    const row = slotsRaw[slot.key] || {};
+    const quantity = Number(row.quantity || slot.defaultQty);
+    slots[slot.key] = {
+      componentId: String(row.componentId || ""),
+      quantity: Number.isInteger(quantity) && quantity > 0 ? quantity : slot.defaultQty,
+    };
+  }
+
+  const extrasRaw = body.extras;
+  const rows = !extrasRaw
+    ? []
+    : Array.isArray(extrasRaw)
+      ? extrasRaw
+      : Object.values(extrasRaw as Record<string, unknown>);
+
+  const extras = rows
+    .map((row) => {
+      const item = row as { componentId?: string; quantity?: string };
+      return {
+        componentId: Number(item.componentId),
+        quantity: Number(item.quantity || 1),
+      };
+    })
+    .filter((item) => Number.isInteger(item.componentId) && item.componentId > 0);
+
+  return {
+    configId,
+    name: String(body.name || ""),
+    description: String(body.description || ""),
+    salePrice:
+      body.salePrice === undefined || body.salePrice === null || body.salePrice === ""
+        ? ""
+        : String(body.salePrice),
+    status: body.status === "inactive" ? "inactive" : "active",
+    slots,
+    extras,
+  };
+};
+
 const EXTRA_CATEGORIES = ["GPU", "SSD", "HDD", "Fan", "Ram", "RAM"];
 const SINGLE_QTY_ONE = ["CPU", "Mainboard", "PSU", "Case"];
 const RAM_CATS = ["Ram", "RAM"];
@@ -55,6 +115,19 @@ const CATEGORY_CODE: Record<string, string> = {
   HDD: "HD",
   Case: "CA",
   Fan: "FA",
+};
+
+const MAX_SALE_PRICE = 9_999_999_999;
+
+const normalizeSalePrice = (value: number | undefined): number => {
+  const salePrice = Number(value || 0);
+  if (!Number.isFinite(salePrice) || salePrice < 0) {
+    throw new Error("INVALID_PRICE");
+  }
+  if (salePrice > MAX_SALE_PRICE) {
+    throw new Error("PRICE_TOO_LARGE");
+  }
+  return Math.round(salePrice);
 };
 
 const toNumber = (value: Prisma.Decimal | number | string): number => Number(value);
@@ -242,16 +315,12 @@ const assertSlotCompatibility = (components: CompatComponent[]) => {
   const mainRamType = main ? attrOf(main, "ram_type") : null;
   const ramTypes = rams.map((ram) => attrOf(ram, "ram_type"));
 
-  if (!cpuSocket || !mainSocket || !mainRamType || ramTypes.some((type) => !type)) {
-    throw new Error("MISSING_SPEC");
+  if (cpuSocket && mainSocket && cpuSocket !== mainSocket) {
+    throw new Error(`INCOMPATIBLE_SOCKET:${cpuSocket}:${mainSocket}`);
   }
 
-  if (cpuSocket !== mainSocket) {
-    throw new Error("INCOMPATIBLE_SOCKET");
-  }
-
-  if (ramTypes.some((type) => type !== mainRamType)) {
-    throw new Error("INCOMPATIBLE_RAM");
+  if (mainRamType && ramTypes.some((type) => type && type !== mainRamType)) {
+    throw new Error(`INCOMPATIBLE_RAM:${ramTypes.find((type) => type && type !== mainRamType)}:${mainRamType}`);
   }
 };
 
@@ -392,7 +461,7 @@ export const createConfig = async (dto: CreateBomDto): Promise<BomConfigRow> => 
   }
 
   const { items, cost } = await validateItems(dto.items);
-  const salePrice = dto.salePrice && dto.salePrice > 0 ? dto.salePrice : 0;
+  const salePrice = normalizeSalePrice(dto.salePrice);
   if (salePrice > 0 && salePrice < cost) {
     throw new Error("SALE_BELOW_COST");
   }
@@ -423,7 +492,7 @@ export const updateConfig = async (id: number, dto: UpdateBomDto): Promise<BomCo
   }
 
   const validated = dto.items ? await validateItems(dto.items) : undefined;
-  const salePrice = dto.salePrice;
+  const salePrice = dto.salePrice === undefined ? undefined : normalizeSalePrice(dto.salePrice);
   let cost = validated?.cost;
   if (salePrice && salePrice > 0 && cost === undefined) {
     cost = totalsOf(await getConfigById(id)).totalCost;
@@ -442,7 +511,7 @@ export const updateConfig = async (id: number, dto: UpdateBomDto): Promise<BomCo
       data: {
         ...(name ? { name } : {}),
         ...(dto.description !== undefined ? { description: dto.description.trim() || null } : {}),
-        ...(dto.salePrice !== undefined ? { salePrice: dto.salePrice } : {}),
+        ...(salePrice !== undefined ? { salePrice } : {}),
         ...(dto.status ? { status: dto.status } : {}),
         ...(validated ? { bomItems: { create: validated.items } } : {}),
       },

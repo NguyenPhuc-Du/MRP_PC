@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { prisma } from "../config/db";
-import { systemConfig } from "../config/system";
+import { prefixForRole, systemConfig } from "../config/system";
 import { comparePassword, hashPassword } from "../utils/password.util";
 import { Account, AccountRole, Prisma } from "../generated/prisma";
 import { ChangePasswordDto, UpdateProfileDto } from "../dtos/profile.dto";
@@ -107,7 +107,7 @@ export async function login(
     select: { permissions: true },
   });
 
-  const home = firstViewPath(role?.permissions, systemConfig.prefixAdmin);
+  const home = firstViewPath(role?.permissions, prefixForRole(account.role));
 
   if (!home) {
     res.clearCookie("access_token", {

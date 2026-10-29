@@ -3,7 +3,8 @@ import { systemConfig } from "../config/system";
 import { paginationHelper } from "../utils/pagination.utils";
 import * as productionService from "../services/production.service";
 
-const BASE = () => `${systemConfig.prefixAdmin}/production`;
+const base = (res: Response): string =>
+  `${res.locals.prefixAdmin || systemConfig.prefixAdmin}/production`;
 
 const errorMessage = (error: unknown): string => {
   if (!(error instanceof Error)) {
@@ -69,7 +70,7 @@ export const detail = async (req: Request, res: Response): Promise<void> => {
     const order = await productionService.getOrderDetail(orderId);
     if (!order) {
       req.flash("error", "Không tìm thấy yêu cầu sản xuất");
-      res.redirect(BASE());
+      res.redirect(base(res));
       return;
     }
 
@@ -80,7 +81,7 @@ export const detail = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error(error);
     req.flash("error", "Không tải được chi tiết yêu cầu");
-    res.redirect(BASE());
+    res.redirect(base(res));
   }
 };
 
@@ -109,11 +110,11 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
         ? `Đã giao yêu cầu #${order.id} (${order.pcConfig.name} × ${order.quantityRequested}) cho ${assigneeName}. Nhân viên sẽ thấy trên app.`
         : `Đã tạo yêu cầu #${order.id} (${order.pcConfig.name} × ${order.quantityRequested}). Chưa phân công.`,
     );
-    res.redirect(BASE());
+    res.redirect(base(res));
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(`${BASE()}/create`);
+    res.redirect(`${base(res)}/create`);
   }
 };
 
@@ -121,10 +122,10 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
     await productionService.softDeleteProductionOrder(Number(req.params.orderId));
     req.flash("success", "Đã huỷ yêu cầu sản xuất");
-    res.redirect(BASE());
+    res.redirect(base(res));
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(BASE());
+    res.redirect(base(res));
   }
 };
