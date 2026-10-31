@@ -34,19 +34,10 @@ const bomFieldRules = [
     .withMessage("Tên cấu hình không được để trống")
     .isLength({ max: 100 })
     .withMessage("Tên cấu hình tối đa 100 ký tự"),
-  body("salePrice")
-    .optional({ values: "falsy" })
-    .isFloat({ min: 0 })
-    .withMessage("Giá bán không hợp lệ"),
   body("status")
     .optional({ values: "falsy" })
     .isIn(["active", "inactive"])
     .withMessage("Trạng thái không hợp lệ"),
-  body("description")
-    .optional({ values: "falsy" })
-    .trim()
-    .isLength({ max: 2000 })
-    .withMessage("Mô tả tối đa 2000 ký tự"),
 ];
 
 export const validateCreateBom = [
