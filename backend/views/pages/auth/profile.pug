@@ -2,10 +2,13 @@ extends ../../layouts/admin-layout.pug
 include ../../mixins/alert.pug
 
 block main
-    link(rel="stylesheet", href="/css/profile.css")
+    link(rel="stylesheet", href="/css/profile.css?v=2")
     +alert-success(4000)
     +alert-error(5000)
     .profile-page
+        button.profile-back#btn-profile-back(type="button" data-fallback=backFallback)
+            i.bi.bi-arrow-left
+            | Quay lại
         .comp-eyebrow TÀI KHOẢN
         h2.mb-1 Thông tin cá nhân
         p.text-muted.mb-4 Xem và cập nhật thông tin đăng nhập, liên hệ của bạn
@@ -15,37 +18,37 @@ block main
             .col-12.col-lg-4
                 .comp-card.h-100.d-flex.flex-column.align-items-center.text-center.py-4
                     .profile-avatar-lg
-                        | #{user.fullName ? user.fullName.trim().charAt(0).toUpperCase() : 'U'}
+                        | #{profile.fullName ? profile.fullName.trim().charAt(0).toUpperCase() : 'U'}
 
-                    h5.mt-3.mb-0 #{user.fullName || user.username}
-                    .text-muted.small.mb-3 \@#{user.username}
+                    h5.mt-3.mb-0 #{profile.fullName || profile.username}
+                    .text-muted.small.mb-3 \@#{profile.username}
 
-                    span.comp-status.mb-2(class=user.status === 'active' ? 'comp-status-ok' : 'comp-status-out')
+                    span.comp-status.mb-2(class=profile.status === 'active' ? 'comp-status-ok' : 'comp-status-out')
                         span.comp-dot
-                        if user.status === 'active'
+                        if profile.status === 'active'
                             | Đang hoạt động
                         else
                             | Đã khoá
 
                     .profile-role-chip.mb-4
                         i.bi.bi-shield-check.me-1
-                        if user.role === 'admin'
+                        if profile.role === 'admin'
                             | Quản trị viên
-                        else if user.role === 'warehouse_manager'
+                        else if profile.role === 'warehouse_manager'
                             | Quản lý kho
-                        else if user.role === 'staff'
+                        else if profile.role === 'staff'
                             | Nhân viên lắp ráp
                         else
-                            | #{user.role}
+                            | #{profile.role}
 
                     .profile-meta.w-100.text-start
                         .profile-meta-row
                             i.bi.bi-calendar3
-                            span Tạo tài khoản: #{user.createdAt.toLocaleDateString('vi-VN')}
-                        if user.updatedAt
+                            span Tạo tài khoản: #{profile.createdAt.toLocaleDateString('vi-VN')}
+                        if profile.updatedAt
                             .profile-meta-row
                                 i.bi.bi-clock-history
-                                span Cập nhật lần cuối: #{user.updatedAt.toLocaleDateString('vi-VN')}
+                                span Cập nhật lần cuối: #{profile.updatedAt.toLocaleDateString('vi-VN')}
 
                     hr.w-100
 
@@ -66,33 +69,33 @@ block main
                         .profile-grid
                             .profile-field
                                 label.profile-field-label Họ và tên
-                                input.form-control.profile-field-input(type="text" name="fullName" value=user.fullName disabled)
+                                input.form-control.profile-field-input(type="text" name="fullName" value=profile.fullName disabled)
 
                             .profile-field
                                 label.profile-field-label Tên đăng nhập
-                                input.form-control.profile-field-input(type="text" value=user.username disabled)
+                                input.form-control.profile-field-input(type="text" value=profile.username disabled)
                                 .profile-field-hint Không thể thay đổi tên đăng nhập
 
                             .profile-field
                                 label.profile-field-label Email
-                                input.form-control.profile-field-input(type="email" name="email" value=user.email disabled)
+                                input.form-control.profile-field-input(type="email" name="email" value=profile.email disabled)
 
                             .profile-field
                                 label.profile-field-label Số điện thoại
-                                input.form-control.profile-field-input(type="text" name="phone" value=user.phone disabled)
+                                input.form-control.profile-field-input(type="text" name="phone" value=profile.phone disabled)
 
                             .profile-field
                                 label.profile-field-label Vai trò
                                 input.form-control.profile-field-input(
                                     type="text"
                                     disabled
-                                    value=user.role === 'admin' ? 'Quản trị viên' : user.role === 'warehouse_manager' ? 'Quản lý kho' : 'Nhân viên lắp ráp'
+                                    value=profile.role === 'admin' ? 'Quản trị viên' : profile.role === 'warehouse_manager' ? 'Quản lý kho' : 'Nhân viên lắp ráp'
                                 )
                                 .profile-field-hint Liên hệ quản trị viên để đổi vai trò
 
                             .profile-field
                                 label.profile-field-label Trạng thái tài khoản
-                                input.form-control.profile-field-input(type="text" disabled value=user.status === 'active' ? 'Đang hoạt động' : 'Đã khoá')
+                                input.form-control.profile-field-input(type="text" disabled value=profile.status === 'active' ? 'Đang hoạt động' : 'Đã khoá')
 
                         .profile-form-actions.mt-3.d-none
                             button.comp-btn.comp-btn-light(type="button" id="btn-cancel-edit") Huỷ
@@ -146,4 +149,3 @@ block main
                             | Xác nhận đăng xuất
 
 block script
-    script(src="/js/profile.js")
