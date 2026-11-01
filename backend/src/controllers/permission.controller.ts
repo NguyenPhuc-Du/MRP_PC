@@ -39,5 +39,6 @@ export const permissionsPatch = async (req: Request, res: Response): Promise<voi
         req.flash("error", "Cập nhật phân quyền thất bại");
     }
 
-    res.redirect(`${systemConfig.prefixAdmin}/permissions`);
+    const prefix = res.locals.prefixAdmin || systemConfig.prefixAdmin;
+    res.redirect(`${prefix}/permissions`);
 };

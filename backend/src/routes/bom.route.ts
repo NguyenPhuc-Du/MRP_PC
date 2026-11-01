@@ -11,6 +11,6 @@ router.get("/create", requirePermission('bom_create'), bomController.create);
 router.post("/create", requirePermission('bom_create'), bomValidate.validateCreateBom, bomController.createPost);
 
 router.get("/detail/:id", requirePermission('bom_view'), bomController.detail);
-router.post("/detail/:id", requirePermission('bom_view'), bomValidate.validateUpdateBom, bomController.updatePost);
+router.post("/detail/:id", requirePermission('bom_edit'), bomValidate.validateUpdateBom, bomController.updatePost);
 
 export const bomRoutes = router;

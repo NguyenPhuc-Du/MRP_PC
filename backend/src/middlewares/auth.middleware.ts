@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../config/database";
 import { prefixForRole, systemConfig } from "../config/system";
-import { firstViewPath } from "../constants/permissions";
+import { firstViewPath, sanitizePermissions } from "../constants/permissions";
 
 interface AccessTokenPayload extends JwtPayload {
   username?: string;
@@ -61,7 +61,7 @@ export const requireAuth = async (
       where: { id: account.role },
     });
 
-    const permissions = role?.permissions || [];
+    const permissions = sanitizePermissions(role?.permissions);
 
     res.locals.user = {
       ...account,
@@ -101,28 +101,6 @@ export const requireAuth = async (
     res.clearCookie("access_token");
     res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
   }
-};
-
-/** Web: chỉ quản lý kho. */
-export const requireWarehouse = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
-  const role =
-    (res.locals.user as { role?: string } | undefined)?.role ??
-    req.session.account?.role;
-
-  if (role !== "warehouse_manager") {
-    req.flash(
-      "error",
-      "Chỉ cho phép quản lý kho được nhập hàng và xác nhận phiếu",
-    );
-    res.redirect(`${prefixForRole(role)}/importOrders`);
-    return;
-  }
-
-  next();
 };
 
 /** API Android: Bearer JWT. */
@@ -207,6 +185,7 @@ export const requirePermission = (permissionKey: string) => {
       return next();
     }
 
+    req.flash("error", "Bạn không có quyền truy cập chức năng này");
     const home = firstViewPath(
       permissions,
       prefixForRole(req.session.account?.role),
