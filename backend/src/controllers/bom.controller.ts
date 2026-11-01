@@ -5,7 +5,13 @@ import { BomItemInput, CreateBomDto } from "../dtos/bom.dto";
 import * as bomService from "../services/bom.service";
 import { BomFormDraft } from "../services/bom.service";
 import { paginationHelper } from "../utils/pagination.utils";
-const BASE = () => `${systemConfig.prefixAdmin}/bom`;
+const base = (res: Response): string =>
+  `${res.locals.prefixAdmin || systemConfig.prefixAdmin}/bom`;
+
+const canEditBom = (res: Response): boolean => {
+  const permissions = res.locals.user?.permissions;
+  return Array.isArray(permissions) && permissions.includes("bom_edit");
+};
 
 const errorMessage = (error: unknown): string => {
   if (!(error instanceof Error)) {
@@ -175,7 +181,8 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   res.render("pages/bom/form", {
     pageTitle: "Tạo cấu hình BOM",
     mode: "create",
-    formAction: `${BASE()}/create`,
+    formAction: `${base(res)}/create`,
+    canEdit: true,
     config: withDraft({ ...emptyConfig, slots }, draft),
     catalog,
   });
@@ -186,12 +193,12 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
     const config = await bomService.createConfig(parseBomDto(req));
     delete req.session.bomDraft;
     req.flash("success", "Tạo cấu hình BOM thành công");
-    redirectKeepingSession(req, res, `${BASE()}/detail/${config.id}`);
+    redirectKeepingSession(req, res, `${base(res)}/detail/${config.id}`);
   } catch (error) {
     console.error(error);
     rememberDraft(req);
     req.flash("error", errorMessage(error));
-    redirectKeepingSession(req, res, `${BASE()}/create`);
+    redirectKeepingSession(req, res, `${base(res)}/create`);
   }
 };
 
@@ -208,14 +215,15 @@ export const detail = async (req: Request, res: Response): Promise<void> => {
     res.render("pages/bom/form", {
       pageTitle: config.name || row.name,
       mode: "edit",
-      formAction: `${BASE()}/detail/${row.id}`,
+      formAction: `${base(res)}/detail/${row.id}`,
+      canEdit: canEditBom(res),
       config,
       catalog,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "BOM_NOT_FOUND") {
       req.flash("error", errorMessage(error));
-      res.redirect(BASE());
+      res.redirect(base(res));
       return;
     }
 
@@ -230,11 +238,11 @@ export const updatePost = async (req: Request, res: Response): Promise<void> => 
     await bomService.updateConfig(id, parseBomDto(req));
     delete req.session.bomDraft;
     req.flash("success", "Cập nhật cấu hình BOM thành công");
-    redirectKeepingSession(req, res, `${BASE()}/detail/${id}`);
+    redirectKeepingSession(req, res, `${base(res)}/detail/${id}`);
   } catch (error) {
     console.error(error);
     rememberDraft(req, id);
     req.flash("error", errorMessage(error));
-    redirectKeepingSession(req, res, `${BASE()}/detail/${id}`);
+    redirectKeepingSession(req, res, `${base(res)}/detail/${id}`);
   }
 };

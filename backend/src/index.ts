@@ -14,6 +14,7 @@ import { systemConfig } from "./config/system";
 import { formatDate } from "./utils/date.util";
 
 import apiRoutes from "./api/api.routes";
+import { ensureDefaultRoles } from "./services/permission.service";
 
 const SESSION_MAX_AGE_MS = 8 * 60 * 60 * 1000;
 
@@ -26,7 +27,8 @@ const startServer = async () => {
     throw new Error("SESSION_SECRET is not configured");
   }
 
-  database.connectDatabase();
+  await database.connectDatabase();
+  await ensureDefaultRoles();
   await connectRedis();
 
   app.use(express.static(path.join(__dirname, "../public")));

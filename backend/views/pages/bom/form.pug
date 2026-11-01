@@ -7,12 +7,13 @@ block main
     +alert-error(6000)
 
     - const isEdit = mode === "edit"
+    - const readOnly = isEdit && !canEdit
     - const extras = config.extras && config.extras.length ? config.extras : []
     - const bomSlots = catalog && catalog.slots ? catalog.slots : []
     - const bomGrouped = catalog && catalog.grouped ? catalog.grouped : {}
     - const extraOptions = bomGrouped.extra || []
 
-    form.bom-page#bom-form(action=formAction method="POST")
+    form.bom-page#bom-form(action=formAction method="POST" onsubmit=readOnly ? "return false" : undefined)
         .bom-detail-head
             div
                 .bom-crumb
@@ -23,21 +24,24 @@ block main
                 h1.bom-title= isEdit ? config.name : "Tạo cấu hình BOM"
                 p.bom-desc Đặt tên và chọn đủ 7 linh kiện. Mỗi ô chỉ hiện đúng loại linh kiện.
             .bom-head-actions
-                a.bom-btn-ghost(href=`${prefixAdmin}/bom`) Hủy
-                button.bom-btn-primary(type="submit")= isEdit ? "Lưu cấu hình" : "Tạo cấu hình"
+                a.bom-btn-ghost(href=`${prefixAdmin}/bom`) Quay lại
+                if readOnly
+                    span.bom-btn-ghost Chỉ xem
+                else
+                    button.bom-btn-primary(type="submit")= isEdit ? "Lưu cấu hình" : "Tạo cấu hình"
 
         .bom-split
             .bom-card
                 h2.bom-card-title Thông tin cấu hình
                 label.bom-field
                     span Tên cấu hình
-                    input.bom-input(type="text" name="name" required maxlength="100" value=config.name placeholder="vd: PC Văn phòng AMD")
+                    input.bom-input(type="text" name="name" required maxlength="100" value=config.name placeholder="vd: PC Văn phòng AMD" disabled=readOnly)
                 label.bom-field
                     span Mã BOM
                     input.bom-input(type="text" value=config.code readonly)
                 label.bom-field
                     span Trạng thái
-                    select.bom-input(name="status")
+                    select.bom-input(name="status" disabled=readOnly)
                         option(value="active" selected=(config.statusDb !== "inactive")) Hoạt động
                         option(value="inactive" selected=(config.statusDb === "inactive")) Ngưng
 
@@ -57,6 +61,7 @@ block main
                             select.bom-input(
                                 name=`slots[${slot.key}][componentId]`
                                 data-bom-required="1"
+                                disabled=readOnly
                             )
                                 option(value="") -- Chọn #{slot.label} --
                                 each component in options
@@ -71,29 +76,32 @@ block main
                                 step="1"
                                 required
                                 value=value.quantity || slot.defaultQty
+                                disabled=readOnly
                             )
 
                 .bom-card-head.bom-extra-head
                     div
                         h2.bom-card-title Linh kiện đi kèm
                         p.bom-card-sub GPU, quạt, ổ phụ. Không bắt buộc.
-                    button.bom-btn-primary.bom-btn-sm(type="button" id="bom-add-item")
-                        i.bi.bi-plus-lg
-                        span Thêm linh kiện
+                    if !readOnly
+                        button.bom-btn-primary.bom-btn-sm(type="button" id="bom-add-item")
+                            i.bi.bi-plus-lg
+                            span Thêm linh kiện
 
                 #bom-extra-list
                     each item, index in extras
                         .bom-item-edit
-                            select.bom-input(name=`extras[${index}][componentId]`)
+                            select.bom-input(name=`extras[${index}][componentId]` disabled=readOnly)
                                 option(value="") -- Chọn linh kiện kèm --
                                 each component in extraOptions
                                     option(
                                         value=component.id
                                         selected=(Number(item.componentId) === component.id)
                                     ) #{component.category} · #{component.name}
-                            input.bom-input(type="number" name=`extras[${index}][quantity]` min="1" step="1" value=item.quantity || 1)
-                            button.bom-item-del(type="button" title="Xóa khỏi BOM")
-                                i.bi.bi-trash
+                            input.bom-input(type="number" name=`extras[${index}][quantity]` min="1" step="1" value=item.quantity || 1 disabled=readOnly)
+                            if !readOnly
+                                button.bom-item-del(type="button" title="Xóa khỏi BOM")
+                                    i.bi.bi-trash
 
     template#bom-item-template
         .bom-item-edit

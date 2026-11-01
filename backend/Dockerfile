@@ -14,4 +14,4 @@ COPY . .
 RUN npx prisma generate
 EXPOSE 3000
 # Sync deps into backend_node_modules volume when package.json changes
-CMD ["sh", "-c", "npm install && npx prisma generate && npm run dev"]
+CMD ["sh", "-c", "npm install && npx prisma generate && npx prisma migrate deploy && npm run dev"]
