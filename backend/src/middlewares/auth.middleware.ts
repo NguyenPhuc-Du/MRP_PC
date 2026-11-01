@@ -67,6 +67,7 @@ export const requireAuth = async (
       ...account,
       permissions,
     };
+    res.locals.navPermissions = permissions;
 
     req.session.account = {
       id: account.id,

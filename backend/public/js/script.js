@@ -96,6 +96,18 @@
 
 
 document.addEventListener('DOMContentLoaded', function () {
+  var backBtn = document.getElementById('btn-profile-back');
+  if (backBtn) {
+    backBtn.addEventListener('click', function () {
+      var fallback = backBtn.getAttribute('data-fallback') || '/';
+      if (window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+      window.location.href = fallback;
+    });
+  }
+
   var editBtn = document.getElementById('btn-edit-profile');
   var cancelBtn = document.getElementById('btn-cancel-edit');
   var form = document.getElementById('form-profile');
