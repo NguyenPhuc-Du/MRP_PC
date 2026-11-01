@@ -25,21 +25,7 @@ paginationButton.forEach(button => {
   var addBtn = document.getElementById("bom-add-item");
   var template = document.getElementById("bom-item-template");
   var form = document.getElementById("bom-form");
-  var costText = document.getElementById("bom-cost-text");
-  var suggestText = document.getElementById("bom-suggest-text");
-  var saleText = document.getElementById("bom-sale-text");
-  var saleInput = document.getElementById("bom-sale-price");
-  var marginText = document.getElementById("bom-margin-text");
-  var marginRate = 0.15;
-
-  function formatVnd(value) {
-    return new Intl.NumberFormat("vi-VN").format(Math.round(value)) + " đ";
-  }
-
-  function selectedPrice(select) {
-    if (!select || !select.selectedOptions || !select.selectedOptions[0]) return 0;
-    return Number(select.selectedOptions[0].getAttribute("data-price") || 0);
-  }
+  var missingWarn = document.getElementById("bom-missing-warn");
 
   function reindex() {
     if (!list) return;
@@ -51,43 +37,18 @@ paginationButton.forEach(button => {
     });
   }
 
-  function updateTotals() {
-    if (!form || !costText) return;
-
-    var requiredSelects = form.querySelectorAll("[data-bom-required='1']");
-    var complete = true;
-    Array.prototype.forEach.call(requiredSelects, function (select) {
-      if (!select.value) complete = false;
+  function missingSlotLabels() {
+    if (!form) return [];
+    var missing = [];
+    form.querySelectorAll("[data-bom-required='1']").forEach(function (select) {
+      var empty = !select.value;
+      select.classList.toggle("is-missing", empty);
+      if (!empty) return;
+      var slot = select.closest(".bom-slot");
+      var label = slot ? slot.querySelector(".bom-slot-label") : null;
+      missing.push(label ? label.textContent.trim() : "linh kiện");
     });
-
-    if (!complete) {
-      costText.textContent = "Chưa đủ linh kiện";
-      if (suggestText) suggestText.textContent = "—";
-      if (saleText) saleText.textContent = "Chưa chốt";
-      if (marginText) marginText.textContent = "—";
-      return;
-    }
-
-    var total = 0;
-    form.querySelectorAll(".bom-cost-select").forEach(function (select) {
-      if (!select.value) return;
-      var row = select.closest(".bom-slot, .bom-item-edit") || form;
-      var qtyInput = row.querySelector(".bom-cost-qty");
-      var qty = Number(qtyInput && qtyInput.value ? qtyInput.value : 1);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
-      total += selectedPrice(select) * qty;
-    });
-
-    var suggested = total / (1 - marginRate);
-    var sale = Number(saleInput && saleInput.value);
-    var hasSale = Number.isFinite(sale) && sale > 0;
-    var marginBase = hasSale ? sale : suggested;
-    var margin = marginBase > 0 ? ((marginBase - total) / marginBase) * 100 : 0;
-    costText.textContent = formatVnd(total);
-    if (suggestText) suggestText.textContent = formatVnd(suggested);
-    if (saleText) saleText.textContent = hasSale ? formatVnd(sale) : "Chưa chốt";
-    if (marginText) marginText.textContent = margin.toFixed(1).replace(".", ",") + "%";
-    form.setAttribute("data-bom-cost", String(total));
+    return missing;
   }
 
   if (addBtn && template && list) {
@@ -99,7 +60,6 @@ paginationButton.forEach(button => {
         list.appendChild(wrap.firstElementChild);
       }
       reindex();
-      updateTotals();
     });
   }
 
@@ -113,14 +73,35 @@ paginationButton.forEach(button => {
       if (row) {
         row.remove();
         reindex();
-        updateTotals();
       }
     });
   }
 
   if (form) {
-    form.addEventListener("change", updateTotals);
-    form.addEventListener("input", updateTotals);
-    updateTotals();
+    form.addEventListener("change", function (event) {
+      var target = event.target;
+      if (!target || !target.matches || !target.matches("[data-bom-required='1']")) return;
+      if (target.value) target.classList.remove("is-missing");
+      if (!missingWarn || missingWarn.hidden) return;
+      var missing = missingSlotLabels();
+      if (!missing.length) {
+        missingWarn.hidden = true;
+        return;
+      }
+      missingWarn.textContent = "Chưa chọn đủ linh kiện (" + missing.join(", ") + "). Hãy chọn đủ rồi tạo lại.";
+    });
+
+    form.addEventListener("submit", function (event) {
+      var missing = missingSlotLabels();
+      if (!missing.length) {
+        if (missingWarn) missingWarn.hidden = true;
+        return;
+      }
+      event.preventDefault();
+      if (!missingWarn) return;
+      missingWarn.hidden = false;
+      missingWarn.textContent = "Chưa chọn đủ linh kiện (" + missing.join(", ") + "). Hãy chọn đủ rồi tạo lại.";
+      missingWarn.scrollIntoView({ block: "nearest" });
+    });
   }
 })();

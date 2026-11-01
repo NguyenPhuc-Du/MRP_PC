@@ -23,32 +23,6 @@ block main
                 .bom-search
                     i.bi.bi-search
                     input(type="text" placeholder="Tìm theo tên cấu hình hoặc mã BOM...")
-                .bom-toolbar-actions
-                    .dropdown
-                        button.bom-btn-ghost.dropdown-toggle(
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        )
-                            i.bi.bi-funnel
-                            span Bộ lọc
-                        ul.dropdown-menu.dropdown-menu-end
-                            li
-                                a.dropdown-item(
-                                    class=(!sort ? "active" : "")
-                                    href=`${prefixAdmin}/bom`
-                                ) Mặc định
-                            li
-                                a.dropdown-item(
-                                    class=(sort === "price_asc" ? "active" : "")
-                                    href=`${prefixAdmin}/bom?sort=price_asc`
-                                ) Giá tăng dần
-                            li
-                                a.dropdown-item(
-                                    class=(sort === "price_desc" ? "active" : "")
-                                    href=`${prefixAdmin}/bom?sort=price_desc`
-                                ) Giá giảm dần
-
             .table-responsive
                 table.bom-table
                     thead
@@ -56,8 +30,6 @@ block main
                             th TÊN CẤU HÌNH
                             th MÃ BOM
                             th LINH KIỆN
-                            th GIÁ VỐN
-                            th GIÁ BÁN CUỐI
                             th TRẠNG THÁI
                             if user && user.permissions && user.permissions.includes('bom_view')
                                 th
@@ -73,12 +45,6 @@ block main
                                     td
                                         span.bom-code= config.code
                                     td #{config.itemCount} linh kiện · #{config.groupCount} nhóm
-                                    td.bom-money= config.totalCostText
-                                    td.bom-money
-                                      if config.saleLocked
-                                        span.is-locked= config.salePriceText
-                                      else
-                                        span.is-open= config.salePriceText || "Chưa chốt"
                                     td
                                         span.bom-status(class=`is-${config.status}`)
                                             span.bom-status-dot
@@ -91,7 +57,7 @@ block main
                             tr
                                 - const canView = user && user.permissions && user.permissions.includes('bom_view');
                                 - const canCreate = user && user.permissions && user.permissions.includes('bom_create');
-                                td.text-center.py-4(colspan=canView ? "7" : "6")
+                                td.text-center.py-4(colspan=canView ? "5" : "4")
                                     | Chưa có cấu hình BOM. #{canCreate ? 'Bấm “Thêm cấu hình” để tạo mới.' : ''}
 
             .d-flex.justify-content-between.align-items-center.mt-4

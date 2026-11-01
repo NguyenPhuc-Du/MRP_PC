@@ -489,6 +489,21 @@
   color: #8a8d9a;
 }
 
+.bom-warn {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff6e8;
+  color: #b54708;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bom-input.is-missing {
+  border-color: #f04438;
+  background: #fff8f6;
+}
+
 .bom-slot-list {
   display: flex;
   flex-direction: column;

@@ -21,7 +21,7 @@ block main
                     strong= isEdit ? config.name : "Tạo cấu hình"
                 .bom-code-pill= config.code
                 h1.bom-title= isEdit ? config.name : "Tạo cấu hình BOM"
-                p.bom-desc Chọn đủ 7 linh kiện bắt buộc. Giá bán chốt sau khi đã có giá vốn.
+                p.bom-desc Đặt tên và chọn đủ 7 linh kiện. Mỗi ô chỉ hiện đúng loại linh kiện.
             .bom-head-actions
                 a.bom-btn-ghost(href=`${prefixAdmin}/bom`) Hủy
                 button.bom-btn-primary(type="submit")= isEdit ? "Lưu cấu hình" : "Tạo cấu hình"
@@ -35,23 +35,16 @@ block main
                 label.bom-field
                     span Mã BOM
                     input.bom-input(type="text" value=config.code readonly)
-                .bom-field-row
-                    label.bom-field
-                        span Trạng thái
-                        select.bom-input(name="status")
-                            option(value="active" selected=(config.statusDb !== "inactive")) Hoạt động
-                            option(value="inactive" selected=(config.statusDb === "inactive")) Ngưng
-                    label.bom-field
-                        span Giá bán (chốt sau)
-                        input.bom-input#bom-sale-price(type="number" name="salePrice" min="0" max="9999999999" step="1000" value=config.salePrice placeholder="Để trống nếu chưa chốt")
                 label.bom-field
-                    span Mô tả
-                    textarea.bom-textarea(name="description" placeholder="Mô tả ngắn cho cấu hình")= config.description
-                p.bom-hint Giá đề xuất = giá vốn chia 0,85 để lãi 15% trên giá bán. Margin thực tế tính theo giá bán cuối nếu đã chốt.
+                    span Trạng thái
+                    select.bom-input(name="status")
+                        option(value="active" selected=(config.statusDb !== "inactive")) Hoạt động
+                        option(value="inactive" selected=(config.statusDb === "inactive")) Ngưng
 
             .bom-card
                 h2.bom-card-title Linh kiện bắt buộc
-                p.bom-card-sub CPU, main, RAM, ổ cứng, nguồn, tản nhiệt, case — mỗi ô chỉ hiện đúng loại.
+                p.bom-card-sub CPU chỉ hiện CPU, RAM chỉ hiện RAM. Không kiểm tra socket hay loại RAM có khớp nhau.
+                p#bom-missing-warn.bom-warn(hidden) Chưa chọn đủ linh kiện. Hãy chọn đủ 7 linh kiện rồi tạo lại.
 
                 .bom-slot-list
                     each slot in bomSlots
@@ -61,24 +54,20 @@ block main
                             .bom-slot-head
                                 span.bom-slot-label= slot.label
                                 span.bom-slot-req Bắt buộc
-                            select.bom-input.bom-cost-select(
+                            select.bom-input(
                                 name=`slots[${slot.key}][componentId]`
-                                required
                                 data-bom-required="1"
                             )
-                                option(value="" data-price="0") -- Chọn #{slot.label} --
+                                option(value="") -- Chọn #{slot.label} --
                                 each component in options
                                     option(
                                         value=component.id
-                                        data-price=component.unitPrice
                                         selected=(Number(value.componentId) === component.id)
                                     ) #{component.name}
-                            - const qtyMax = ["cpu", "main", "psu", "case"].includes(slot.key) ? 1 : (slot.key === "ram" ? 4 : undefined)
-                            input.bom-input.bom-cost-qty(
+                            input.bom-input(
                                 type="number"
                                 name=`slots[${slot.key}][quantity]`
                                 min="1"
-                                max=qtyMax
                                 step="1"
                                 required
                                 value=value.quantity || slot.defaultQty
@@ -87,7 +76,7 @@ block main
                 .bom-card-head.bom-extra-head
                     div
                         h2.bom-card-title Linh kiện đi kèm
-                        p.bom-card-sub GPU, fan thêm, ổ phụ... Không bắt buộc.
+                        p.bom-card-sub GPU, quạt, ổ phụ. Không bắt buộc.
                     button.bom-btn-primary.bom-btn-sm(type="button" id="bom-add-item")
                         i.bi.bi-plus-lg
                         span Thêm linh kiện
@@ -95,39 +84,24 @@ block main
                 #bom-extra-list
                     each item, index in extras
                         .bom-item-edit
-                            select.bom-input.bom-cost-select(name=`extras[${index}][componentId]`)
-                                option(value="" data-price="0") -- Chọn linh kiện kèm --
+                            select.bom-input(name=`extras[${index}][componentId]`)
+                                option(value="") -- Chọn linh kiện kèm --
                                 each component in extraOptions
                                     option(
                                         value=component.id
-                                        data-price=component.unitPrice
                                         selected=(Number(item.componentId) === component.id)
                                     ) #{component.category} · #{component.name}
-                            input.bom-input.bom-cost-qty(type="number" name=`extras[${index}][quantity]` min="1" step="1" value=item.quantity || 1)
+                            input.bom-input(type="number" name=`extras[${index}][quantity]` min="1" step="1" value=item.quantity || 1)
                             button.bom-item-del(type="button" title="Xóa khỏi BOM")
                                 i.bi.bi-trash
 
-                .bom-summary
-                    .bom-summary-col
-                        span.bom-summary-label Giá vốn
-                        strong.bom-summary-value#bom-cost-text= config.totalCostText || "Chưa đủ linh kiện"
-                    .bom-summary-col
-                        span.bom-summary-label Giá đề xuất (lãi 15%)
-                        strong.bom-summary-value#bom-suggest-text= config.suggestedSaleText || "—"
-                    .bom-summary-col.bom-summary-final
-                        span.bom-summary-label Giá bán cuối
-                        strong.bom-summary-value.bom-final#bom-sale-text= config.salePriceText || "Chưa chốt"
-                    .bom-summary-col
-                        span.bom-summary-label Margin thực tế
-                        strong.bom-summary-value.bom-margin#bom-margin-text= config.marginText || "—"
-
     template#bom-item-template
         .bom-item-edit
-            select.bom-input.bom-cost-select(name="extras[__index__][componentId]")
-                option(value="" data-price="0") -- Chọn linh kiện kèm --
+            select.bom-input(name="extras[__index__][componentId]")
+                option(value="") -- Chọn linh kiện kèm --
                 each component in extraOptions
-                    option(value=component.id data-price=component.unitPrice) #{component.category} · #{component.name}
-            input.bom-input.bom-cost-qty(type="number" name="extras[__index__][quantity]" min="1" step="1" value="1")
+                    option(value=component.id) #{component.category} · #{component.name}
+            input.bom-input(type="number" name="extras[__index__][quantity]" min="1" step="1" value="1")
             button.bom-item-del(type="button" title="Xóa khỏi BOM")
                 i.bi.bi-trash
 

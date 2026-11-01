@@ -17,14 +17,9 @@ const errorMessage = (error: unknown): string => {
       return "Không tìm thấy cấu hình BOM";
     case "NAME_REQUIRED":
       return "Tên cấu hình không được để trống";
-    case "INVALID_PRICE":
-      return "Giá bán không hợp lệ";
-    case "PRICE_TOO_LARGE":
-      return "Giá bán tối đa 9.999.999.999 đ. Để trống nếu chưa chốt giá";
-    case "MISSING_REQUIRED_SLOT":
-      return "BOM phải có đủ CPU, mainboard, RAM, ổ cứng, nguồn, tản nhiệt và case";
+    case "NOT_ENOUGH_COMPONENTS":
     case "NO_ITEMS":
-      return "Thêm ít nhất một linh kiện vào BOM";
+      return "Chưa chọn đủ linh kiện. Hãy chọn đủ 7 linh kiện rồi tạo lại.";
     case "INVALID_QTY":
       return "Số lượng linh kiện phải là số nguyên lớn hơn 0";
     case "DUPLICATE_COMPONENT":
@@ -33,30 +28,13 @@ const errorMessage = (error: unknown): string => {
       return "Linh kiện không tồn tại";
     case "COMPONENT_INACTIVE":
       return "Không gắn linh kiện đã ngừng kinh doanh";
-    case "SLOT_SINGLE_ONLY":
-      return "CPU, mainboard, nguồn và case: mỗi loại đúng 1 linh kiện, số lượng 1";
-    case "INVALID_RAM":
-      return "RAM phải từ 1 đến 4 thanh";
-    case "GPU_SINGLE_ONLY":
-      return "Chỉ được 1 GPU trong BOM";
-    case "SALE_BELOW_COST":
-      return "Giá chốt không được nhỏ hơn giá vốn";
     default:
       break;
   }
 
-  if (error.message.startsWith("INCOMPATIBLE_SOCKET:")) {
-    const [, cpuSocket, mainSocket] = error.message.split(":");
-    return `Socket CPU (${cpuSocket}) không khớp socket mainboard (${mainSocket})`;
-  }
-
-  if (error.message.startsWith("INCOMPATIBLE_RAM:")) {
-    const [, ramType, mainType] = error.message.split(":");
-    return `Loại RAM (${ramType}) không khớp mainboard (${mainType})`;
-  }
-
-  if (error.message.includes("numeric field overflow") || error.message.includes("22003")) {
-    return "Giá bán quá lớn. Tối đa 9.999.999.999 đ, hoặc để trống nếu chưa chốt";
+  if (error.message.startsWith("NOT_ENOUGH_COMPONENTS:")) {
+    const labels = error.message.slice("NOT_ENOUGH_COMPONENTS:".length);
+    return `Chưa chọn đủ linh kiện (${labels}). Hãy chọn đủ rồi tạo lại.`;
   }
 
   return "Thao tác thất bại";
@@ -84,10 +62,19 @@ const parseBomDto = (req: Request): CreateBomDto => {
     quantity: Number(slots[slot.key]?.quantity || slot.defaultQty),
   }));
 
+  const missingLabels = bomService.REQUIRED_SLOTS
+    .filter((slot, index) => {
+      const id = slotItems[index]?.componentId;
+      return !Number.isInteger(id) || id < 1;
+    })
+    .map((slot) => slot.label);
+
+  if (missingLabels.length > 0) {
+    throw new Error(`NOT_ENOUGH_COMPONENTS:${missingLabels.join(", ")}`);
+  }
+
   return {
     name: String(req.body.name || ""),
-    description: String(req.body.description || ""),
-    salePrice: Number(req.body.salePrice) || 0,
     status: req.body.status === "inactive" ? "inactive" : "active",
     items: [...slotItems, ...parseNamedItems(req.body.extras)],
   };
