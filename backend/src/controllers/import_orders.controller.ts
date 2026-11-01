@@ -149,8 +149,7 @@ export const createPost = async (
   res: Response,
 ): Promise<void> => {
   try {
-    // 1) Chặn role: middleware requireWarehouse đã chạy trước
-    // 2) Người tạo = session, không getDefaultCreator()
+    // Người tạo = session, không getDefaultCreator()
     const createdBy = req.session.account?.id;
     if (!createdBy) {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
@@ -288,7 +287,7 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const confirm = async (req: Request, res: Response): Promise<void> => {
-  // Chỉ QL kho tới đây (requireWarehouse). Phiếu phải đang draft, SL > 0, rồi inventory.increment.
+  // Đã qua requirePermission("importOrders_edit"). Phiếu phải đang draft, SL > 0, rồi inventory.increment.
   const orderId = Number(req.params.orderId);
   try {
     const accountId = req.session.account?.id;

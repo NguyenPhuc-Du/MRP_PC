@@ -6,7 +6,7 @@ import { prefixForRole, systemConfig } from "../config/system";
 import { comparePassword, hashPassword } from "../utils/password.util";
 import { Account, AccountRole, Prisma } from "../generated/prisma";
 import { ChangePasswordDto, UpdateProfileDto } from "../dtos/profile.dto";
-import { firstViewPath } from "../constants/permissions";
+import { firstViewPath, sanitizePermissions } from "../constants/permissions";
 
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
@@ -37,7 +37,7 @@ function createAccessToken(account: {
     getJwtSecret(),
     {
       expiresIn: (process.env.JWT_EXPIRES_IN ??
-        "1h") as SignOptions["expiresIn"],
+        "8h") as SignOptions["expiresIn"],
     },
   );
 }
@@ -92,7 +92,7 @@ export async function login(
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 1000,
+    maxAge: 8 * 60 * 60 * 1000,
   });
 
   req.session.account = {
@@ -107,7 +107,10 @@ export async function login(
     select: { permissions: true },
   });
 
-  const home = firstViewPath(role?.permissions, prefixForRole(account.role));
+  const home = firstViewPath(
+    sanitizePermissions(role?.permissions),
+    prefixForRole(account.role),
+  );
 
   if (!home) {
     res.clearCookie("access_token", {

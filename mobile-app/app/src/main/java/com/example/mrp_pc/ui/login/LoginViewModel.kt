@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mrp_pc.data.local.TokenStore
+import com.example.mrp_pc.data.local.accessTokenExpired
+import com.example.mrp_pc.data.remote.SessionBus
 import com.example.mrp_pc.data.repository.AuthRepositoryImpl
 import com.example.mrp_pc.di.NetworkModule
 import com.example.mrp_pc.domain.usecase.LoginUseCase
@@ -35,17 +37,39 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val state: LoginUiState get() = _uiState.value
 
     init {
+        viewModelScope.launch {
+            SessionBus.expired.collect {
+                _uiState.update {
+                    it.copy(
+                        isCheckingSession = false,
+                        isLoading = false,
+                        loggedIn = false,
+                        errorMessage = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+                    )
+                }
+            }
+        }
         checkSavedSession()
     }
 
     private fun checkSavedSession() {
         viewModelScope.launch {
             val token = tokenStore.accessToken.first()
+            val expired = !token.isNullOrBlank() && accessTokenExpired(token)
+
+            if (expired) {
+                tokenStore.clearSession()
+            }
 
             _uiState.update {
                 it.copy(
                     isCheckingSession = false,
-                    loggedIn = !token.isNullOrBlank(),
+                    loggedIn = !token.isNullOrBlank() && !expired,
+                    errorMessage = if (expired) {
+                        "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+                    } else {
+                        null
+                    },
                 )
             }
         }

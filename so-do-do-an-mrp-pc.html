@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chương III — Phân tích và thiết kế MRP PC</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    body { margin: 0; font-family: "Times New Roman", Times, serif; background: #f4f4f4; color: #111; }
+    header, nav, main { max-width: 1100px; margin: 0 auto; }
+    header { padding: 24px 16px 0; }
+    h1 { font-size: 26px; text-align: center; font-weight: 700; }
+    h2 { font-size: 20px; margin: 28px 0 8px; }
+    h3 { font-size: 17px; margin: 22px 0 8px; }
+    p { line-height: 1.45; }
+    nav { display: flex; flex-wrap: wrap; gap: 12px; padding: 8px 16px 16px; position: sticky; top: 0; background: #f4f4f4; }
+    nav a { color: #0b3d91; }
+    section { background: #fff; border: 1px solid #ccc; margin: 0 16px 18px; padding: 16px 18px 22px; overflow: auto; }
+    .cap { text-align: center; font-style: italic; margin: 4px 0 16px; }
+    table { border-collapse: collapse; width: 100%; margin: 8px 0 4px; font-size: 15px; }
+    td, th { border: 1px solid #222; padding: 6px 8px; vertical-align: top; text-align: left; }
+    td.k { width: 170px; font-weight: 700; }
+    .rel { font-family: Consolas, monospace; line-height: 1.7; }
+    .rel u { text-underline-offset: 2px; }
+    .mermaid { display: flex; justify-content: center; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CHƯƠNG III: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG</h1>
+    <p>Cùng cấu trúc hình với báo cáo OOAD (BFD cây chức năng, use case include/extend, đặc tả hai cột, sequence có alt, ERD, RDM, lược đồ bảng, sơ đồ lớp). Nội dung bám đồ án MRP linh kiện PC: Admin, Quản lý kho, Nhân viên lắp ráp. Không có đăng ký công khai, quên mật khẩu, nghe nhạc hay upload track.</p>
+  </header>
+  <nav>
+    <a href="#bfd">1. BFD</a>
+    <a href="#uc">2. Use case</a>
+    <a href="#spec">3. Đặc tả</a>
+    <a href="#seq">4. Sequence</a>
+    <a href="#erd">5. ERD và RDM</a>
+    <a href="#db">6. Lược đồ CSDL</a>
+    <a href="#cls">7. Sơ đồ lớp</a>
+  </nav>
+  <main>
+    <section id="bfd">
+      <h2>1. Mô hình BFD</h2>
+      <div class="mermaid">
+flowchart TB
+  SYS["MRP PC"]
+  SYS --> AD["Quản trị hệ thống"]
+  SYS --> CAT["Danh mục linh kiện"]
+  SYS --> WH["Kho vận"]
+  SYS --> PR["Sản xuất và lắp ráp"]
+  SYS --> RP["Thống kê"]
+  AD --> AD1["Tạo tài khoản"]
+  AD --> AD2["Phân quyền vai trò"]
+  AD --> AD3["Khóa và mở khóa"]
+  AD --> AD4["Sao lưu CSDL"]
+  CAT --> C1["Thêm, sửa, xóa mềm"]
+  CAT --> C2["Hãng và nhà cung cấp"]
+  CAT --> C3["Thuộc tính EAV"]
+  CAT --> C4["Tìm kiếm"]
+  WH --> W1["Phiếu nhập"]
+  WH --> W2["Phiếu xuất"]
+  W1 --> W11["Tạo và sửa nháp"]
+  W1 --> W12["Xác nhận, cộng tồn"]
+  W2 --> W21["Duyệt NVL, trừ tồn"]
+  W2 --> W22["Duyệt thành phẩm"]
+  W2 --> W23["Từ chối, không đổi tồn"]
+  PR --> P1["BOM cấu hình PC"]
+  PR --> P2["Lệnh sản xuất"]
+  PR --> P3["App nhân viên lắp ráp"]
+  P3 --> P31["Kiểm tra tồn"]
+  P3 --> P32["Xin xuất NVL"]
+  P3 --> P33["Xác nhận lắp"]
+  P3 --> P34["Xin xuất thành phẩm"]
+  RP --> R1["Dashboard số liệu"]
+  RP --> R2["Cảnh báo tồn và top NVL"]
+      </div>
+      <p class="cap">1.1. Mô hình BFD</p>
+    </section>
+
+    <section id="uc">
+      <h2>2. Mô hình Use case</h2>
+      <h3>2.1. Use case tổng quát</h3>
+      <div class="mermaid">
+flowchart TB
+  subgraph AD[Admin]
+    direction TB
+    AD0([Admin])
+    AD0 --- AD1([1. Tạo tài khoản])
+    AD0 --- AD2([2. Phân quyền])
+    AD0 --- AD13([13. Quản lý tài khoản])
+    AD0 --- AD15([15. Sao lưu])
+    AD0 --- AD12([12. Thống kê số liệu])
+    AD0 --- AD16([16. Cảnh báo tồn])
+    AD0 --- AD3([3. Đăng nhập])
+    AD0 --- AD4([4. Đổi mật khẩu])
+    AD0 --- AD10([10. Đăng xuất])
+    AD0 --- AD11([11. Xem hồ sơ])
+  end
+  subgraph QL[Quản lý kho]
+    direction TB
+    QL0([Quản lý kho])
+    QL0 --- QL5([5. Tìm kiếm linh kiện])
+    QL0 --- QL14([14. Quản lý linh kiện])
+    QL0 --- QL17([17. Lập BOM])
+    QL0 --- QL9([9. Phiếu nhập])
+    QL0 --- QL7([7. Duyệt phiếu xuất])
+    QL0 --- QL8([8. Lệnh sản xuất])
+    QL0 --- QL12([12. Thống kê số liệu])
+    QL0 --- QL16([16. Cảnh báo tồn])
+    QL0 --- QL3([3. Đăng nhập])
+    QL0 --- QL4([4. Đổi mật khẩu])
+    QL0 --- QL10([10. Đăng xuất])
+    QL0 --- QL11([11. Xem hồ sơ])
+  end
+  subgraph NV[Nhân viên lắp ráp]
+    direction TB
+    NV0([Nhân viên])
+    NV0 --- NV6([6. Lắp ráp])
+    NV0 --- NV3([3. Đăng nhập app])
+    NV0 --- NV10([10. Đăng xuất app])
+  end
+  AD ~~~ QL
+  QL ~~~ NV
+      </div>
+      <p class="cap">2.1. Use case tổng quát</p>
+
+      <h3>2.2. Use case tạo tài khoản</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Admin]) --- M([1. Tạo tài khoản])
+  M -.->|include| a([1.1. Nhập username])
+  M -.->|include| b([1.2. Nhập password])
+  M -.->|include| c([1.3. Nhập email, họ tên])
+  M -.->|include| d([1.4. Chọn vai trò])
+  d -.->|extend| e([1.4.1. Chặn admin thứ hai])
+      </div>
+      <p class="cap">2.2. Use case tạo tài khoản</p>
+
+      <h3>2.3. Use case đăng nhập</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Admin / QL kho / Nhân viên]) --- M([2. Đăng nhập])
+  M -.->|include| a([2.1. Nhập username])
+  M -.->|include| b([2.2. Nhập password])
+  M -.->|extend| c([2.3. Vào web theo quyền])
+  M -.->|extend| d([2.4. Vào app nếu là staff])
+      </div>
+      <p class="cap">2.3. Use case đăng nhập</p>
+
+      <h3>2.4. Use case đổi mật khẩu</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Người đã đăng nhập web]) --- M([3. Đổi mật khẩu])
+  M -.->|include| a([3.1. Nhập mật khẩu hiện tại])
+  M -.->|include| b([3.2. Nhập mật khẩu mới])
+  M -.->|include| c([3.3. Xác nhận mật khẩu])
+  b -.->|extend| d([3.2.1. Từ chối nếu ngắn hơn 8 ký tự])
+      </div>
+      <p class="cap">2.4. Use case đổi mật khẩu</p>
+
+      <h3>2.5. Use case lắp ráp</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Nhân viên]) --- M([4. Lắp ráp])
+  M -.->|include| a([4.1. Xem lệnh được gán])
+  M -.->|include| b([4.2. Kiểm tra tồn])
+  M -.->|extend| c([4.3. Xin xuất NVL])
+  M -.->|extend| d([4.4. Xác nhận lắp])
+  M -.->|extend| e([4.5. Xin xuất thành phẩm])
+      </div>
+      <p class="cap">2.5. Use case lắp ráp</p>
+
+      <h3>2.6. Use case tìm kiếm</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Quản lý kho]) --- M([5. Tìm kiếm linh kiện])
+  M -.->|include| a([5.1. Nhập tên])
+  M -.->|extend| b([5.2. Lọc trạng thái])
+  M -.->|extend| c([5.3. Lọc hết hàng])
+  M -.->|include| d([5.4. Phân trang 10 dòng])
+      </div>
+      <p class="cap">2.6. Use case tìm kiếm</p>
+
+      <h3>2.7. Use case duyệt phiếu xuất</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Quản lý kho]) --- M([6. Duyệt phiếu xuất])
+  M -.->|include| a([6.1. Xem phiếu pending])
+  M -.->|extend| b([6.2. Duyệt NVL])
+  M -.->|extend| c([6.3. Duyệt thành phẩm])
+  M -.->|extend| d([6.4. Từ chối])
+      </div>
+      <p class="cap">2.7. Use case duyệt phiếu xuất</p>
+
+      <h3>2.8. Use case lệnh sản xuất</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Quản lý kho]) --- M([7. Lệnh sản xuất])
+  M -.->|include| a([7.1. Chọn cấu hình active])
+  M -.->|include| b([7.2. Nhập số lượng])
+  M -.->|extend| c([7.3. Gán nhân viên])
+  M -.->|extend| d([7.4. Xóa mềm khi còn pending])
+      </div>
+      <p class="cap">2.8. Use case lệnh sản xuất</p>
+
+      <h3>2.9. Use case phiếu nhập</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Quản lý kho]) --- M([8. Phiếu nhập])
+  M -.->|include| a([8.1. Chọn nhà cung cấp])
+  M -.->|include| b([8.2. Nhập dòng linh kiện])
+  M -.->|extend| c([8.3. Sửa khi còn nháp])
+  M -.->|include| d([8.4. Xác nhận và cộng tồn])
+      </div>
+      <p class="cap">2.9. Use case phiếu nhập</p>
+
+      <h3>2.10. Use case sửa thông tin</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Người đã đăng nhập web]) --- M([9. Sửa thông tin])
+  M -.->|include| a([9.1. Sửa họ tên])
+  M -.->|include| b([9.2. Sửa email])
+  M -.->|include| c([9.3. Sửa điện thoại])
+      </div>
+      <p class="cap">2.10. Use case sửa thông tin</p>
+
+      <h3>2.11. Use case thống kê số liệu</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Admin / QL kho]) --- M([10. Thống kê số liệu])
+  M -.->|include| a([10.1. Đếm linh kiện và giá trị tồn])
+  M -.->|include| b([10.2. Phiếu nhập trong ngày])
+  M -.->|include| c([10.3. Phiếu xuất đang chờ])
+  M -.->|include| d([10.4. Thành phẩm lắp và đã xuất])
+  M -.->|extend| e([10.5. Xuất Excel hoặc PDF])
+      </div>
+      <p class="cap">2.11. Use case thống kê số liệu</p>
+
+      <h3>2.12. Use case thống kê tồn và top NVL</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Admin / QL kho]) --- M([11. Tồn và top NVL])
+  M -.->|include| a([11.1. Dưới ngưỡng tối thiểu])
+  M -.->|include| b([11.2. Hết hàng])
+  M -.->|include| c([11.3. Top 5 NVL đã xuất])
+  M -.->|include| d([11.4. Biểu đồ 6 ngày])
+      </div>
+      <p class="cap">2.12. Use case thống kê tồn và top NVL</p>
+
+      <h3>2.13. Use case quản lý tài khoản</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Admin]) --- M([12. Quản lý tài khoản])
+  M -.->|include| a([12.1. Xem danh sách])
+  M -.->|extend| b([12.2. Sửa tài khoản])
+  M -.->|extend| c([12.3. Khóa])
+  M -.->|extend| d([12.4. Mở khóa])
+      </div>
+      <p class="cap">2.13. Use case quản lý tài khoản</p>
+
+      <h3>2.14. Use case quản lý linh kiện</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Quản lý kho]) --- M([13. Quản lý linh kiện])
+  M -.->|include| a([13.1. Thêm và tạo tồn 0])
+  M -.->|extend| b([13.2. Sửa])
+  M -.->|extend| c([13.3. Đổi trạng thái])
+  M -.->|extend| d([13.4. Xóa mềm])
+  M -.->|extend| e([13.5. Tải ảnh lên R2])
+      </div>
+      <p class="cap">2.14. Use case quản lý linh kiện</p>
+
+      <h3>2.15. Use case đăng xuất</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Web hoặc nhân viên trên app]) --- M([14. Đăng xuất])
+  M -.->|extend| a([14.1. Web xóa cookie JWT])
+  M -.->|extend| b([14.2. App xóa token trong máy])
+  M -.->|include| c([14.3. Về màn hình đăng nhập])
+      </div>
+      <p class="cap">2.15. Use case đăng xuất</p>
+
+      <h3>2.16. Use case xem thông tin</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Người đã đăng nhập web]) --- M([15. Xem thông tin])
+  M -.->|include| a([15.1. Xem hồ sơ])
+  M -.->|extend| b([15.2. Sang sửa thông tin])
+  M -.->|extend| c([15.3. Sang đổi mật khẩu])
+      </div>
+      <p class="cap">2.16. Use case xem thông tin</p>
+
+      <h3>2.17. Use case phân quyền</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Admin]) --- M([16. Phân quyền])
+  M -.->|include| a([16.1. Xem ba vai trò])
+  M -.->|include| b([16.2. Gán quyền cho vai trò])
+  M -.->|extend| c([16.3. Bỏ quyền không có trong danh mục])
+      </div>
+      <p class="cap">2.17. Use case phân quyền</p>
+
+      <h3>2.18. Use case sao lưu</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Admin]) --- M([17. Sao lưu])
+  M -.->|include| a([17.1. Chạy pg_dump])
+  M -.->|include| b([17.2. Ghi audit create_backup])
+  M -.->|extend| c([17.3. Tải file sao lưu])
+  M -.->|extend| d([17.4. Từ chối nếu thiếu pg_dump hoặc file rỗng])
+      </div>
+      <p class="cap">2.18. Use case sao lưu</p>
+
+      <h3>2.19. Use case lập BOM</h3>
+      <div class="mermaid">
+flowchart LR
+  A([Quản lý kho]) --- M([18. Lập BOM])
+  M -.->|include| a([18.1. Đủ slot CPU, main, RAM, ổ, PSU, tản, case])
+  M -.->|include| b([18.2. Khớp socket CPU và loại RAM])
+  M -.->|extend| c([18.3. Thêm GPU hoặc linh kiện phụ])
+  M -.->|extend| d([18.4. Từ chối nếu giá bán dưới vốn])
+      </div>
+      <p class="cap">2.19. Use case lập BOM</p>
+    </section>
+
+    <section id="spec">
+      <h2>3. Đặc tả Use case</h2>
+      <h3>3.1. Đặc tả use case tạo tài khoản</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Tạo tài khoản</td></tr>
+        <tr><td class="k">Actor</td><td>Admin</td></tr>
+        <tr><td class="k">Brief Description</td><td>Bắt đầu khi Admin mở chức năng tạo tài khoản.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Admin đã đăng nhập và có quyền account_create.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Nhập username, mật khẩu, họ tên, email, điện thoại, vai trò, trạng thái.<br>- Hệ thống băm mật khẩu.<br>- Ghi một dòng vào accounts.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Đã có admin mà chọn vai trò admin: báo ADMIN_EXISTS.<br>- Trùng username hoặc email: không tạo.</td></tr>
+        <tr><td class="k">Post condition</td><td>Có tài khoản mới. Hệ thống không có tự đăng ký.</td></tr>
+      </table>
+      <p class="cap">3.1. Đặc tả use case tạo tài khoản</p>
+
+      <h3>3.2. Đặc tả use case đăng nhập</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Đăng nhập</td></tr>
+        <tr><td class="k">Actor</td><td>Admin, Quản lý kho, Nhân viên lắp ráp</td></tr>
+        <tr><td class="k">Brief Description</td><td>Web dùng cookie JWT. App nhân viên dùng POST /api/auth/login.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Tài khoản đang active.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Nhập username và password.<br>- So với password_hash.<br>- Web: ký JWT 8 giờ, ghi cookie và session Redis, đọc permissions, cập nhật last_login_at, vào /admin hoặc /warehouse.<br>- App: chỉ trả accessToken khi role là staff.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Sai username hoặc sai mật khẩu: báo lỗi, được nhập lại.<br>- Web không có quyền xem trang: xóa cookie.<br>- App không phải staff: 403, không trả token.</td></tr>
+        <tr><td class="k">Post condition</td><td>Web có cookie JWT. App của nhân viên có accessToken.</td></tr>
+      </table>
+      <p class="cap">3.2. Đặc tả use case đăng nhập</p>
+
+      <h3>3.3. Đặc tả use case đổi mật khẩu</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Đổi mật khẩu</td></tr>
+        <tr><td class="k">Actor</td><td>Người đã đăng nhập web</td></tr>
+        <tr><td class="k">Brief Description</td><td>Đổi mật khẩu khi đang ở hồ sơ. Không có quên mật khẩu.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Cookie JWT còn hiệu lực.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Nhập mật khẩu hiện tại, mật khẩu mới, xác nhận.<br>- Mật khẩu mới từ 8 ký tự và khớp xác nhận.<br>- Đúng mật khẩu hiện tại thì ghi hash mới.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Thiếu trường, quá ngắn hoặc xác nhận lệch: ở lại hồ sơ.<br>- Sai mật khẩu hiện tại: không đổi.</td></tr>
+        <tr><td class="k">Post condition</td><td>password_hash là mật khẩu mới.</td></tr>
+      </table>
+      <p class="cap">3.3. Đặc tả use case đổi mật khẩu</p>
+
+      <h3>3.4. Đặc tả use case lắp ráp</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Lắp ráp</td></tr>
+        <tr><td class="k">Actor</td><td>Nhân viên lắp ráp</td></tr>
+        <tr><td class="k">Brief Description</td><td>Nhân viên xử lý lệnh được gán trên app.</td></tr>
+        <tr><td class="k">Precondition</td><td>- JWT role staff.<br>- Lệnh assigned_to đúng người và chưa xóa.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Xem lệnh và kiểm tra tồn theo BOM nhân số lượng.<br>- Xin xuất NVL: lệnh pending chuyển in_progress, tạo phiếu material pending, không trừ tồn.<br>- Xác nhận lắp khi tồn đủ: trừ tồn, status done.<br>- Khi done thì xin xuất thành phẩm.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Đã có phiếu cùng loại chưa bị từ chối: không tạo trùng.<br>- Tồn không đủ lúc xác nhận: không trừ, không hoàn thành.<br>- Lệnh chưa done: không xin thành phẩm.</td></tr>
+        <tr><td class="k">Post condition</td><td>Phiếu xuất ở trạng thái pending để quản lý kho duyệt.</td></tr>
+      </table>
+      <p class="cap">3.4. Đặc tả use case lắp ráp</p>
+
+      <h3>3.5. Đặc tả use case tìm kiếm</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Tìm kiếm linh kiện</td></tr>
+        <tr><td class="k">Actor</td><td>Quản lý kho</td></tr>
+        <tr><td class="k">Brief Description</td><td>Lọc danh sách linh kiện chưa xóa.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có quyền components_view.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Nhập tên, lọc contains không phân biệt hoa thường.<br>- Lọc active, discontinued hoặc hết hàng.<br>- Mỗi trang 10 dòng, mới tạo trước.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Bỏ trống từ khóa: lấy mọi linh kiện chưa xóa theo trạng thái đang chọn.</td></tr>
+        <tr><td class="k">Post condition</td><td>Danh sách đúng trang, kèm danh mục và tồn.</td></tr>
+      </table>
+      <p class="cap">3.5. Đặc tả use case tìm kiếm</p>
+
+      <h3>3.6. Đặc tả use case duyệt phiếu xuất</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Duyệt phiếu xuất</td></tr>
+        <tr><td class="k">Actor</td><td>Quản lý kho</td></tr>
+        <tr><td class="k">Brief Description</td><td>Phiếu do app tạo. Web chỉ xem, duyệt hoặc từ chối.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Phiếu đang pending.<br>- Có quyền exportOrders_approve.</td></tr>
+        <tr><td class="k">Main flow</td><td>- NVL: mọi dòng đủ tồn thì trừ quantity_on_hand, ghi approved.<br>- Thành phẩm: chỉ đổi trạng thái, không trừ tồn linh kiện.<br>- Từ chối: status rejected, không đổi tồn.<br>- Ghi audit.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Không còn pending: không xử lý.<br>- NVL thiếu hàng: không trừ một phần.</td></tr>
+        <tr><td class="k">Post condition</td><td>Phiếu hết pending.</td></tr>
+      </table>
+      <p class="cap">3.6. Đặc tả use case duyệt phiếu xuất</p>
+
+      <h3>3.7. Đặc tả use case lệnh sản xuất</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Lệnh sản xuất</td></tr>
+        <tr><td class="k">Actor</td><td>Quản lý kho</td></tr>
+        <tr><td class="k">Brief Description</td><td>Tạo lệnh lắp theo một cấu hình PC và có thể gán nhân viên.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có pc_configs đang active.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Chọn cấu hình active, số lượng nguyên từ 1.<br>- Gán staff đang active hoặc để trống.<br>- Ghi lệnh status pending.<br>- Xóa mềm chỉ khi còn pending.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Cấu hình ngưng, số lượng sai, hoặc người gán không phải staff: không tạo.<br>- Lệnh đã chạy: không xóa.</td></tr>
+        <tr><td class="k">Post condition</td><td>Nhân viên được gán thấy lệnh trên app.</td></tr>
+      </table>
+      <p class="cap">3.7. Đặc tả use case lệnh sản xuất</p>
+
+      <h3>3.8. Đặc tả use case phiếu nhập</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Phiếu nhập</td></tr>
+        <tr><td class="k">Actor</td><td>Quản lý kho</td></tr>
+        <tr><td class="k">Brief Description</td><td>Nhập hàng từ nhà cung cấp rồi cộng tồn khi xác nhận.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Role warehouse_manager và có quyền nhập.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Chọn nhà cung cấp và các linh kiện thuộc nhà cung cấp đó.<br>- Tạo phiếu draft, ghi audit.<br>- Sửa được khi còn draft.<br>- Xác nhận: status confirmed, cộng tồn từng dòng, ghi audit.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Phiếu đã confirmed: không sửa và không xác nhận lại.<br>- Thiếu dòng hoặc số lượng nhỏ hơn 1: từ chối.</td></tr>
+        <tr><td class="k">Post condition</td><td>Tồn tăng đúng số lượng đã xác nhận.</td></tr>
+      </table>
+      <p class="cap">3.8. Đặc tả use case phiếu nhập</p>
+
+      <h3>3.9. Đặc tả use case sửa thông tin</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Sửa thông tin</td></tr>
+        <tr><td class="k">Actor</td><td>Người đã đăng nhập web</td></tr>
+        <tr><td class="k">Brief Description</td><td>Sửa họ tên, email, điện thoại của chính mình.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Đã đăng nhập.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Gửi họ tên, email, điện thoại.<br>- Cập nhật account theo id phiên.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Email đã thuộc tài khoản khác: không lưu.<br>- Không đổi username và vai trò ở màn này.</td></tr>
+        <tr><td class="k">Post condition</td><td>Hồ sơ được cập nhật.</td></tr>
+      </table>
+      <p class="cap">3.9. Đặc tả use case sửa thông tin</p>
+
+      <h3>3.10. Đặc tả use case thống kê số liệu</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Thống kê số liệu</td></tr>
+        <tr><td class="k">Actor</td><td>Admin, Quản lý kho</td></tr>
+        <tr><td class="k">Brief Description</td><td>Dashboard đọc số liệu kho và sản xuất tại thời điểm mở trang.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có quyền dashboard_view.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Đếm linh kiện chưa xóa, giá trị tồn, nhập hôm nay.<br>- Đếm phiếu xuất pending và pending quá 2 ngày.<br>- Cộng thành phẩm đã lắp và đã xuất.<br>- Có thể xuất Excel hoặc PDF.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Không có quyền: không vào trang.</td></tr>
+        <tr><td class="k">Post condition</td><td>Màn hình hiện số liệu vừa đọc.</td></tr>
+      </table>
+      <p class="cap">3.10. Đặc tả use case thống kê số liệu</p>
+
+      <h3>3.11. Đặc tả use case thống kê tồn và top NVL</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Thống kê tồn và top NVL</td></tr>
+        <tr><td class="k">Actor</td><td>Admin, Quản lý kho</td></tr>
+        <tr><td class="k">Brief Description</td><td>Cảnh báo hàng dưới ngưỡng và linh kiện xuất nhiều.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có dashboard_view. Ngưỡng mặc định của linh kiện là 5.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Tồn bằng 0: hết hàng. Tồn dương nhưng không quá ngưỡng: sắp hết.<br>- Top 5 theo tổng số lượng phiếu xuất NVL đã duyệt.<br>- Biểu đồ số lượng nhập và xuất đã duyệt trong 6 ngày.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Chưa có phiếu: top và biểu đồ bằng không.</td></tr>
+        <tr><td class="k">Post condition</td><td>Danh sách cảnh báo sắp theo tồn tăng dần.</td></tr>
+      </table>
+      <p class="cap">3.11. Đặc tả use case thống kê tồn và top NVL</p>
+
+      <h3>3.12. Đặc tả use case quản lý tài khoản</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Quản lý tài khoản</td></tr>
+        <tr><td class="k">Actor</td><td>Admin</td></tr>
+        <tr><td class="k">Brief Description</td><td>Xem, sửa, khóa và mở khóa tài khoản.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có quyền account_view, account_edit hoặc account_lock.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Xem danh sách.<br>- Sửa thông tin tài khoản được chọn.<br>- Khóa đặt status locked. Mở khóa đặt active.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Không khóa được admin.<br>- Khóa tài khoản đã khóa, hoặc mở tài khoản đang active: từ chối.</td></tr>
+        <tr><td class="k">Post condition</td><td>Tài khoản locked bị đưa về trang đăng nhập ở request web sau.</td></tr>
+      </table>
+      <p class="cap">3.12. Đặc tả use case quản lý tài khoản</p>
+
+      <h3>3.13. Đặc tả use case quản lý linh kiện</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Quản lý linh kiện</td></tr>
+        <tr><td class="k">Actor</td><td>Quản lý kho</td></tr>
+        <tr><td class="k">Brief Description</td><td>Khai báo linh kiện, thuộc tính, ảnh và tồn ban đầu.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có danh mục, và quyền tạo, sửa hoặc xóa tương ứng.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Tạo linh kiện và một dòng inventory bằng 0.<br>- Ảnh JPEG, PNG hoặc WebP tối đa 2MB thì đưa lên R2.<br>- Sửa thông tin hoặc đổi active / discontinued.<br>- Xóa mềm: deleted và deleted_at.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Ảnh sai loại hoặc quá 2MB: không lưu file.</td></tr>
+        <tr><td class="k">Post condition</td><td>Linh kiện mới có tồn. Linh kiện xóa mềm không còn trong danh sách.</td></tr>
+      </table>
+      <p class="cap">3.13. Đặc tả use case quản lý linh kiện</p>
+
+      <h3>3.14. Đặc tả use case đăng xuất</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Đăng xuất</td></tr>
+        <tr><td class="k">Actor</td><td>Người đã đăng nhập web, nhân viên trên app</td></tr>
+        <tr><td class="k">Brief Description</td><td>Kết thúc phiên web hoặc phiên app. App chỉ xóa token trong máy, không gọi API logout.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Web còn cookie access_token, hoặc app đang giữ accessToken.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Web: POST /auth/logout, xóa cookie, về /admin/auth/login.<br>- App: xóa accessToken cục bộ, về màn hình đăng nhập.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Web hết cookie: các trang nghiệp vụ vẫn về login.</td></tr>
+        <tr><td class="k">Post condition</td><td>Web không còn cookie. App không còn token.</td></tr>
+      </table>
+      <p class="cap">3.14. Đặc tả use case đăng xuất</p>
+
+      <h3>3.15. Đặc tả use case xem thông tin</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Xem thông tin</td></tr>
+        <tr><td class="k">Actor</td><td>Người đã đăng nhập web</td></tr>
+        <tr><td class="k">Brief Description</td><td>Xem hồ sơ của chính mình.</td></tr>
+        <tr><td class="k">Precondition</td><td>- JWT còn hiệu lực và tài khoản chưa locked.</td></tr>
+        <tr><td class="k">Main flow</td><td>- GET /auth/profile.<br>- Đọc account theo id phiên và hiện họ tên, email, điện thoại, vai trò.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Không tìm thấy account: về trang đăng nhập.</td></tr>
+        <tr><td class="k">Post condition</td><td>Chỉ đọc. Có thể chuyển sang sửa hồ sơ hoặc đổi mật khẩu.</td></tr>
+      </table>
+      <p class="cap">3.15. Đặc tả use case xem thông tin</p>
+
+      <h3>3.16. Đặc tả use case phân quyền</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Phân quyền</td></tr>
+        <tr><td class="k">Actor</td><td>Admin</td></tr>
+        <tr><td class="k">Brief Description</td><td>Gán mảng quyền cho admin, quản lý kho và nhân viên.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có quyền roles_permissions. Ba vai trò đã có trong roles.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Xem admin, warehouse_manager, staff.<br>- Chọn các quyền hợp lệ.<br>- Ghi đè mảng permissions của từng vai trò.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Quyền không nằm trong danh mục: bị loại, không ghi.</td></tr>
+        <tr><td class="k">Post condition</td><td>Lần đăng nhập web sau đọc permissions mới để chọn trang.</td></tr>
+      </table>
+      <p class="cap">3.16. Đặc tả use case phân quyền</p>
+
+      <h3>3.17. Đặc tả use case sao lưu</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Sao lưu</td></tr>
+        <tr><td class="k">Actor</td><td>Admin</td></tr>
+        <tr><td class="k">Brief Description</td><td>Xuất cơ sở dữ liệu PostgreSQL bằng pg_dump và ghi nhật ký.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có quyền backup_create. Máy chủ có pg_dump và DATABASE_URL.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Chạy pg_dump, không kèm owner và acl.<br>- Giữ file nếu kích thước từ 10 byte.<br>- Ghi audit_logs action create_backup.<br>- Có thể tải lại file đúng tên.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Thiếu DATABASE_URL, thiếu pg_dump, dump lỗi hoặc file rỗng: không giữ file.<br>- Tên file không đúng mẫu: không cho tải.</td></tr>
+        <tr><td class="k">Post condition</td><td>Có file sao lưu và một dòng audit.</td></tr>
+      </table>
+      <p class="cap">3.17. Đặc tả use case sao lưu</p>
+
+      <h3>3.18. Đặc tả use case lập BOM</h3>
+      <table>
+        <tr><td class="k">Use case</td><td>Lập BOM</td></tr>
+        <tr><td class="k">Actor</td><td>Quản lý kho</td></tr>
+        <tr><td class="k">Brief Description</td><td>Tạo hoặc sửa cấu hình PC và các dòng bom_items.</td></tr>
+        <tr><td class="k">Precondition</td><td>- Có quyền bom_create hoặc bom_edit. Linh kiện đang active.</td></tr>
+        <tr><td class="k">Main flow</td><td>- Nhập tên, giá bán và đủ slot CPU, mainboard, RAM, ổ cứng, PSU, tản nhiệt, case.<br>- CPU và mainboard cùng socket nếu cả hai có thuộc tính socket.<br>- RAM cùng ram_type với mainboard nếu cả hai có thuộc tính.<br>- CPU, mainboard, PSU, case mỗi loại một món, số lượng 1. RAM từ 1 đến 4. GPU tối đa một.<br>- Giá bán lớn hơn hoặc bằng vốn thì ghi pc_configs và bom_items.</td></tr>
+        <tr><td class="k">Alternative flow</td><td>- Thiếu slot, lệch socket, lệch loại RAM, trùng linh kiện, linh kiện ngưng hoặc giá dưới vốn: không lưu.</td></tr>
+        <tr><td class="k">Post condition</td><td>Cấu hình active có thể được chọn khi tạo lệnh lắp.</td></tr>
+      </table>
+      <p class="cap">3.18. Đặc tả use case lập BOM</p>
+    </section>
+
+    <section id="seq">
+      <h2>4. Mô hình Sequence</h2>
+      <p>Mỗi sơ đồ gồm người dùng, giao diện, hệ thống xử lý và cơ sở dữ liệu. Khối alt là nhánh lỗi hoặc nhánh loại phiếu, giống cách vẽ trong báo cáo mẫu.</p>
+
+      <h3>4.1. Sequence tạo tài khoản</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor AD as Admin
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  AD->>UI: username, password, email, vai trò
+  UI->>SV: Gửi tạo tài khoản
+  SV->>DB: username hoặc email đã tồn tại?
+  alt Trùng hoặc tạo admin thứ hai
+    DB-->>SV: Đã tồn tại
+    SV-->>UI: Báo lỗi, không ghi
+  else Hợp lệ
+    SV->>SV: Băm mật khẩu
+    SV->>DB: insert accounts
+    SV-->>UI: Tạo thành công
+  end
+      </div>
+      <p class="cap">4.1. Sequence tạo tài khoản</p>
+
+      <h3>4.2. Sequence đăng nhập</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor U as Người dùng
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  U->>UI: username, password
+  UI->>SV: Gửi đăng nhập
+  SV->>DB: Tìm account và so mật khẩu
+  alt Sai hoặc không active
+    SV-->>UI: Báo sai thông tin
+  else Web và có quyền xem
+    SV->>DB: Đọc permissions, ghi last_login_at
+    SV-->>UI: Cookie JWT, vào /admin hoặc /warehouse
+  else App và role là staff
+    SV-->>UI: accessToken
+  end
+      </div>
+      <p class="cap">4.2. Sequence đăng nhập</p>
+
+      <h3>4.3. Sequence đổi mật khẩu</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor U as Người dùng
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  U->>UI: Mật khẩu hiện tại, mới, xác nhận
+  UI->>SV: Gửi đổi mật khẩu
+  alt Ngắn hơn 8 ký tự hoặc xác nhận lệch
+    SV-->>UI: Báo lỗi
+  else Đúng mật khẩu hiện tại
+    SV->>DB: Ghi password_hash mới
+    SV-->>UI: Đổi thành công
+  else Sai mật khẩu hiện tại
+    SV-->>UI: Không đổi
+  end
+      </div>
+      <p class="cap">4.3. Sequence đổi mật khẩu</p>
+
+      <h3>4.4. Sequence lắp ráp</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor NV as Nhân viên
+  participant UI as App
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  NV->>UI: Mở lệnh được gán
+  UI->>SV: Kiểm tra tồn BOM
+  SV->>DB: Đọc quantity_on_hand
+  alt Xin xuất NVL
+    SV->>DB: pending thành in_progress, tạo phiếu material
+  else Xác nhận lắp khi đủ tồn
+    SV->>DB: Trừ tồn, status done
+  else Xin thành phẩm khi đã done
+    SV->>DB: Tạo phiếu finished_product pending
+  end
+      </div>
+      <p class="cap">4.4. Sequence lắp ráp</p>
+
+      <h3>4.5. Sequence tìm kiếm</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor QL as Quản lý kho
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  QL->>UI: Tên, trạng thái, trang
+  UI->>SV: Tìm linh kiện
+  SV->>DB: deleted = false, lọc tên, lấy 10 dòng
+  DB-->>SV: Danh sách và tồn
+  SV-->>UI: Hiện kết quả
+      </div>
+      <p class="cap">4.5. Sequence tìm kiếm</p>
+
+      <h3>4.6. Sequence duyệt phiếu xuất</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor QL as Quản lý kho
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  QL->>UI: Duyệt hoặc từ chối
+  UI->>SV: Gửi quyết định
+  SV->>DB: Phiếu phải pending
+  alt Duyệt NVL và đủ tồn
+    SV->>DB: Trừ tồn, status approved, ghi audit
+  else Duyệt thành phẩm
+    SV->>DB: status approved, không trừ tồn linh kiện
+  else Từ chối hoặc thiếu hàng
+    SV->>DB: rejected hoặc giữ nguyên tồn
+  end
+      </div>
+      <p class="cap">4.6. Sequence duyệt phiếu xuất</p>
+
+      <h3>4.7. Sequence lệnh sản xuất</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor QL as Quản lý kho
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  QL->>UI: Cấu hình, số lượng, nhân viên
+  UI->>SV: Tạo lệnh
+  SV->>DB: Cấu hình active, staff active
+  alt Không hợp lệ
+    SV-->>UI: Không tạo
+  else Hợp lệ
+    SV->>DB: insert pending
+    SV-->>UI: Lệnh mới
+  end
+      </div>
+      <p class="cap">4.7. Sequence lệnh sản xuất</p>
+
+      <h3>4.8. Sequence phiếu nhập</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor QL as Quản lý kho
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  QL->>UI: Nhà cung cấp và dòng hàng
+  UI->>SV: Tạo phiếu
+  SV->>DB: draft, items, audit
+  QL->>UI: Xác nhận
+  UI->>SV: confirm
+  SV->>DB: confirmed, cộng tồn, audit
+      </div>
+      <p class="cap">4.8. Sequence phiếu nhập</p>
+
+      <h3>4.9. Sequence lập BOM</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor QL as Quản lý kho
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  QL->>UI: Tên, giá, các slot
+  UI->>SV: Lưu cấu hình
+  SV->>DB: Đọc linh kiện và thuộc tính
+  alt Thiếu slot, lệch socket hoặc giá dưới vốn
+    SV-->>UI: Không lưu
+  else Hợp lệ
+    SV->>DB: insert pc_configs và bom_items
+  end
+      </div>
+      <p class="cap">4.9. Sequence lập BOM</p>
+
+      <h3>4.10. Sequence xóa mềm</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor QL as Quản lý kho
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  alt Xóa linh kiện
+    QL->>UI: Xóa linh kiện
+    UI->>SV: deleteComponent
+    SV->>DB: deleted = true, deleted_at
+  else Xóa lệnh
+    QL->>UI: Xóa lệnh
+    UI->>SV: softDelete
+    SV->>DB: Chỉ khi pending thì ghi deleted_at
+  end
+      </div>
+      <p class="cap">4.10. Sequence xóa mềm</p>
+
+      <h3>4.11. Sequence khóa tài khoản</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor AD as Admin
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  AD->>UI: Khóa tài khoản
+  UI->>SV: lock
+  SV->>DB: Đọc account
+  alt Là admin hoặc đã khóa
+    SV-->>UI: Từ chối
+  else Hợp lệ
+    SV->>DB: status = locked
+  end
+      </div>
+      <p class="cap">4.11. Sequence khóa tài khoản</p>
+
+      <h3>4.12. Sequence thống kê top NVL</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor U as Admin hoặc QL kho
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  U->>UI: Mở dashboard
+  UI->>SV: Lấy cảnh báo và top
+  SV->>DB: Tồn so với ngưỡng
+  SV->>DB: Top 5 phiếu NVL đã duyệt
+  SV->>DB: Số lượng nhập xuất 6 ngày
+  SV-->>UI: Danh sách và biểu đồ
+      </div>
+      <p class="cap">4.12. Sequence thống kê top NVL</p>
+
+      <h3>4.13. Sequence thống kê số lượng</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor U as Admin hoặc QL kho
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  U->>UI: GET /dashboard
+  UI->>SV: getDashboardData
+  SV->>DB: Linh kiện, tồn, nhập, xuất, thành phẩm
+  SV-->>UI: Số liệu hoặc file Excel, PDF
+      </div>
+      <p class="cap">4.13. Sequence thống kê số lượng</p>
+
+      <h3>4.14. Sequence đăng xuất</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor U as Người dùng
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  alt Đăng xuất web
+    U->>UI: Đăng xuất
+    UI->>SV: POST /auth/logout
+    SV->>UI: Xóa cookie access_token
+    SV-->>U: Về trang đăng nhập web
+  else Đăng xuất app
+    U->>UI: Đăng xuất
+    UI->>UI: Xóa accessToken trong máy
+    UI-->>U: Về màn hình đăng nhập app
+  end
+      </div>
+      <p class="cap">4.14. Sequence đăng xuất</p>
+
+      <h3>4.15. Sequence xem thông tin</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor U as Người dùng
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  U->>UI: Mở hồ sơ
+  UI->>SV: GET /auth/profile
+  SV->>DB: findUnique theo id phiên
+  DB-->>SV: account
+  SV-->>UI: Hiện họ tên, email, điện thoại
+      </div>
+      <p class="cap">4.15. Sequence xem thông tin</p>
+
+      <h3>4.16. Sequence phân quyền</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor AD as Admin
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  AD->>UI: Quyền của ba vai trò
+  UI->>SV: Gửi phân quyền
+  SV->>SV: Chỉ giữ quyền có trong danh mục
+  SV->>DB: Cập nhật roles.permissions
+  SV-->>UI: Đã lưu
+      </div>
+      <p class="cap">4.16. Sequence phân quyền</p>
+
+      <h3>4.17. Sequence sao lưu</h3>
+      <div class="mermaid">
+sequenceDiagram
+  actor AD as Admin
+  participant UI as Giao diện
+  participant SV as Hệ thống xử lý
+  participant DB as Cơ sở dữ liệu
+  AD->>UI: Tạo sao lưu
+  UI->>SV: Yêu cầu backup
+  alt Thiếu pg_dump hoặc file rỗng
+    SV-->>UI: Không giữ file
+  else Dump thành công
+    SV->>SV: pg_dump ra file
+    SV->>DB: Ghi audit create_backup
+    SV-->>UI: Có file để tải
+  end
+      </div>
+      <p class="cap">4.17. Sequence sao lưu</p>
+    </section>
+
+    <section id="erd">
+      <h2>5. ERD và RDM</h2>
+      <h3>5.1. ERD</h3>
+      <p>Thực thể là ô chữ nhật, quan hệ là hình thoi, thuộc tính khóa là hình tròn. Đúng kiểu Chen trong báo cáo mẫu, thu về các thực thể nghiệp vụ của MRP.</p>
+      <div class="mermaid">
+flowchart TB
+  ACC[Account] --- R1{thuộc vai trò}
+  R1 --- ROLE[Role]
+  BR[Brand] --- RB{hãng}
+  RB --- COMP[Component]
+  SUP[Supplier] --- RS{cung cấp linh kiện}
+  RS --- COMP
+  CAT[Category] --- RC{phân loại}
+  RC --- COMP
+  CAT --- RA{định nghĩa}
+  RA --- ADEF[AttributeDefinition]
+  COMP --- RV{có giá trị}
+  RV --- CATTR[ComponentAttribute]
+  ADEF --- RD{theo định nghĩa}
+  RD --- CATTR
+  COMP --- RI{có tồn}
+  RI --- INV[Inventory]
+  PC[PcConfig] --- R9{định mức}
+  R9 --- BOM[BomItem]
+  COMP --- R8{thuộc BOM}
+  R8 --- BOM
+  PC --- R10{được lắp}
+  R10 --- PO[ProductionOrder]
+  ACC --- R11{được gán}
+  R11 --- PO
+  ACC --- R2{tạo phiếu nhập}
+  R2 --- IMP[ImportOrder]
+  SUP --- R3{bán theo phiếu}
+  R3 --- IMP
+  IMP --- R4{gồm dòng}
+  R4 --- IMPI[ImportOrderItem]
+  COMP --- R5{dòng nhập}
+  R5 --- IMPI
+  ACC --- R12{xin xuất}
+  R12 --- EXP[ExportOrder]
+  EXP --- R13{gồm dòng}
+  R13 --- EXPI[ExportOrderItem]
+  COMP --- R14{xuất NVL}
+  R14 --- EXPI
+  PC --- R15{xuất thành phẩm}
+  R15 --- EXPI
+  ACC --- R16{ghi nhật ký}
+  R16 --- LOG[AuditLog]
+      </div>
+      <p class="cap">5.1. ERD</p>
+
+      <h3>5.2. RDM</h3>
+      <div class="rel">
+        <div>ACCOUNTS(<u>id</u>, username, password_hash, full_name, email, phone, role, status, created_at, updated_at, last_login_at)</div>
+        <div>ROLES(<u>id</u>, permissions, updated_at)</div>
+        <div>COMPONENT_CATEGORIES(<u>id</u>, name, description)</div>
+        <div>BRANDS(<u>id</u>, name, created_at)</div>
+        <div>SUPPLIERS(<u>id</u>, name, phone, email, address, created_at)</div>
+        <div>COMPONENTS(<u>id</u>, category_id, name, unit, unit_price, min_stock_threshold, image_url, brand_id, supplier_id, status, created_at, deleted, deleted_at)</div>
+        <div>ATTRIBUTE_DEFINITIONS(<u>id</u>, category_id, name, data_type, unit, is_required)</div>
+        <div>COMPONENT_ATTRIBUTES(<u>id</u>, component_id, attribute_definition_id, value)</div>
+        <div>INVENTORY(<u>id</u>, component_id, quantity_on_hand, updated_at)</div>
+        <div>PC_CONFIGS(<u>id</u>, name, description, sale_price, status, created_at)</div>
+        <div>BOM_ITEMS(<u>id</u>, pc_config_id, component_id, quantity)</div>
+        <div>IMPORT_ORDERS(<u>id</u>, supplier_id, code, created_by, note, status, created_at)</div>
+        <div>IMPORT_ORDER_ITEMS(<u>id</u>, import_order_id, component_id, quantity, unit_price)</div>
+        <div>EXPORT_ORDERS(<u>id</u>, code, type, requested_by, approved_by, status, note, created_at, approved_at)</div>
+        <div>EXPORT_ORDER_ITEMS(<u>id</u>, export_order_id, component_id, pc_config_id, quantity)</div>
+        <div>PRODUCTION_ORDERS(<u>id</u>, pc_config_id, quantity_requested, assigned_to, status, created_by, created_at, completed_at, deleted_at)</div>
+        <div>REFRESH_TOKENS(<u>id</u>, account_id, token, revoked, expires_at, created_at)</div>
+        <div>AUDIT_LOGS(<u>id</u>, account_id, action, target_table, target_id, detail, created_at)</div>
+      </div>
+      <p>Gạch chân là khóa chính. Khóa ngoại: components.category_id, brand_id, supplier_id; inventory.component_id; bom_items trỏ pc_configs và components; import_orders trỏ suppliers và accounts; export_orders trỏ accounts; production_orders trỏ pc_configs và accounts. accounts.role trùng giá trị với roles.id nhưng không khai báo khóa ngoại trong Prisma. Login hiện chưa ghi refresh_tokens.</p>
+      <p class="cap">5.2. RDM</p>
+    </section>
+
+    <section id="db">
+      <h2>6. Lược đồ cơ sở dữ liệu và bảng mô tả</h2>
+      <h3>6.1. Bảng mô tả tổng quát</h3>
+      <table>
+        <tr><th>STT</th><th>Tên bảng</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>accounts</td><td>Tài khoản Admin, quản lý kho và nhân viên lắp ráp</td></tr>
+        <tr><td>2</td><td>roles</td><td>Ba vai trò và mảng quyền</td></tr>
+        <tr><td>3</td><td>component_categories</td><td>Danh mục linh kiện, ví dụ CPU, RAM, SSD</td></tr>
+        <tr><td>4</td><td>brands</td><td>Hãng linh kiện</td></tr>
+        <tr><td>5</td><td>suppliers</td><td>Nhà cung cấp</td></tr>
+        <tr><td>6</td><td>components</td><td>Linh kiện, có xóa mềm</td></tr>
+        <tr><td>7</td><td>attribute_definitions</td><td>Định nghĩa thuộc tính theo danh mục</td></tr>
+        <tr><td>8</td><td>component_attributes</td><td>Giá trị thuộc tính của từng linh kiện</td></tr>
+        <tr><td>9</td><td>inventory</td><td>Tồn kho, một linh kiện một dòng</td></tr>
+        <tr><td>10</td><td>pc_configs</td><td>Cấu hình máy tính</td></tr>
+        <tr><td>11</td><td>bom_items</td><td>Định mức linh kiện của một cấu hình</td></tr>
+        <tr><td>12</td><td>import_orders</td><td>Phiếu nhập</td></tr>
+        <tr><td>13</td><td>import_order_items</td><td>Dòng phiếu nhập</td></tr>
+        <tr><td>14</td><td>export_orders</td><td>Phiếu xuất NVL hoặc thành phẩm</td></tr>
+        <tr><td>15</td><td>export_order_items</td><td>Dòng phiếu xuất</td></tr>
+        <tr><td>16</td><td>production_orders</td><td>Lệnh lắp ráp, có xóa mềm</td></tr>
+        <tr><td>17</td><td>refresh_tokens</td><td>Có trong schema, đăng nhập hiện chưa ghi</td></tr>
+        <tr><td>18</td><td>audit_logs</td><td>Nhật ký nhập kho, duyệt xuất và sao lưu</td></tr>
+      </table>
+      <p class="cap">Bảng 6.1. Bảng mô tả tổng quát</p>
+
+      <h3>Bảng mô tả chi tiết</h3>
+      <p><strong>accounts</strong></p>
+      <table>
+        <tr><th>STT</th><th>Thuộc tính</th><th>Kiểu dữ liệu</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>id</td><td>integer</td><td>Khóa chính, tự tăng</td></tr>
+        <tr><td>2</td><td>username</td><td>varchar(50)</td><td>Tên đăng nhập, duy nhất</td></tr>
+        <tr><td>3</td><td>password_hash</td><td>varchar(255)</td><td>Mật khẩu đã băm</td></tr>
+        <tr><td>4</td><td>full_name</td><td>varchar(100)</td><td>Họ tên</td></tr>
+        <tr><td>5</td><td>email</td><td>varchar(100)</td><td>Email, duy nhất</td></tr>
+        <tr><td>6</td><td>phone</td><td>varchar(20)</td><td>Điện thoại</td></tr>
+        <tr><td>7</td><td>role</td><td>AccountRole</td><td>admin, warehouse_manager, staff</td></tr>
+        <tr><td>8</td><td>status</td><td>AccountStatus</td><td>active hoặc locked</td></tr>
+        <tr><td>9</td><td>last_login_at</td><td>timestamptz</td><td>Lần đăng nhập gần nhất</td></tr>
+      </table>
+      <p class="cap">Bảng 6.2. Bảng mô tả chi tiết accounts</p>
+
+      <p><strong>components</strong></p>
+      <table>
+        <tr><th>STT</th><th>Thuộc tính</th><th>Kiểu dữ liệu</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>id</td><td>integer</td><td>Khóa chính</td></tr>
+        <tr><td>2</td><td>category_id</td><td>integer</td><td>Khóa ngoại danh mục</td></tr>
+        <tr><td>3</td><td>name</td><td>varchar(150)</td><td>Tên linh kiện</td></tr>
+        <tr><td>4</td><td>unit_price</td><td>decimal(12,2)</td><td>Đơn giá</td></tr>
+        <tr><td>5</td><td>min_stock_threshold</td><td>integer</td><td>Ngưỡng cảnh báo, mặc định 5</td></tr>
+        <tr><td>6</td><td>image_url</td><td>varchar(500)</td><td>Ảnh trên R2</td></tr>
+        <tr><td>7</td><td>brand_id</td><td>integer</td><td>Hãng, được trống</td></tr>
+        <tr><td>8</td><td>supplier_id</td><td>integer</td><td>Nhà cung cấp, được trống</td></tr>
+        <tr><td>9</td><td>status</td><td>ComponentStatus</td><td>active hoặc discontinued</td></tr>
+        <tr><td>10</td><td>deleted</td><td>boolean</td><td>Xóa mềm</td></tr>
+      </table>
+      <p class="cap">Bảng 6.3. Bảng mô tả chi tiết components</p>
+
+      <p><strong>inventory</strong></p>
+      <table>
+        <tr><th>STT</th><th>Thuộc tính</th><th>Kiểu dữ liệu</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>id</td><td>integer</td><td>Khóa chính</td></tr>
+        <tr><td>2</td><td>component_id</td><td>integer</td><td>Khóa ngoại, duy nhất</td></tr>
+        <tr><td>3</td><td>quantity_on_hand</td><td>integer</td><td>Số lượng tồn, mặc định 0</td></tr>
+      </table>
+      <p class="cap">Bảng 6.4. Bảng mô tả chi tiết inventory</p>
+
+      <p><strong>pc_configs và bom_items</strong></p>
+      <table>
+        <tr><th>STT</th><th>Thuộc tính</th><th>Kiểu dữ liệu</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>pc_configs.id</td><td>integer</td><td>Khóa chính cấu hình</td></tr>
+        <tr><td>2</td><td>name</td><td>varchar(100)</td><td>Tên cấu hình</td></tr>
+        <tr><td>3</td><td>sale_price</td><td>decimal(12,2)</td><td>Giá bán</td></tr>
+        <tr><td>4</td><td>status</td><td>PcConfigStatus</td><td>active hoặc inactive</td></tr>
+        <tr><td>5</td><td>bom_items.pc_config_id</td><td>integer</td><td>Khóa ngoại cấu hình</td></tr>
+        <tr><td>6</td><td>bom_items.component_id</td><td>integer</td><td>Khóa ngoại linh kiện</td></tr>
+        <tr><td>7</td><td>quantity</td><td>integer</td><td>Số lượng định mức</td></tr>
+      </table>
+      <p class="cap">Bảng 6.5. Bảng mô tả chi tiết BOM</p>
+
+      <p><strong>import_orders và import_order_items</strong></p>
+      <table>
+        <tr><th>STT</th><th>Thuộc tính</th><th>Kiểu dữ liệu</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>code</td><td>varchar(30)</td><td>Mã phiếu, duy nhất</td></tr>
+        <tr><td>2</td><td>supplier_id</td><td>integer</td><td>Nhà cung cấp</td></tr>
+        <tr><td>3</td><td>created_by</td><td>integer</td><td>Người tạo</td></tr>
+        <tr><td>4</td><td>status</td><td>ImportOrderStatus</td><td>draft hoặc confirmed. Service tạo mới ghi draft</td></tr>
+        <tr><td>5</td><td>component_id</td><td>integer</td><td>Linh kiện trên dòng</td></tr>
+        <tr><td>6</td><td>quantity</td><td>integer</td><td>Số lượng nhập</td></tr>
+        <tr><td>7</td><td>unit_price</td><td>decimal(12,2)</td><td>Đơn giá dòng</td></tr>
+      </table>
+      <p class="cap">Bảng 6.6. Bảng mô tả chi tiết phiếu nhập</p>
+
+      <p><strong>export_orders và production_orders</strong></p>
+      <table>
+        <tr><th>STT</th><th>Thuộc tính</th><th>Kiểu dữ liệu</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>export_orders.type</td><td>ExportOrderType</td><td>material hoặc finished_product</td></tr>
+        <tr><td>2</td><td>export_orders.status</td><td>ExportOrderStatus</td><td>pending, approved, rejected</td></tr>
+        <tr><td>3</td><td>requested_by</td><td>integer</td><td>Nhân viên xin xuất</td></tr>
+        <tr><td>4</td><td>approved_by</td><td>integer</td><td>Quản lý kho duyệt</td></tr>
+        <tr><td>5</td><td>pc_config_id</td><td>integer</td><td>Cấu hình của lệnh lắp</td></tr>
+        <tr><td>6</td><td>quantity_requested</td><td>integer</td><td>Số máy cần lắp</td></tr>
+        <tr><td>7</td><td>assigned_to</td><td>integer</td><td>Nhân viên được gán</td></tr>
+        <tr><td>8</td><td>production_orders.status</td><td>ProductionOrderStatus</td><td>pending, in_progress, done</td></tr>
+        <tr><td>9</td><td>deleted_at</td><td>timestamptz</td><td>Xóa mềm lệnh</td></tr>
+      </table>
+      <p class="cap">Bảng 6.7. Bảng mô tả chi tiết xuất kho và lệnh sản xuất</p>
+    </section>
+
+    <section id="cls">
+      <h2>7. Sơ đồ lớp</h2>
+      <h3>7.1. Sơ đồ lớp</h3>
+      <div class="mermaid">
+classDiagram
+  class Account {
+    +int id
+    +string username
+    +string passwordHash
+    +string role
+    +string status
+  }
+  class Role {
+    +string id
+    +string[] permissions
+  }
+  class Component {
+    +int id
+    +string name
+    +decimal unitPrice
+    +string status
+    +bool deleted
+  }
+  class Inventory {
+    +int componentId
+    +int quantityOnHand
+  }
+  class PcConfig {
+    +int id
+    +string name
+    +decimal salePrice
+    +string status
+  }
+  class BomItem {
+    +int pcConfigId
+    +int componentId
+    +int quantity
+  }
+  class ImportOrder {
+    +string code
+    +string status
+  }
+  class ExportOrder {
+    +string code
+    +string type
+    +string status
+  }
+  class ProductionOrder {
+    +int quantityRequested
+    +string status
+    +datetime deletedAt
+  }
+  class AuthService {
+    +login()
+    +loginForApi()
+    +logout()
+    +changePasswordById()
+  }
+  class AccountService {
+    +createAccount()
+    +lockAccountById()
+    +unlockAccountById()
+  }
+  class ComponentService {
+    +createComponent()
+    +getAllComponents()
+    +deleteComponent()
+  }
+  class ImportOrderService {
+    +createOrder()
+    +confirmOrder()
+  }
+  class ExportService {
+    +approve()
+    +reject()
+  }
+  class BomService {
+    +createConfig()
+    +updateConfig()
+  }
+  class ProductionService {
+    +createProductionOrder()
+    +requestMaterialExport()
+    +confirmAssemble()
+    +requestProductExport()
+  }
+  class DashboardService {
+    +getDashboardData()
+  }
+  class PermissionService {
+    +getRoles()
+    +updatePermissions()
+  }
+  class BackupService {
+    +listBackups()
+    +createBackup()
+  }
+  class Brand {
+    +int id
+    +string name
+  }
+  class Supplier {
+    +int id
+    +string name
+  }
+  class AttributeDefinition {
+    +string name
+    +string dataType
+  }
+  class ComponentAttribute {
+    +string value
+  }
+  class AuditLog {
+    +string action
+    +string targetTable
+  }
+  Account --> Role
+  Component --> Inventory
+  PcConfig --> BomItem
+  Component --> BomItem
+  PcConfig --> ProductionOrder
+  Account --> ProductionOrder
+  Account --> ImportOrder
+  Account --> ExportOrder
+  AuthService --> Account
+  AccountService --> Account
+  ComponentService --> Component
+  ImportOrderService --> ImportOrder
+  ImportOrderService --> Inventory
+  ExportService --> ExportOrder
+  ExportService --> Inventory
+  BomService --> PcConfig
+  ProductionService --> ProductionOrder
+  DashboardService --> Inventory
+  PermissionService --> Role
+  BackupService --> AuditLog
+  Account --> AuditLog
+  Brand --> Component
+  Supplier --> Component
+  Component --> ComponentAttribute
+  AttributeDefinition --> ComponentAttribute
+      </div>
+      <p class="cap">7.1. Sơ đồ lớp</p>
+
+      <h3>7.2. Danh sách sơ đồ lớp</h3>
+      <table>
+        <tr><th>STT</th><th>Tên lớp</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>Account</td><td>Thông tin tài khoản</td></tr>
+        <tr><td>2</td><td>Role</td><td>Vai trò và quyền</td></tr>
+        <tr><td>3</td><td>Component</td><td>Linh kiện</td></tr>
+        <tr><td>4</td><td>Inventory</td><td>Tồn kho</td></tr>
+        <tr><td>5</td><td>PcConfig</td><td>Cấu hình máy</td></tr>
+        <tr><td>6</td><td>BomItem</td><td>Dòng định mức</td></tr>
+        <tr><td>7</td><td>ImportOrder</td><td>Phiếu nhập</td></tr>
+        <tr><td>8</td><td>ExportOrder</td><td>Phiếu xuất</td></tr>
+        <tr><td>9</td><td>ProductionOrder</td><td>Lệnh lắp ráp</td></tr>
+        <tr><td>10</td><td>AuthService</td><td>Đăng nhập, đăng xuất, đổi mật khẩu</td></tr>
+        <tr><td>11</td><td>AccountService</td><td>Tạo, sửa, khóa tài khoản</td></tr>
+        <tr><td>12</td><td>ComponentService</td><td>Linh kiện và tồn ban đầu</td></tr>
+        <tr><td>13</td><td>ImportOrderService</td><td>Phiếu nhập và cộng tồn</td></tr>
+        <tr><td>14</td><td>ExportService</td><td>Duyệt và từ chối phiếu xuất</td></tr>
+        <tr><td>15</td><td>BomService</td><td>Cấu hình và BOM</td></tr>
+        <tr><td>16</td><td>ProductionService</td><td>Lệnh lắp và app nhân viên</td></tr>
+        <tr><td>17</td><td>DashboardService</td><td>Thống kê</td></tr>
+        <tr><td>18</td><td>PermissionService</td><td>Gán quyền cho ba vai trò</td></tr>
+        <tr><td>19</td><td>BackupService</td><td>Sao lưu bằng pg_dump</td></tr>
+        <tr><td>20</td><td>Brand</td><td>Hãng linh kiện</td></tr>
+        <tr><td>21</td><td>Supplier</td><td>Nhà cung cấp</td></tr>
+        <tr><td>22</td><td>AttributeDefinition</td><td>Thuộc tính theo danh mục</td></tr>
+        <tr><td>23</td><td>ComponentAttribute</td><td>Giá trị thuộc tính của linh kiện</td></tr>
+        <tr><td>24</td><td>AuditLog</td><td>Nhật ký sao lưu, nhập và duyệt xuất</td></tr>
+      </table>
+      <p class="cap">Bảng 7.1. Danh sách sơ đồ lớp</p>
+
+      <h3>7.3. Mô tả sơ đồ lớp</h3>
+      <p><strong>AuthService</strong></p>
+      <table>
+        <tr><th>STT</th><th>Phương thức</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>login(username)</td><td>Đăng nhập web, cookie JWT, chọn trang theo quyền</td></tr>
+        <tr><td>2</td><td>loginForApi(username, password)</td><td>Đăng nhập app, trả accessToken</td></tr>
+        <tr><td>3</td><td>logout()</td><td>Xóa cookie access_token</td></tr>
+        <tr><td>4</td><td>changePasswordById(...)</td><td>Đổi mật khẩu khi đúng mật khẩu hiện tại</td></tr>
+        <tr><td>5</td><td>updateProfileById(...)</td><td>Sửa họ tên, email, điện thoại</td></tr>
+      </table>
+      <p class="cap">Bảng 7.2. AuthService</p>
+      <p><strong>ProductionService</strong></p>
+      <table>
+        <tr><th>STT</th><th>Phương thức</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>createProductionOrder(...)</td><td>Tạo lệnh pending</td></tr>
+        <tr><td>2</td><td>softDeleteProductionOrder(id)</td><td>Xóa mềm nếu còn pending</td></tr>
+        <tr><td>3</td><td>getMyOders(accountId)</td><td>Lệnh được gán cho nhân viên</td></tr>
+        <tr><td>4</td><td>requestMaterialExport(...)</td><td>Xin xuất NVL, không trừ tồn</td></tr>
+        <tr><td>5</td><td>confirmAssemble(...)</td><td>Trừ tồn và hoàn thành lệnh</td></tr>
+        <tr><td>6</td><td>requestProductExport(...)</td><td>Xin xuất thành phẩm khi lệnh done</td></tr>
+      </table>
+      <p class="cap">Bảng 7.3. ProductionService</p>
+      <p><strong>ImportOrderService và ExportService</strong></p>
+      <table>
+        <tr><th>STT</th><th>Phương thức</th><th>Mô tả</th></tr>
+        <tr><td>1</td><td>createOrder(...)</td><td>Tạo phiếu nhập draft</td></tr>
+        <tr><td>2</td><td>confirmOrder(id)</td><td>Xác nhận và cộng tồn</td></tr>
+        <tr><td>3</td><td>approve(id)</td><td>Duyệt xuất. NVL thì trừ tồn</td></tr>
+        <tr><td>4</td><td>reject(id)</td><td>Từ chối, không đổi tồn</td></tr>
+      </table>
+      <p class="cap">Bảng 7.4. Nhập kho và xuất kho</p>
+    </section>
+  </main>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose", flowchart: { htmlLabels: true, curve: "linear" } });
+  </script>
+</body>
+</html>

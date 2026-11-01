@@ -7,12 +7,13 @@ block main
     +alert-error(6000)
 
     - const isEdit = mode === "edit"
+    - const readOnly = isEdit && !canEdit
     - const extras = config.extras && config.extras.length ? config.extras : []
     - const bomSlots = catalog && catalog.slots ? catalog.slots : []
     - const bomGrouped = catalog && catalog.grouped ? catalog.grouped : {}
     - const extraOptions = bomGrouped.extra || []
 
-    form.bom-page#bom-form(action=formAction method="POST")
+    form.bom-page#bom-form(action=formAction method="POST" onsubmit=readOnly ? "return false" : undefined)
         .bom-detail-head
             div
                 .bom-crumb
@@ -23,30 +24,33 @@ block main
                 h1.bom-title= isEdit ? config.name : "Tạo cấu hình BOM"
                 p.bom-desc Chọn đủ 7 linh kiện bắt buộc. Giá bán chốt sau khi đã có giá vốn.
             .bom-head-actions
-                a.bom-btn-ghost(href=`${prefixAdmin}/bom`) Hủy
-                button.bom-btn-primary(type="submit")= isEdit ? "Lưu cấu hình" : "Tạo cấu hình"
+                a.bom-btn-ghost(href=`${prefixAdmin}/bom`) Quay lại
+                if readOnly
+                    span.bom-btn-ghost Chỉ xem
+                else
+                    button.bom-btn-primary(type="submit")= isEdit ? "Lưu cấu hình" : "Tạo cấu hình"
 
         .bom-split
             .bom-card
                 h2.bom-card-title Thông tin cấu hình
                 label.bom-field
                     span Tên cấu hình
-                    input.bom-input(type="text" name="name" required maxlength="100" value=config.name placeholder="vd: PC Văn phòng AMD")
+                    input.bom-input(type="text" name="name" required maxlength="100" value=config.name placeholder="vd: PC Văn phòng AMD" disabled=readOnly)
                 label.bom-field
                     span Mã BOM
                     input.bom-input(type="text" value=config.code readonly)
                 .bom-field-row
                     label.bom-field
                         span Trạng thái
-                        select.bom-input(name="status")
+                        select.bom-input(name="status" disabled=readOnly)
                             option(value="active" selected=(config.statusDb !== "inactive")) Hoạt động
                             option(value="inactive" selected=(config.statusDb === "inactive")) Ngưng
                     label.bom-field
                         span Giá bán (chốt sau)
-                        input.bom-input#bom-sale-price(type="number" name="salePrice" min="0" max="9999999999" step="1000" value=config.salePrice placeholder="Để trống nếu chưa chốt")
+                        input.bom-input#bom-sale-price(type="number" name="salePrice" min="0" max="9999999999" step="1000" value=config.salePrice placeholder="Để trống nếu chưa chốt" disabled=readOnly)
                 label.bom-field
                     span Mô tả
-                    textarea.bom-textarea(name="description" placeholder="Mô tả ngắn cho cấu hình")= config.description
+                    textarea.bom-textarea(name="description" placeholder="Mô tả ngắn cho cấu hình" disabled=readOnly)= config.description
                 p.bom-hint Giá đề xuất = giá vốn chia 0,85 để lãi 15% trên giá bán. Margin thực tế tính theo giá bán cuối nếu đã chốt.
 
             .bom-card
@@ -65,6 +69,7 @@ block main
                                 name=`slots[${slot.key}][componentId]`
                                 required
                                 data-bom-required="1"
+                                disabled=readOnly
                             )
                                 option(value="" data-price="0") -- Chọn #{slot.label} --
                                 each component in options
@@ -82,20 +87,22 @@ block main
                                 step="1"
                                 required
                                 value=value.quantity || slot.defaultQty
+                                disabled=readOnly
                             )
 
                 .bom-card-head.bom-extra-head
                     div
                         h2.bom-card-title Linh kiện đi kèm
                         p.bom-card-sub GPU, fan thêm, ổ phụ... Không bắt buộc.
-                    button.bom-btn-primary.bom-btn-sm(type="button" id="bom-add-item")
-                        i.bi.bi-plus-lg
-                        span Thêm linh kiện
+                    if !readOnly
+                        button.bom-btn-primary.bom-btn-sm(type="button" id="bom-add-item")
+                            i.bi.bi-plus-lg
+                            span Thêm linh kiện
 
                 #bom-extra-list
                     each item, index in extras
                         .bom-item-edit
-                            select.bom-input.bom-cost-select(name=`extras[${index}][componentId]`)
+                            select.bom-input.bom-cost-select(name=`extras[${index}][componentId]` disabled=readOnly)
                                 option(value="" data-price="0") -- Chọn linh kiện kèm --
                                 each component in extraOptions
                                     option(
@@ -103,9 +110,10 @@ block main
                                         data-price=component.unitPrice
                                         selected=(Number(item.componentId) === component.id)
                                     ) #{component.category} · #{component.name}
-                            input.bom-input.bom-cost-qty(type="number" name=`extras[${index}][quantity]` min="1" step="1" value=item.quantity || 1)
-                            button.bom-item-del(type="button" title="Xóa khỏi BOM")
-                                i.bi.bi-trash
+                            input.bom-input.bom-cost-qty(type="number" name=`extras[${index}][quantity]` min="1" step="1" value=item.quantity || 1 disabled=readOnly)
+                            if !readOnly
+                                button.bom-item-del(type="button" title="Xóa khỏi BOM")
+                                    i.bi.bi-trash
 
                 .bom-summary
                     .bom-summary-col
