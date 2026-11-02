@@ -61,8 +61,8 @@ block main
                         img.comp-thumb(src=component.imageUrl alt=component.name)
                       span.comp-name= component.name
                   td.comp-muted= component.category
-                  td.comp-muted —
-                  td.comp-muted —
+                  td.comp-muted= component.brand
+                  td.comp-muted= component.supplier
                   td.comp-muted= component.unit
                   td.comp-stock= component.quantityOnHand
                   td.comp-muted= component.minStockThreshold

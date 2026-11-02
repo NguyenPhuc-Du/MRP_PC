@@ -115,6 +115,8 @@ export const index = async (req: Request, res: Response): Promise<void> => {
         name: row.name,
         imageUrl: row.imageUrl,
         category: row.category?.name ?? "—",
+        brand: row.brand?.name ?? "—",
+        supplier: row.supplier?.name ?? "—",
         unit: row.unit ?? "—",
         quantityOnHand,
         minStockThreshold: row.minStockThreshold,

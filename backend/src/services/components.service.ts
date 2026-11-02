@@ -33,6 +33,16 @@ const listInclude = {
       name: true,
     },
   },
+  brand: {
+    select: {
+      name: true,
+    },
+  },
+  supplier: {
+    select: {
+      name: true,
+    },
+  },
   inventory: {
     select: {
       quantityOnHand: true,
