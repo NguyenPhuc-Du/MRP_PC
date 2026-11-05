@@ -1,0 +1,41 @@
+﻿23|Đầu đề 2|Mục Lục
+24|Bình thường|Mục lục hình ảnh	6
+25|Bình thường|Mục lục bảng	9
+27|Bình thường|CHƯƠNG I: TỔNG QUAN ĐỀ TÀI	13
+31|Bình thường|CHƯƠNG II: CƠ SỞ LÝ LUẬN	15
+53|Bình thường|CHƯƠNG III: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG	20
+91|Bình thường|8.5.5. Genre	109
+100|Bình thường|CHƯƠNG IV: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN	125
+104|Đầu đề 2|Mục lục hình ảnh
+158|Bình thường|8. 2.Giao diện đăng ký	61
+159|Bình thường|8. 3.Giao diện quên mật khẩu	63
+160|Bình thường|8. 4.Giao diện màn hình chính của user	65
+161|Bình thường|8. 5.Giao diện Now Playing Bar	68
+162|Bình thường|8. 6.Giao diện Stream View	70
+163|Bình thường|8. 7. Giao diện Feed	72
+164|Bình thường|8. 8.Giao diện Feed Following	74
+165|Bình thường|8. 9.Giao diện Profile	77
+166|Bình thường|8. 10.Giao diện Edit Profile	81
+167|Bình thường|8. 11.Giao diện lấy nguồn	83
+168|Bình thường|8. 12.Giao diện upload track	85
+169|Bình thường|8. 13.Giao diện xóa nhạc	87
+170|Bình thường|8. 14.Giao diện track liked	89
+171|Bình thường|8. 15. Giao diện Followers	91
+172|Bình thường|8. 16.Giao diện Following	93
+173|Bình thường|8. 17. Giao diện Other user profile	95
+174|Bình thường|8. 18.Giao diện search	98
+175|Bình thường|8. 19. Giao diện search track	100
+176|Bình thường|8. 20. Giao diện search user	103
+177|Bình thường|8. 21. Giao diện search genre	106
+178|Bình thường|8. 22. Giao diện genre	109
+179|Bình thường|8. 23.Giao diện upload	111
+180|Bình thường|8. 24. Giao diện genre	113
+181|Bình thường|8. 25. Giao diện Admin	115
+182|Bình thường|8. 26.Giao diện list track	117
+183|Bình thường|8. 27.Giao diện list user	120
+184|Bình thường|8. 28.Giao diện thống kê	123
+185|Đầu đề 2|Mục lục bảng
+276|Bình thường|CHƯƠNG I: TỔNG QUAN ĐỀ TÀI
+312|Bình thường|CHƯƠNG II: CƠ SỞ LÝ LUẬN
+390|Bình thường|Giao diện web và ứng dụng Android thân thiện, dễ sử dụng; giao diện web được tách riêng theo vai trò, ứng dụng Android hướng dẫn nhân viên lắp ráp theo từng bước thực hiện.
+520|Bình thường|CHƯƠNG III: PHÂN TÍCH VÀ THIẾT KẾ HỆ

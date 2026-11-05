@@ -1,0 +1,1 @@
+Mô tả sơ đồ lớp	52Mô tả giao diện	59Đăng nhập	59Đăng nhập	59Đăng ký	61Quên mật khẩu	63Màn hình chính của User	65Màn hình chính của User	65Now Playing Bar	68Stream View	70Feed	72Feed	72Feed Following	74Profile	77Profile	77Edit Profile	81Lấy nguồn	83Track Uploaded	85Xóa nhạc	87Track Liked	89Followers	90Following	93

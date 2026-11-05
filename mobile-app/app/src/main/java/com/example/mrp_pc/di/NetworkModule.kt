@@ -9,7 +9,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object NetworkModule {
-    private const val BASE_URL = "https://motor-blame-stopwatch.ngrok-free.dev/"
+    private const val BASE_URL = "https://contort-bust-golf.ngrok-free.dev/"
 
     lateinit var apiService: ApiService
         private set
