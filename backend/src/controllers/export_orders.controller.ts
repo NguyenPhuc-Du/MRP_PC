@@ -15,7 +15,7 @@ const errorMessage = (error: unknown): string => {
     case "STOCK_NOT_ENOUGH":
       return "Không đủ tồn để duyệt phiếu xuất";
     case "INVALID_LINE":
-      return "Phiếu xuất linh kiện thiếu mã linh kiện";
+      return "Phiếu xuất thiếu mã hàng";
     default:
       return "Thao tác thất bại";
   }

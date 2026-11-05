@@ -1,6 +1,6 @@
 aside.sider
-    - const perms = user && user.permissions ? user.permissions : []
-    if perms.includes('dashboard_view') || perms.includes('components_view') || perms.includes('importOrders_view') || perms.includes('exportOrders_view') || perms.includes('bom_view')
+    - const perms = (Array.isArray(navPermissions) && navPermissions.length) ? navPermissions : (user && Array.isArray(user.permissions) ? user.permissions : [])
+    if perms.includes('dashboard_view') || perms.includes('components_view') || perms.includes('importOrders_view') || perms.includes('exportOrders_view') || perms.includes('bom_view') || perms.includes('production_view')
         .section-label VẬN HÀNH
         nav.side-nav
             if perms.includes('dashboard_view')

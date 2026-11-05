@@ -27,36 +27,56 @@ mixin statusBadge(status)
       | Đã khóa
 
 block main
-  link(rel="stylesheet" href="/css/account.css")
+  link(rel="stylesheet" href="/css/account.css?v=2")
 
   +alert-success(4000)
   +alert-error(6000)
+
+  -
+    const hasFilter = Boolean(filters && (filters.keyword || filters.role || filters.status))
 
   .page-head
     div
       .page-eyebrow HỆ THỐNG
       h1.page-title Quản lý người dùng
-      p.page-desc #{totalAccounts} tài khoản trong hệ thống.
+      p.page-desc
+        if hasFilter
+          | #{totalAccounts} tài khoản khớp bộ lọc.
+        else
+          | #{totalAccounts} tài khoản trong hệ thống.
     if user.permissions && user.permissions.includes('account_create')
       .page-actions
         a.btn-gradient(href=`${prefixAdmin}/accounts/create`)
           i.bi.bi-plus-lg
           | Thêm người dùng
 
-  .form-card.toolbar-card
+  form.form-card.toolbar-card(method="GET" action=`${prefixAdmin}/accounts`)
     .toolbar-row
       .search-input-wrap
         i.bi.bi-search
-        input.input-custom.toolbar-search(type="text" placeholder="Tìm kiếm theo mã hoặc tên...")
+        input.input-custom.toolbar-search(
+          type="search"
+          name="keyword"
+          value=(filters && filters.keyword) || ""
+          placeholder="Tìm theo tên, tài khoản, email hoặc số điện thoại..."
+          autocomplete="off"
+        )
+      .toolbar-filters
+        select.input-custom.filter-select(name="role" data-filter-select)
+          option(value="" selected=!filters || !filters.role) Tất cả vai trò
+          option(value="admin" selected=filters && filters.role === "admin") Admin
+          option(value="warehouse_manager" selected=filters && filters.role === "warehouse_manager") Quản lý kho
+          option(value="staff" selected=filters && filters.role === "staff") Nhân viên
+        select.input-custom.filter-select(name="status" data-filter-select)
+          option(value="" selected=!filters || !filters.status) Tất cả trạng thái
+          option(value="active" selected=filters && filters.status === "active") Hoạt động
+          option(value="locked" selected=filters && filters.status === "locked") Đã khóa
       .toolbar-actions
-        button.btn-soft(type="button")
+        button.btn-soft(type="submit")
           i.bi.bi-funnel
-          | Bộ lọc
-        button.btn-soft.icon-only(type="button" title="Đổi chế độ xem")
-          i.bi.bi-layout-three-columns
-        button.btn-soft(type="button")
-          i.bi.bi-download
-          | Xuất
+          | Lọc
+        if hasFilter
+          a.btn-soft(href=`${prefixAdmin}/accounts`) Đặt lại
 
   .form-card.table-card
     .table-scroll
@@ -114,4 +134,68 @@ block main
             tr
               td.empty-state(colspan="6")
                 i.bi.bi-inbox
-                p Chưa có tài khoản nào.
+                if hasFilter
+                  p Không có tài khoản khớp bộ lọc.
+                else
+                  p Chưa có tài khoản nào.
+
+    .table-footer
+      .table-footer-text
+        if totalAccounts
+          | Hiển thị #{objectPagination.skipPage + 1}–#{objectPagination.skipPage + accounts.length} trong #{totalAccounts}
+        else
+          | Không có dữ liệu
+      nav.pagination-mini(aria-label="Phân trang người dùng")
+        if objectPagination.currentPage > 1
+          button.page-btn(type="button" data-page=(objectPagination.currentPage - 1) pagination-button aria-label="Trang trước")
+            i.bi.bi-chevron-left
+        else
+          button.page-btn(type="button" disabled aria-label="Trang trước")
+            i.bi.bi-chevron-left
+        - for (var i = 1; i <= objectPagination.countPage; i++)
+          button.page-btn(
+            type="button"
+            class=(i === objectPagination.currentPage ? "active" : "")
+            data-page=i
+            pagination-button
+            aria-current=(i === objectPagination.currentPage ? "page" : false)
+          ) #{i}
+        if objectPagination.currentPage < objectPagination.countPage
+          button.page-btn(type="button" data-page=(objectPagination.currentPage + 1) pagination-button aria-label="Trang sau")
+            i.bi.bi-chevron-right
+        else
+          button.page-btn(type="button" disabled aria-label="Trang sau")
+            i.bi.bi-chevron-right
+
+block script
+  script.
+    var filterForm = document.querySelector(".toolbar-card");
+    if (filterForm) {
+      filterForm.addEventListener("submit", function () {
+        filterForm.querySelectorAll("input, select").forEach(function (field) {
+          if (field.name && !field.value) field.disabled = true;
+        });
+      });
+      document.querySelectorAll("[data-filter-select]").forEach(function (select) {
+        select.addEventListener("change", function () {
+          if (typeof filterForm.requestSubmit === "function") {
+            filterForm.requestSubmit();
+          } else {
+            filterForm.submit();
+          }
+        });
+      });
+    }
+
+    document.querySelectorAll("[pagination-button]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var url = new URL(window.location.href);
+        var page = button.getAttribute("data-page");
+        if (page && page !== "1") {
+          url.searchParams.set("page", page);
+        } else {
+          url.searchParams.delete("page");
+        }
+        window.location.href = url.toString();
+      });
+    });

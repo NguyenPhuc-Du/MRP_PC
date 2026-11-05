@@ -22,7 +22,7 @@ block main
         div
           //- p.io-kicker= mode === "edit" ? "Cập nhật phiếu nháp" : "Phiếu nhập kho"
           h1.io-title= mode === "edit" ? code : "Tạo phiếu nhập"
-          p.io-desc Chọn nhà cung cấp và thương hiệu từ danh mục, hoặc thêm mới bằng tay.
+          p.io-desc Tạo phiếu nhập sẽ cộng số lượng vào tồn đang có. Lưu nháp thì chưa cộng.
         .io-form-hero-meta
           .io-hero-chip
             i.bi.bi-person
@@ -81,7 +81,7 @@ block main
               .io-item-fields
                 label
                   span Số lượng
-                  input.io-input(type="number" min="0" name=`items[${index}][quantity]` value=item.quantity required)
+                  input.io-input(type="number" min="1" step="1" name=`items[${index}][quantity]` value=item.quantity required)
                 label
                   span Đơn giá
                   input.io-input(type="number" min="0" step="1000" name=`items[${index}][unitPrice]` value=item.unitPrice required)
@@ -91,7 +91,7 @@ block main
       .io-form-actions
         a.io-btn-ghost(href=backHref) Hủy
         button.io-btn-ghost(type="submit" data-intent="draft") Lưu nháp
-        button.io-btn-primary(type="submit" data-intent="create")= mode === "edit" ? "Cập nhật phiếu" : "Tạo phiếu nhập"
+        button.io-btn-primary(type="submit" data-intent="create") Nhập kho
 
     .io-overlay.is-picker
     .io-picker
@@ -126,5 +126,4 @@ block main
             .io-item-meta #{component.brandName} · #{component.supplierName}
 
 block script
-  script(src="/js/script.js")
   script(src="/js/import-orders.js")

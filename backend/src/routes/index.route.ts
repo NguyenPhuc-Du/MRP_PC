@@ -12,31 +12,23 @@ import { requireAuth } from "../middlewares/auth.middleware";
 import { productionRoutes } from "./production.route";
 import { backupRoutes } from "./backup.route";
 
+const mountPanel = (app: Express, prefix: string): void => {
+  app.use(`${prefix}/auth`, authRoutes);
+  app.use(prefix, requireAuth);
+  app.use(`${prefix}/dashboard`, dashboardRoutes);
+  app.use(`${prefix}/components`, componentRoutes);
+  app.use(`${prefix}/accounts`, accountRoutes);
+  app.use(`${prefix}/importOrders`, importOrderRoutes);
+  app.use(`${prefix}/exportOrders`, exportOrderRoutes);
+  app.use(`${prefix}/bom`, bomRoutes);
+  app.use(`${prefix}/permissions`, permissionRoutes);
+  app.use(`${prefix}/production`, productionRoutes);
+  app.use(`${prefix}/backup`, backupRoutes);
+};
+
 const adminRoutes = (app: Express): void => {
-  const PATH_ADMIN = `${systemConfig.prefixAdmin}`;
-
-  app.use(`${PATH_ADMIN}/auth`, authRoutes);
-
-  app.use(PATH_ADMIN, requireAuth);
-
-  app.use(`${PATH_ADMIN}/dashboard`, dashboardRoutes);
-
-  app.use(`${PATH_ADMIN}/components`, componentRoutes);
-
-  app.use(`${PATH_ADMIN}/accounts`, accountRoutes);
-
-  app.use(`${PATH_ADMIN}/importOrders`, importOrderRoutes);
-
-  app.use(`${PATH_ADMIN}/exportOrders`, exportOrderRoutes);
-
-  app.use(`${PATH_ADMIN}/bom`, bomRoutes);
-
-  app.use(`${PATH_ADMIN}/permissions`, permissionRoutes);
-
-  app.use(`${PATH_ADMIN}/production`, productionRoutes);
-
-  app.use(`${PATH_ADMIN}/backup`, backupRoutes);
-
+  mountPanel(app, systemConfig.prefixAdmin);
+  mountPanel(app, systemConfig.prefixWarehouse);
 };
 
 export default adminRoutes;

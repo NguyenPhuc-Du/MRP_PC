@@ -1,7 +1,35 @@
 import { prisma } from "../config/database";
 import { CreateAccountDto, UpdateAccountDto } from "../dtos/account.dto";
-import { Account, Prisma } from "../generated/prisma";
+import { Account, AccountRole, AccountStatus, Prisma } from "../generated/prisma";
 import { hashPassword } from "../utils/password.util";
+
+export type AccountListFilter = {
+    keyword: string;
+    role: AccountRole | "";
+    status: AccountStatus | "";
+};
+
+const whereFromFilter = (filter: AccountListFilter): Prisma.AccountWhereInput => {
+    const where: Prisma.AccountWhereInput = {};
+    const keyword = filter.keyword.trim();
+
+    if (keyword) {
+        where.OR = [
+            { username: { contains: keyword, mode: "insensitive" } },
+            { fullName: { contains: keyword, mode: "insensitive" } },
+            { email: { contains: keyword, mode: "insensitive" } },
+            { phone: { contains: keyword, mode: "insensitive" } },
+        ];
+    }
+    if (filter.role) {
+        where.role = filter.role;
+    }
+    if (filter.status) {
+        where.status = filter.status;
+    }
+
+    return where;
+};
 
 const uniqueErrorCode = (error: unknown): "USERNAME_TAKEN" | "EMAIL_TAKEN" | null => {
     if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
@@ -141,6 +169,25 @@ export const updateAccountById = async (updateAccountDto: UpdateAccountDto, acco
 
 export const getAllAccounts = async (): Promise<Account[]> => {
     return await prisma.account.findMany();
+};
+
+export const countAccounts = async (filter: AccountListFilter): Promise<number> => {
+    return prisma.account.count({
+        where: whereFromFilter(filter),
+    });
+};
+
+export const listAccounts = async (
+    filter: AccountListFilter,
+    skip: number,
+    take: number,
+): Promise<Account[]> => {
+    return prisma.account.findMany({
+        where: whereFromFilter(filter),
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        skip,
+        take,
+    });
 };
 
 export const lockAccountById = async (accountId: number): Promise<void> => {

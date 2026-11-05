@@ -3,8 +3,15 @@ import { systemConfig } from "../config/system";
 import { BomItemInput, CreateBomDto } from "../dtos/bom.dto";
 
 import * as bomService from "../services/bom.service";
+import { BomFormDraft } from "../services/bom.service";
 import { paginationHelper } from "../utils/pagination.utils";
-const BASE = () => `${systemConfig.prefixAdmin}/bom`;
+const base = (res: Response): string =>
+  `${res.locals.prefixAdmin || systemConfig.prefixAdmin}/bom`;
+
+const canEditBom = (res: Response): boolean => {
+  const permissions = res.locals.user?.permissions;
+  return Array.isArray(permissions) && permissions.includes("bom_edit");
+};
 
 const errorMessage = (error: unknown): string => {
   if (!(error instanceof Error)) {
@@ -16,12 +23,9 @@ const errorMessage = (error: unknown): string => {
       return "Không tìm thấy cấu hình BOM";
     case "NAME_REQUIRED":
       return "Tên cấu hình không được để trống";
-    case "INVALID_PRICE":
-      return "Giá bán phải lớn hơn 0";
-    case "MISSING_REQUIRED_SLOT":
-      return "BOM phải có đủ CPU, mainboard, RAM, ổ cứng, nguồn, tản nhiệt và case";
+    case "NOT_ENOUGH_COMPONENTS":
     case "NO_ITEMS":
-      return "Thêm ít nhất một linh kiện vào BOM";
+      return "Chưa chọn đủ linh kiện. Hãy chọn đủ 7 linh kiện rồi tạo lại.";
     case "INVALID_QTY":
       return "Số lượng linh kiện phải là số nguyên lớn hơn 0";
     case "DUPLICATE_COMPONENT":
@@ -30,23 +34,16 @@ const errorMessage = (error: unknown): string => {
       return "Linh kiện không tồn tại";
     case "COMPONENT_INACTIVE":
       return "Không gắn linh kiện đã ngừng kinh doanh";
-    case "SLOT_SINGLE_ONLY":
-      return "CPU, mainboard, nguồn và case: mỗi loại đúng 1 linh kiện, số lượng 1";
-    case "INVALID_RAM":
-      return "RAM phải từ 1 đến 4 thanh";
-    case "GPU_SINGLE_ONLY":
-      return "Chỉ được 1 GPU trong BOM";
-    case "SALE_BELOW_COST":
-      return "Giá chốt không được nhỏ hơn giá vốn";
-    case "MISSING_SPEC":
-      return "CPU, mainboard hoặc RAM thiếu socket / loại RAM";
-    case "INCOMPATIBLE_SOCKET":
-      return "Socket CPU không khớp mainboard";
-    case "INCOMPATIBLE_RAM":
-      return "Loại RAM không khớp mainboard";
     default:
-      return "Thao tác thất bại";
+      break;
   }
+
+  if (error.message.startsWith("NOT_ENOUGH_COMPONENTS:")) {
+    const labels = error.message.slice("NOT_ENOUGH_COMPONENTS:".length);
+    return `Chưa chọn đủ linh kiện (${labels}). Hãy chọn đủ rồi tạo lại.`;
+  }
+
+  return "Thao tác thất bại";
 };
 
 const parseNamedItems = (raw: unknown): BomItemInput[] => {
@@ -71,12 +68,65 @@ const parseBomDto = (req: Request): CreateBomDto => {
     quantity: Number(slots[slot.key]?.quantity || slot.defaultQty),
   }));
 
+  const missingLabels = bomService.REQUIRED_SLOTS
+    .filter((slot, index) => {
+      const id = slotItems[index]?.componentId;
+      return !Number.isInteger(id) || id < 1;
+    })
+    .map((slot) => slot.label);
+
+  if (missingLabels.length > 0) {
+    throw new Error(`NOT_ENOUGH_COMPONENTS:${missingLabels.join(", ")}`);
+  }
+
   return {
     name: String(req.body.name || ""),
-    description: String(req.body.description || ""),
-    salePrice: Number(req.body.salePrice) || 0,
     status: req.body.status === "inactive" ? "inactive" : "active",
     items: [...slotItems, ...parseNamedItems(req.body.extras)],
+  };
+};
+
+const redirectKeepingSession = (req: Request, res: Response, url: string): void => {
+  req.session.save(() => {
+    res.redirect(url);
+  });
+};
+
+const rememberDraft = (req: Request, configId?: number): void => {
+  req.session.bomDraft = bomService.bomFormDraftFromBody(
+    req.body as Record<string, unknown>,
+    configId,
+  );
+};
+
+const takeDraft = (req: Request, configId?: number): BomFormDraft | undefined => {
+  const draft = req.session.bomDraft;
+  if (!draft) {
+    return undefined;
+  }
+
+  const matches = configId ? draft.configId === configId : !draft.configId;
+  if (!matches) {
+    return undefined;
+  }
+
+  delete req.session.bomDraft;
+  return draft;
+};
+
+const withDraft = <T extends Record<string, unknown>>(config: T, draft?: BomFormDraft): T => {
+  if (!draft) {
+    return config;
+  }
+
+  return {
+    ...config,
+    name: draft.name,
+    description: draft.description,
+    salePrice: draft.salePrice,
+    statusDb: draft.status,
+    slots: draft.slots,
+    extras: draft.extras,
   };
 };
 
@@ -121,17 +171,19 @@ export const index = async (req: Request, res: Response): Promise<void> => {
   });
 };
 
-export const create = async (_req: Request, res: Response): Promise<void> => {
+export const create = async (req: Request, res: Response): Promise<void> => {
   const catalog = await bomService.getComponentOptions();
   const slots = Object.fromEntries(
     (catalog.slots || []).map((slot) => [slot.key, { componentId: "", quantity: slot.defaultQty }]),
   );
+  const draft = takeDraft(req);
 
   res.render("pages/bom/form", {
     pageTitle: "Tạo cấu hình BOM",
     mode: "create",
-    formAction: `${BASE()}/create`,
-    config: { ...emptyConfig, slots },
+    formAction: `${base(res)}/create`,
+    canEdit: true,
+    config: withDraft({ ...emptyConfig, slots }, draft),
     catalog,
   });
 };
@@ -139,12 +191,14 @@ export const create = async (_req: Request, res: Response): Promise<void> => {
 export const createPost = async (req: Request, res: Response): Promise<void> => {
   try {
     const config = await bomService.createConfig(parseBomDto(req));
+    delete req.session.bomDraft;
     req.flash("success", "Tạo cấu hình BOM thành công");
-    res.redirect(`${BASE()}/detail/${config.id}`);
+    redirectKeepingSession(req, res, `${base(res)}/detail/${config.id}`);
   } catch (error) {
     console.error(error);
+    rememberDraft(req);
     req.flash("error", errorMessage(error));
-    res.redirect(`${BASE()}/create`);
+    redirectKeepingSession(req, res, `${base(res)}/create`);
   }
 };
 
@@ -155,17 +209,21 @@ export const detail = async (req: Request, res: Response): Promise<void> => {
       bomService.getComponentOptions(),
     ]);
 
+    const draft = takeDraft(req, row.id);
+    const config = withDraft(bomService.mapDetailConfig(row), draft);
+
     res.render("pages/bom/form", {
-      pageTitle: row.name,
+      pageTitle: config.name || row.name,
       mode: "edit",
-      formAction: `${BASE()}/detail/${row.id}`,
-      config: bomService.mapDetailConfig(row),
+      formAction: `${base(res)}/detail/${row.id}`,
+      canEdit: canEditBom(res),
+      config,
       catalog,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "BOM_NOT_FOUND") {
       req.flash("error", errorMessage(error));
-      res.redirect(BASE());
+      res.redirect(base(res));
       return;
     }
 
@@ -178,11 +236,13 @@ export const updatePost = async (req: Request, res: Response): Promise<void> => 
 
   try {
     await bomService.updateConfig(id, parseBomDto(req));
+    delete req.session.bomDraft;
     req.flash("success", "Cập nhật cấu hình BOM thành công");
-    res.redirect(`${BASE()}/detail/${id}`);
+    redirectKeepingSession(req, res, `${base(res)}/detail/${id}`);
   } catch (error) {
     console.error(error);
+    rememberDraft(req, id);
     req.flash("error", errorMessage(error));
-    res.redirect(`${BASE()}/detail/${id}`);
+    redirectKeepingSession(req, res, `${base(res)}/detail/${id}`);
   }
 };

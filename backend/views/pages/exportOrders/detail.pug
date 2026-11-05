@@ -43,11 +43,12 @@ block main
           span Ghi chú
           strong= order.note
 
-    if order.status === "pending" && order.shortGroups.length
+    //- if order.status === "pending" && order.shortGroups.length
+    if order.status === "pending" && order.type === "finished_product" && !order.stockOk
       .io-alert
         .io-alert-head
           i.bi.bi-exclamation-triangle
-          strong Không đủ tồn để duyệt
+          strong Chưa đủ thành phẩm trong kho để duyệt
         each group in order.shortGroups
           .io-shortage-group
             p= group.supplierName
@@ -73,12 +74,11 @@ block main
                 td.text-end.io-num= line.onHand === null ? "—" : line.onHand
                 td.text-end.io-num= line.after === null ? "—" : line.after
                 td
-                  if line.kind === "product"
-                    span —
-                  else if line.enough
+                  if line.enough
                     span.io-badge.is-ok Đủ
                   else
                     span.io-badge.is-bad Thiếu
+
 
     if canApprove && order.status === "pending"
       .io-head-actions

@@ -163,7 +163,7 @@
       data.name + '</div><div class="io-item-meta">' +
       (data.brandName || "—") + " · " + (data.supplierName || "Chưa gán NCC") +
       " · Tồn kho hiện tại " + data.stock +
-      '</div></div><div class="io-item-fields"><label><span>Số lượng</span><input class="io-input" type="number" min="0" name="items[' +
+      '</div></div><div class="io-item-fields"><label><span>Số lượng</span><input class="io-input" type="number" min="1" step="1" name="items[' +
       index + '][quantity]" value="1" required></label><label><span>Đơn giá</span><input class="io-input" type="number" min="0" step="1000" name="items[' +
       index + '][unitPrice]" value="' + data.price + '" required></label><button class="io-del" type="button" title="Xóa"><i class="bi bi-trash"></i></button></div>';
     itemList.appendChild(row);

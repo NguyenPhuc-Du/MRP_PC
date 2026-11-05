@@ -8,6 +8,7 @@ backups/*
 *.iml
 .gradle
 /local.properties
+mobile-app/local.properties
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml

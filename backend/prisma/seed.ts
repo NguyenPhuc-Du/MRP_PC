@@ -181,13 +181,35 @@ async function main() {
 
   await prisma.productionOrder.upsert({
     where: { id: 1 },
-    update: {},
+    update: {
+      status: "done",
+      quantityRequested: 1,
+      completedAt: new Date(),
+    },
     create: {
       pcConfigId: officePc.id,
       quantityRequested: 1,
       assignedTo: staff.id,
       createdBy: admin.id,
-      status: "pending",
+      status: "done",
+      completedAt: new Date(),
+    },
+  });
+
+  await prisma.productionOrder.upsert({
+    where: { id: 2 },
+    update: {
+      status: "done",
+      quantityRequested: 1,
+      completedAt: new Date(),
+    },
+    create: {
+      pcConfigId: officePc.id,
+      quantityRequested: 1,
+      assignedTo: staff.id,
+      createdBy: admin.id,
+      status: "done",
+      completedAt: new Date(),
     },
   });
 

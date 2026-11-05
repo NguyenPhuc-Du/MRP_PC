@@ -402,6 +402,9 @@ export const createOrder = async (data: SaveImportOrderDto) => {
   if (!items.length) {
     throw new Error("NO_ITEMS");
   }
+  if (items.some((item) => item.quantity < 1)) {
+    throw new Error("INVALID_QTY");
+  }
   await assertItemsBelongToSupplier(
     data.supplierId,
     items.map((item) => item.componentId),
@@ -455,6 +458,9 @@ export const updateDraft = async (id: number, data: SaveImportOrderDto) => {
   const items = normalizeItems(data.items);
   if (!items.length) {
     throw new Error("NO_ITEMS");
+  }
+  if (items.some((item) => item.quantity < 1)) {
+    throw new Error("INVALID_QTY");
   }
   await assertItemsBelongToSupplier(
     data.supplierId,

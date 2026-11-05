@@ -130,8 +130,17 @@ block main
                           button.io-btn-primary(type="submit") Duyệt
                         form.io-inline-form(method="POST" action=`${prefixAdmin}/exportOrders/${order.id}/reject` onsubmit="return confirm('Từ chối phiếu này?')")
                           button.io-btn-ghost(type="submit") Từ chối
-                    else if order.status === "pending" && !order.stockOk
+                    //- else if order.status === "pending" && !order.stockOk
+                    //-   a.io-code(href=`${prefixAdmin}/exportOrders/${order.id}`) Mở để nhập thêm
+                    //- else if order.status === "pending" && !order.stockOk
+                    //-   a.io-code(href=`${prefixAdmin}/exportOrders/${order.id}`) Mở để nhập thêm
+
+                    else if order.status === "pending" && !order.stockOk && order.type === "material"
                       a.io-code(href=`${prefixAdmin}/exportOrders/${order.id}`) Mở để nhập thêm
+                    else if order.status === "pending" && !order.stockOk
+                      a.io-code(href=`${prefixAdmin}/exportOrders/${order.id}`) Thiếu thành phẩm
+
+
             else
               tr
                 td.io-empty(colspan="10")
