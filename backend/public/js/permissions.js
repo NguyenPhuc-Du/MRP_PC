@@ -76,12 +76,14 @@
 
     var viewInput = checkboxInputs(view)[index];
     if (!viewInput) return;
+    // Không đụng cột Admin đã khóa.
+    if (viewInput.getAttribute("data-locked-role") === "admin") return;
 
     var enabled = viewInput.checked;
     group.forEach(function (row) {
       if (isViewRow(row)) return;
       var input = checkboxInputs(row)[index];
-      if (!input) return;
+      if (!input || input.getAttribute("data-locked-role") === "admin") return;
 
       if (!enabled) {
         input.checked = false;
@@ -104,10 +106,40 @@
     });
   }
 
+  function adminColumnIndex(records) {
+    for (var i = 0; i < records.length; i += 1) {
+      if (records[i].id === "admin") {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  function lockAdminColumn(records) {
+    var adminIndex = adminColumnIndex(records);
+    if (adminIndex < 0) {
+      return;
+    }
+
+    tablePermissions.querySelectorAll("tbody tr[data-name]").forEach(function (row) {
+      var name = row.getAttribute("data-name");
+      if (!name || name === "id") {
+        return;
+      }
+      var inputs = checkboxInputs(row);
+      if (!inputs[adminIndex]) {
+        return;
+      }
+      inputs[adminIndex].disabled = true;
+      inputs[adminIndex].setAttribute("data-locked-role", "admin");
+    });
+  }
+
   function applyRecords(records) {
     tablePermissions.querySelectorAll('tr[data-name] input[type="checkbox"]').forEach(function (input) {
       input.checked = false;
       input.disabled = false;
+      input.removeAttribute("data-locked-role");
     });
 
     records.forEach(function (record, index) {
@@ -124,6 +156,7 @@
     });
 
     syncAllViewLocks();
+    lockAdminColumn(records);
 
     if (!canEdit) {
       tablePermissions.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
@@ -136,7 +169,11 @@
     var permissions = records.map(function (record) {
       return {
         id: record.id,
-        permissions: [],
+        // Admin luôn giữ nguyên quyền gốc, không lấy từ checkbox (đã khóa).
+        permissions:
+          record.id === "admin"
+            ? (record.permissions || []).slice()
+            : [],
       };
     });
 
@@ -147,7 +184,10 @@
       }
 
       checkboxInputs(row).forEach(function (input, index) {
-        if (input.checked && !input.disabled && permissions[index]) {
+        if (!permissions[index] || permissions[index].id === "admin") {
+          return;
+        }
+        if (input.checked && !input.disabled) {
           permissions[index].permissions.push(name);
         }
       });

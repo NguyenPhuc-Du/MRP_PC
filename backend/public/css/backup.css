@@ -30,3 +30,53 @@
   margin:0;
   font-size:14px;
 }
+
+.backup-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:flex-end;
+  align-items:center;
+}
+
+.backup-restore-form{
+  display:inline;
+  margin:0;
+}
+
+.btn-restore{
+  color:#b45309;
+  border-color:rgba(180, 83, 9, 0.25);
+}
+
+.btn-restore:hover{
+  background:rgba(245, 158, 11, 0.12);
+}
+
+.backup-page-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+
+.backup-upload-form{
+  margin:0;
+}
+
+.backup-file-input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  overflow:hidden;
+  z-index:-1;
+}
+
+.btn-upload{
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin:0;
+}
