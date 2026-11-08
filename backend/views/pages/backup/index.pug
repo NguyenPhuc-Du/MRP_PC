@@ -12,21 +12,36 @@ block main
     div
       .page-eyebrow HỆ THỐNG
       h1.page-title Sao lưu dữ liệu
-      p.page-desc Chụp toàn bộ PostgreSQL (đơn sản xuất, kho, phiếu, tài khoản) thành file .sql.
+      p.page-desc Tạo file .sql bằng pg_dump, tải về máy khác, hoặc khôi phục lại database trực tiếp trên web.
     if user.permissions && user.permissions.includes('backup_create')
-      .page-actions
+      .page-actions.backup-page-actions
         form(action=`${prefixAdmin}/backup` method="POST")
           button.btn-gradient.btn-auto(type="submit")
             i.bi.bi-plus-lg
             | Tạo bản sao lưu
+        form.backup-upload-form(
+          action=`${prefixAdmin}/backup/upload`
+          method="POST"
+          enctype="multipart/form-data"
+        )
+          label.btn-soft.btn-upload(for="backupFileInput")
+            i.bi.bi-upload
+            | Nạp file backup
+          input#backupFileInput.backup-file-input(
+            type="file"
+            name="backupFile"
+            accept=".sql,application/sql,text/plain"
+            required
+            onchange="this.form.submit()"
+          )
 
   .form-card.backup-hint
     .form-card-head
       .form-card-icon
         i.bi.bi-info-circle
       div
-        .form-card-title Đây là backup thủ công (hướng pg_dump)
-        .form-card-sub File nằm thư mục backups trên máy chủ. Nên copy thêm ra USB / Drive. Không đẩy file .sql lên Git.
+        .form-card-title Backup / nạp file / khôi phục trên web
+        .form-card-sub Bấm “Nạp file backup” để chọn file .sql từ máy tính và lưu vào thư mục backups. Sau đó có thể bấm “Khôi phục” để ghi đè database hiện tại. Không đẩy file .sql lên Git.
 
   .form-card.table-card
     if files && files.length
@@ -48,11 +63,20 @@ block main
                 td= file.sizeLabel
                 td
                   span.cell-muted= formatDate(file.createdAt)
-                td.text-end
+                td.text-end.backup-actions
                   a.btn-soft(href=`${prefixAdmin}/backup/download/${file.filename}`)
                     i.bi.bi-download
                     | Tải về
+                  if user.permissions && user.permissions.includes('backup_create')
+                    form.backup-restore-form(
+                      action=`${prefixAdmin}/backup/restore/${file.filename}`
+                      method="POST"
+                      onsubmit="return confirm('Khôi phục sẽ XÓA dữ liệu hiện tại và nạp lại từ file này. Tiếp tục?')"
+                    )
+                      button.btn-soft.btn-restore(type="submit")
+                        i.bi.bi-arrow-counterclockwise
+                        | Khôi phục
     else
       .backup-empty
         i.bi.bi-archive
-        p Chưa có bản sao lưu. Bấm “Tạo bản sao lưu” để chụp database hiện tại.
+        p Chưa có bản sao lưu. Bấm “Tạo bản sao lưu” để chụp database hiện tại, hoặc copy file mrp_pc-*.sql vào thư mục backups.

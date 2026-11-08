@@ -180,3 +180,145 @@ export const resolveBackupFile = (filename: string): string => {
 
   return filePath;
 };
+
+/** Lưu file .sql admin upload vào thư mục backups. */
+export const saveUploadedBackup = async (
+  accountId: number,
+  originalName: string,
+  buffer: Buffer,
+): Promise<BackupFile> => {
+  if (!buffer.length) {
+    throw new Error("EMPTY_BACKUP");
+  }
+
+  const baseName = path.basename(originalName || "").trim();
+  if (!baseName.toLowerCase().endsWith(".sql")) {
+    throw new Error("INVALID_UPLOAD");
+  }
+
+  const dir = getBackupDir();
+  await fsp.mkdir(dir, { recursive: true });
+
+  let filename = FILE_PATTERN.test(baseName) ? baseName : timestampName();
+  let filePath = path.join(dir, filename);
+
+  if (fs.existsSync(filePath)) {
+    filename = timestampName();
+    filePath = path.join(dir, filename);
+  }
+
+  await fsp.writeFile(filePath, buffer);
+
+  const stat = await fsp.stat(filePath);
+  if (stat.size < 10) {
+    await fsp.unlink(filePath).catch(() => undefined);
+    throw new Error("EMPTY_BACKUP");
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      accountId,
+      action: "upload_backup",
+      targetTable: "database",
+      detail: `${filename} (from ${baseName})`,
+    },
+  });
+
+  return {
+    filename,
+    size: stat.size,
+    sizeLabel: formatSize(stat.size),
+    createdAt: stat.mtime,
+  };
+};
+
+const runPsql = (
+  db: ReturnType<typeof parseDatabaseUrl>,
+  args: string[],
+  input?: NodeJS.ReadableStream,
+): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    const child = spawn(
+      "psql",
+      [
+        "-h",
+        db.host,
+        "-p",
+        db.port,
+        "-U",
+        db.user,
+        "-d",
+        db.database,
+        "-v",
+        "ON_ERROR_STOP=1",
+        ...args,
+      ],
+      {
+        env: {
+          ...process.env,
+          PGPASSWORD: db.password,
+        },
+      },
+    );
+
+    let stderr = "";
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+
+    child.on("error", (error) => {
+      const code = (error as NodeJS.ErrnoException).code;
+      reject(code === "ENOENT" ? new Error("PSQL_MISSING") : error);
+    });
+
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+      reject(new Error(stderr.trim() || "PSQL_FAILED"));
+    });
+
+    if (input) {
+      input.pipe(child.stdin);
+    }
+  });
+};
+
+/** Khôi phục DB từ file .sql trong thư mục backups (xóa schema public rồi nạp lại). */
+export const restoreBackup = async (
+  accountId: number,
+  filename: string,
+): Promise<BackupFile> => {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL_MISSING");
+  }
+
+  const filePath = resolveBackupFile(filename);
+  const db = parseDatabaseUrl(databaseUrl);
+  const stat = await fsp.stat(filePath);
+
+  await runPsql(db, [
+    "-c",
+    "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO public; GRANT ALL ON SCHEMA public TO CURRENT_USER;",
+  ]);
+
+  await runPsql(db, ["-f", filePath]);
+
+  await prisma.auditLog.create({
+    data: {
+      accountId,
+      action: "restore_backup",
+      targetTable: "database",
+      detail: filename,
+    },
+  });
+
+  return {
+    filename,
+    size: stat.size,
+    sizeLabel: formatSize(stat.size),
+    createdAt: stat.mtime,
+  };
+};
