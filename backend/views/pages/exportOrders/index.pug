@@ -2,7 +2,7 @@ extends ../../layouts/admin-layout.pug
 include ../../mixins/alert.pug
 
 block main
-  link(rel="stylesheet" href="/css/import-orders.css")
+  link(rel="stylesheet" href="/css/import-orders.css?v=6")
   +alert-success(4000)
   +alert-error(6000)
 
@@ -72,14 +72,15 @@ block main
           option(value="pending" selected=(filters.status === "pending")) Chờ duyệt
           option(value="approved" selected=(filters.status === "approved")) Đã xuất
           option(value="rejected" selected=(filters.status === "rejected")) Từ chối
-      .io-filter-item
+      .io-filter-item.io-filter-range
         label Khoảng thời gian
         .io-dates
           input(type="date" name="from" value=filters.from || "")
-          span –
+          span.io-date-sep –
           input(type="date" name="to" value=filters.to || "")
-      button.io-btn-ghost(type="submit") Lọc
-      a.io-btn-ghost(href=`${prefixAdmin}/exportOrders`) Đặt lại
+      .io-filter-actions
+        button.io-btn-ghost(type="submit") Lọc
+        a.io-btn-ghost(href=`${prefixAdmin}/exportOrders`) Đặt lại
 
     .io-card
       .table-responsive

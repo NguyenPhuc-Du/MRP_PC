@@ -2,7 +2,7 @@ extends ../../layouts/admin-layout.pug
 include ../../mixins/alert.pug
 
 block main
-  link(rel="stylesheet" href="/css/import-orders.css")
+  link(rel="stylesheet" href="/css/import-orders.css?v=6")
   +alert-success(4000)
   +alert-error(6000)
 
@@ -83,14 +83,15 @@ block main
           each acc in accounts
             option(value=acc.id selected=(String(filters.createdBy) === String(acc.id)))
               | #{acc.fullName || acc.username}
-      .io-filter-item
+      .io-filter-item.io-filter-range
         label Khoảng thời gian
         .io-dates
           input(type="date" name="from" value=filters.from)
-          span –
+          span.io-date-sep –
           input(type="date" name="to" value=filters.to)
-      button.io-btn-ghost(type="submit") Lọc
-      a.io-btn-ghost(href=`${prefixAdmin}/importOrders`) Đặt lại
+      .io-filter-actions
+        button.io-btn-ghost(type="submit") Lọc
+        a.io-btn-ghost(href=`${prefixAdmin}/importOrders`) Đặt lại
     if shortageGroups && shortageGroups.length
       .io-alert
         .io-alert-head
