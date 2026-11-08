@@ -51,6 +51,8 @@ fun MrpNavGraph() {
                         errorMessage = orderState.errorMessage,
                         onRetry = orderViewModel::loadOrders,
                         onLogout = loginViewModel::logout,
+                        newOrderCount = orderState.newOrderCount,
+                        onNewOrdersClick = orderViewModel::onNewOrdersBannerClick,
                         onOrderClick = { id ->
                             navController.navigateSingle(Routes.orderDetail(id))
                         },

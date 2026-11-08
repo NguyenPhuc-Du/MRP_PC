@@ -2,6 +2,10 @@ package com.example.mrp_pc.ui.orders
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -29,6 +33,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -75,9 +80,12 @@ fun OrderListScreen(
     errorMessage: String? = null,
     selectedFilter: String = "ALL",
     onFilterChange: (String) -> Unit = {},
+    newOrderCount: Int = 0,
+    onNewOrdersClick: () -> Unit = {},
 ) {
     val debouncedLogout = rememberSingleClick(onClick = onLogout)
     val debouncedRetry = rememberSingleClick(onClick = onRetry)
+    val debouncedNewOrders = rememberSingleClick(onClick = onNewOrdersClick)
 
     val displayedOrders = if (selectedFilter == "ALL") {
         orders
@@ -122,6 +130,18 @@ fun OrderListScreen(
                 }
             },
         )
+
+        AnimatedVisibility(
+            visible = newOrderCount > 0 && !isLoading,
+            enter = fadeIn() + slideInVertically(),
+            exit = fadeOut() + slideOutVertically(),
+        ) {
+            NewOrdersBanner(
+                count = newOrderCount,
+                onClick = debouncedNewOrders,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+        }
 
         when {
             isLoading -> LoadingState("Đang tải danh sách lệnh sản xuất...")
@@ -170,6 +190,65 @@ fun OrderListScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun NewOrdersBanner(
+    count: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val title = if (count == 1) "Có 1 yêu cầu mới" else "Có $count yêu cầu mới"
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .bounceClick()
+            .clickableSingle(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = BrandBlue,
+        shadowElevation = 4.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Filled.NotificationsActive,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                )
+                Text(
+                    text = "Chạm để tải lại và cập nhật danh sách",
+                    color = Color.White.copy(alpha = 0.9f),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color.White,
+            )
         }
     }
 }
@@ -463,6 +542,22 @@ private fun OrderListErrorPreview() {
             onRetry = {},
             onLogout = {},
             onOrderClick = {},
+        )
+    }
+}
+
+@Preview(name = "OrderList - Có yêu cầu mới", showBackground = true)
+@Composable
+private fun OrderListNewOrdersPreview() {
+    MrppcTheme(darkTheme = false) {
+        OrderListScreen(
+            orders = sampleOrders,
+            isLoading = false,
+            onRetry = {},
+            onLogout = {},
+            onOrderClick = {},
+            newOrderCount = 1,
+            onNewOrdersClick = {},
         )
     }
 }
