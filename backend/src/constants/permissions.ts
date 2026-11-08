@@ -72,7 +72,6 @@ export type RolePermissionPayload = {
 };
 
 export const ADMIN_PERMISSIONS: PermissionKey[] = [
-  "dashboard_view",
   "account_view",
   "account_create",
   "account_edit",
