@@ -110,6 +110,25 @@
   padding-left: 18px !important;
 }
 
+.perm-th-locked {
+  color: #6b7280 !important;
+}
+
+.perm-lock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
 .perm-table td {
   padding: 12px;
   border-top: 1px solid #f1f2f6;
@@ -172,16 +191,31 @@
 
 .perm-check:has(input:disabled) {
   cursor: not-allowed;
-  opacity: 0.4;
+  opacity: 0.55;
 }
 
-.perm-check:has(input:disabled):hover .perm-check-ui {
+.perm-check:has(input:disabled:not([data-locked-role])):hover .perm-check-ui {
   background: #f4f5f8;
 }
 
-.perm-check:has(input:disabled) input:checked + .perm-check-ui {
+/* Quyền bị khóa theo view (vd. thiếu *_view) — ẩn tick */
+.perm-check:has(input:disabled:not([data-locked-role])) input:checked + .perm-check-ui {
   background: #f4f5f8;
   color: transparent;
+}
+
+/* Cột Admin khóa nhưng vẫn hiện đủ quyền đã gán */
+.perm-check:has(input[data-locked-role="admin"]:checked) {
+  opacity: 0.85;
+}
+
+.perm-check:has(input[data-locked-role="admin"]:checked) input:checked + .perm-check-ui {
+  background: #eefbf3;
+  color: #16a34a;
+}
+
+.perm-check:has(input[data-locked-role="admin"]):hover .perm-check-ui {
+  background: #eefbf3;
 }
 
 @media (max-width: 900px) {

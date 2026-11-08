@@ -27,7 +27,7 @@ block main
         .perm-head-text
           span.perm-eyebrow BẢO MẬT
           h1.perm-title Phân quyền
-          p.perm-subtitle Tick quyền theo từng vai trò, rồi lưu để áp dụng.
+          p.perm-subtitle Tick quyền theo từng vai trò, rồi lưu để áp dụng. Cột Admin bị khóa vì đã có đủ quyền hệ thống.
 
         .perm-head-actions
           button.perm-btn.perm-btn-light(type="button" button-reset) Hoàn tác
@@ -43,13 +43,18 @@ block main
               tr
                 th.perm-th-module Tính năng
                 each item in records
-                  th.text-center= item.title
+                  th.text-center(class=item.id === 'admin' ? 'perm-th-locked' : undefined)
+                    span= item.title
+                    if item.id === 'admin'
+                      span.perm-lock-badge(title="Không thể chỉnh sửa quyền Admin")
+                        i.bi.bi-lock-fill
+                        |  Khóa
             tbody
               tr.d-none(data-name="id")
                 td
                 each item in records
                   td.text-center
-                    input(type="text" value=item.id)
+                    input(type="text" value=item.id data-role-id=item.id)
 
               +permissionGroup("Dashboard")
               +permissionRow("dashboard_view", "Xem")

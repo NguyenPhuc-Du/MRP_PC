@@ -1,5 +1,6 @@
 import { prisma } from "../config/database";
 import {
+    ADMIN_PERMISSIONS,
     DEFAULT_ROLES,
     ROLE_LABELS,
     ROLE_ORDER,
@@ -11,7 +12,9 @@ const samePermissions = (left: string[], right: string[]): boolean => {
     if (left.length !== right.length) {
         return false;
     }
-    return left.every((key, index) => key === right[index]);
+    const sortedLeft = [...left].sort();
+    const sortedRight = [...right].sort();
+    return sortedLeft.every((key, index) => key === sortedRight[index]);
 };
 
 export const ensureDefaultRoles = async (): Promise<void> => {
@@ -31,19 +34,15 @@ export const ensureDefaultRoles = async (): Promise<void> => {
     const rows = await prisma.role.findMany({
         select: { id: true, permissions: true },
     });
-    const defaultsById = new Map(DEFAULT_ROLES.map((role) => [role.id, role.permissions]));
 
     await Promise.all(
         rows.map(async (row) => {
             const cleaned = sanitizePermissions(row.permissions);
-            const defaults = defaultsById.get(row.id) ?? [];
-            const shouldFillAdmin =
-                row.id === "admin" &&
-                !cleaned.includes("dashboard_view") &&
-                !cleaned.includes("backup_view");
-            const next = shouldFillAdmin
-                ? [...new Set([...defaults, ...cleaned])]
-                : cleaned;
+            // Admin luôn cố định full quyền hệ thống.
+            const next =
+                row.id === "admin"
+                    ? [...ADMIN_PERMISSIONS]
+                    : cleaned;
 
             if (samePermissions(next, row.permissions)) {
                 return;
@@ -70,7 +69,10 @@ export const getRoles = async () => {
     return ROLE_ORDER.map((id) => ({
         id,
         title: ROLE_LABELS[id],
-        permissions: sanitizePermissions(byId.get(id)?.permissions ?? []),
+        permissions:
+            id === "admin"
+                ? [...ADMIN_PERMISSIONS]
+                : sanitizePermissions(byId.get(id)?.permissions ?? []),
     }));
 };
 
@@ -79,7 +81,13 @@ export const updatePermissions = async (payload: RolePermissionPayload[]): Promi
         payload.map((item) =>
             prisma.role.update({
                 where: { id: item.id },
-                data: { permissions: sanitizePermissions(item.permissions) },
+                data: {
+                    // Admin luôn giữ full quyền, không cho đổi từ trang Phân quyền.
+                    permissions:
+                        item.id === "admin"
+                            ? [...ADMIN_PERMISSIONS]
+                            : sanitizePermissions(item.permissions),
+                },
             }),
         ),
     );
