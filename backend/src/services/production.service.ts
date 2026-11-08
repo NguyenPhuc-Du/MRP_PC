@@ -1,85 +1,132 @@
 import { prisma } from "../config/db";
+import {
+  decrementComponentStock,
+  incrementProductStock,
+} from "./stock.service";
 
 const notDeleted = { deletedAt: null };
 
 export async function getMyOders(accountId: number) {
-    return await prisma.productionOrder.findMany({
-        where: {
-            assignedTo: accountId,
-            ...notDeleted,
-        },
+  return await prisma.productionOrder.findMany({
+    where: {
+      assignedTo: accountId,
+      ...notDeleted,
+    },
 
+    select: {
+      id: true,
+      quantityRequested: true,
+      status: true,
+      createdAt: true,
+      completedAt: true,
+      pcConfig: {
         select: {
-            id: true,
-            quantityRequested: true,
-            status: true,
-            createdAt: true,
-            completedAt: true,
-            pcConfig: {
-                select: {
-                    id: true,
-                    name: true,
-                    description: true,
-                },
-            },
+          id: true,
+          name: true,
+          description: true,
         },
+      },
+    },
 
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 }
 
 export async function getMyOrderById(accountId: number, orderId: number) {
-    return prisma.productionOrder.findFirst({
-        where: {
-            id: orderId,
-            assignedTo: accountId,
-            ...notDeleted,
-        },
+  return prisma.productionOrder.findFirst({
+    where: {
+      id: orderId,
+      assignedTo: accountId,
+      ...notDeleted,
+    },
+    select: {
+      id: true,
+      quantityRequested: true,
+      status: true,
+      createdAt: true,
+      completedAt: true,
+      pcConfig: {
         select: {
-            id: true,
-            quantityRequested: true,
-            status: true,
-            createdAt: true,
-            completedAt: true,
-            pcConfig: {
-                select: {
-                    id: true,
-                    name: true,
-                    description: true,
-                },
-            },
+          id: true,
+          name: true,
+          description: true,
         },
-    });
+      },
+    },
+  });
+}
+type BomStockSource = {
+  quantity: number;
+  component: {
+    id: number;
+    name: string;
+    unit: string | null;
+    inventory: { quantityOnHand: number } | null;
+  };
+};
+
+type BomStockLine = {
+  componentId: number;
+  componentName: string;
+  unit: string | null;
+  bomQtyPerUnit: number;
+  requiredQty: number;
+  onHandQty: number;
+  missingQty: number;
+  isEnough: boolean;
+};
+
+function mapBomStock(quantityRequested: number, bomItems: BomStockSource[]) {
+  const items: BomStockLine[] = bomItems.map((bom) => {
+    const requiredQty = bom.quantity * quantityRequested;
+    const onHandQty = bom.component.inventory?.quantityOnHand ?? 0;
+    const missingQty = Math.max(0, requiredQty - onHandQty);
+
+    return {
+      componentId: bom.component.id,
+      componentName: bom.component.name,
+      unit: bom.component.unit,
+      bomQtyPerUnit: bom.quantity,
+      requiredQty,
+      onHandQty,
+      missingQty,
+      isEnough: missingQty === 0,
+    };
+  });
+
+  return {
+    items,
+    allEnough: items.length > 0 && items.every((item) => item.isEnough),
+  };
 }
 
 export async function getOrderStockCheck(accountId: number, orderId: number) {
-    const order = await prisma.productionOrder.findFirst({
-      where: {
-        id: orderId,
-        assignedTo: accountId,
-        ...notDeleted,
-      },
-      select: {
-        id: true,
-        quantityRequested: true,
-        pcConfig: {
-          select: {
-            id: true,
-            name: true,
-            bomItems: {
-              select: {
-                quantity: true,
-                component: {
-                  select: {
-                    id: true,
-                    name: true,
-                    unit: true,
-                    inventory: {
-                      select: {
-                        quantityOnHand: true,
-                      },
+  const order = await prisma.productionOrder.findFirst({
+    where: {
+      id: orderId,
+      assignedTo: accountId,
+      ...notDeleted,
+    },
+    select: {
+      id: true,
+      quantityRequested: true,
+      pcConfig: {
+        select: {
+          id: true,
+          name: true,
+          bomItems: {
+            select: {
+              quantity: true,
+              component: {
+                select: {
+                  id: true,
+                  name: true,
+                  unit: true,
+                  inventory: {
+                    select: {
+                      quantityOnHand: true,
                     },
                   },
                 },
@@ -88,43 +135,56 @@ export async function getOrderStockCheck(accountId: number, orderId: number) {
           },
         },
       },
-    });
-  
-    if (!order) {
-      return null;
-    }
-  
-    const items = order.pcConfig.bomItems.map((bom) => {
-      const requiredQty = bom.quantity * order.quantityRequested;
-      const onHandQty = bom.component.inventory?.quantityOnHand ?? 0;
-      const missingQty = Math.max(0, requiredQty - onHandQty);
-  
-      return {
-        componentId: bom.component.id,
-        componentName: bom.component.name,
-        unit: bom.component.unit,
-        bomQtyPerUnit: bom.quantity,
-        requiredQty,
-        onHandQty,
-        missingQty,
-        isEnough: onHandQty >= requiredQty,
-      };
-    });
-  
-    return {
-      orderId: order.id,
-      configName: order.pcConfig.name,
-      quantityRequested: order.quantityRequested,
-      allEnough: items.every((item) => item.isEnough),
-      items,
-    };
+    },
+  });
+
+  if (!order) {
+    return null;
   }
+
+  // const items = order.pcConfig.bomItems.map((bom) => {
+  //   const requiredQty = bom.quantity * order.quantityRequested;
+  //   const onHandQty = bom.component.inventory?.quantityOnHand ?? 0;
+  //   const missingQty = Math.max(0, requiredQty - onHandQty);
+
+  //   return {
+  //     componentId: bom.component.id,
+  //     componentName: bom.component.name,
+  //     unit: bom.component.unit,
+  //     bomQtyPerUnit: bom.quantity,
+  //     requiredQty,
+  //     onHandQty,
+  //     missingQty,
+  //     isEnough: onHandQty >= requiredQty,
+  //   };
+  // });
+  const stock = mapBomStock(order.quantityRequested, order.pcConfig.bomItems);
+
+  return {
+    orderId: order.id,
+    configName: order.pcConfig.name,
+    quantityRequested: order.quantityRequested,
+    allEnough: stock.allEnough,
+    items: stock.items,
+  };
+
+  // return {
+  //   orderId: order.id,
+  //   configName: order.pcConfig.name,
+  //   quantityRequested: order.quantityRequested,
+  //   allEnough: items.every((item) => item.isEnough),
+  //   items,
+  // };
+}
 
 function poNotePrefix(orderId: number): string {
   return `PO#${orderId}`;
 }
 
-async function findLatestExport(orderId: number, type: "material" | "finished_product") {
+async function findLatestExport(
+  orderId: number,
+  type: "material" | "finished_product",
+) {
   return prisma.exportOrder.findFirst({
     where: {
       type,
@@ -185,16 +245,52 @@ function mapExportSummary(
   };
 }
 
+// export async function getAssembleStatus(accountId: number, orderId: number) {
+//   const order = await getAssignedOrder(accountId, orderId);
+//   if (!order) {
+//     return null;
+//   }
+
+//   const stock = await getOrderStockCheck(accountId, orderId);
+//   const materialExport = await findLatestExport(orderId, "material");
+//   const productExport = await findLatestExport(orderId, "finished_product");
+//   const isDone = order.status === "done";
+
+//   return {
+//     order: {
+//       id: order.id,
+//       configName: order.pcConfig.name,
+//       description: order.pcConfig.description,
+//       quantityRequested: order.quantityRequested,
+//       status: order.status,
+//     },
+//     allEnough: stock?.allEnough ?? false,
+//     missingCount: stock?.items.filter((item) => !item.isEnough).length ?? 0,
+//     materialExport: mapExportSummary(materialExport),
+//     productExport: mapExportSummary(productExport),
+//     canRequestMaterial:
+//       !isDone && (!materialExport || materialExport.status === "rejected"),
+//     canConfirmAssemble: !isDone && (stock?.allEnough ?? false),
+//     canRequestProduct:
+//       isDone && (!productExport || productExport.status === "rejected"),
+//   };
+// }
 export async function getAssembleStatus(accountId: number, orderId: number) {
   const order = await getAssignedOrder(accountId, orderId);
   if (!order) {
     return null;
   }
 
-  const stock = await getOrderStockCheck(accountId, orderId);
-  const materialExport = await findLatestExport(orderId, "material");
-  const productExport = await findLatestExport(orderId, "finished_product");
+  const stock = mapBomStock(order.quantityRequested, order.pcConfig.bomItems);
+  const [materialExport, productExport] = await Promise.all([
+    findLatestExport(orderId, "material"),
+    findLatestExport(orderId, "finished_product"),
+  ]);
+
   const isDone = order.status === "done";
+  const materialPending = materialExport?.status === "pending";
+  const materialApproved = materialExport?.status === "approved";
+  const missingCount = stock.items.filter((item) => !item.isEnough).length;
 
   return {
     order: {
@@ -204,21 +300,25 @@ export async function getAssembleStatus(accountId: number, orderId: number) {
       quantityRequested: order.quantityRequested,
       status: order.status,
     },
-    allEnough: stock?.allEnough ?? false,
-    missingCount: stock?.items.filter((item) => !item.isEnough).length ?? 0,
+    allEnough: stock.allEnough,
+    missingCount,
     materialExport: mapExportSummary(materialExport),
     productExport: mapExportSummary(productExport),
     canRequestMaterial:
       !isDone &&
+      !stock.allEnough &&
       (!materialExport || materialExport.status === "rejected"),
-    canConfirmAssemble: !isDone && (stock?.allEnough ?? false),
+    canConfirmAssemble:
+      !isDone && !materialPending && (materialApproved || stock.allEnough),
     canRequestProduct:
-      isDone &&
-      (!productExport || productExport.status === "rejected"),
+      isDone && (!productExport || productExport.status === "rejected"),
   };
 }
 
-export async function requestMaterialExport(accountId: number, orderId: number) {
+export async function requestMaterialExport(
+  accountId: number,
+  orderId: number,
+) {
   const order = await getAssignedOrder(accountId, orderId);
   if (!order) {
     return null;
@@ -237,6 +337,18 @@ export async function requestMaterialExport(accountId: number, orderId: number) 
     throw new Error("NO_BOM");
   }
 
+  const stock = mapBomStock(order.quantityRequested, order.pcConfig.bomItems);
+  if (stock.allEnough) {
+    throw new Error("STOCK_ALREADY_ENOUGH");
+  }
+
+  const exportLines = stock.items
+    .filter((item) => item.requiredQty > 0)
+    .map((item) => ({
+      componentId: item.componentId,
+      quantity: item.requiredQty,
+    }));
+
   const created = await prisma.$transaction(async (tx) => {
     if (order.status === "pending") {
       await tx.productionOrder.update({
@@ -253,10 +365,7 @@ export async function requestMaterialExport(accountId: number, orderId: number) 
         status: "pending",
         note: `${poNotePrefix(order.id)} Xuất NVL cho lệnh lắp ${order.pcConfig.name}`,
         items: {
-          create: order.pcConfig.bomItems.map((bom) => ({
-            componentId: bom.componentId,
-            quantity: bom.quantity * order.quantityRequested,
-          })),
+          create: exportLines,
         },
       },
       select: {
@@ -270,6 +379,46 @@ export async function requestMaterialExport(accountId: number, orderId: number) 
   return created;
 }
 
+// export async function confirmAssemble(accountId: number, orderId: number) {
+//   const order = await getAssignedOrder(accountId, orderId);
+//   if (!order) {
+//     return null;
+//   }
+
+//   if (order.status === "done") {
+//     throw new Error("ORDER_DONE");
+//   }
+
+//   const requirements = order.pcConfig.bomItems.map((bom) => ({
+//     componentId: bom.componentId,
+//     requiredQty: bom.quantity * order.quantityRequested,
+//     onHand: bom.component.inventory?.quantityOnHand ?? 0,
+//   }));
+
+//   if (requirements.some((item) => item.onHand < item.requiredQty)) {
+//     throw new Error("STOCK_NOT_ENOUGH");
+//   }
+
+//   await prisma.$transaction(async (tx) => {
+//     for (const item of requirements) {
+//       await tx.inventory.update({
+//         where: { componentId: item.componentId },
+//         data: { quantityOnHand: { decrement: item.requiredQty } },
+//       });
+//     }
+
+//     await tx.productionOrder.update({
+//       where: { id: order.id },
+//       data: {
+//         status: "done",
+//         completedAt: new Date(),
+//       },
+//     });
+//   });
+
+//   return { orderId: order.id, status: "done" as const };
+// }
+
 export async function confirmAssemble(accountId: number, orderId: number) {
   const order = await getAssignedOrder(accountId, orderId);
   if (!order) {
@@ -280,31 +429,49 @@ export async function confirmAssemble(accountId: number, orderId: number) {
     throw new Error("ORDER_DONE");
   }
 
-  const requirements = order.pcConfig.bomItems.map((bom) => ({
-    componentId: bom.componentId,
-    requiredQty: bom.quantity * order.quantityRequested,
-    onHand: bom.component.inventory?.quantityOnHand ?? 0,
-  }));
-
-  if (requirements.some((item) => item.onHand < item.requiredQty)) {
-    throw new Error("STOCK_NOT_ENOUGH");
+  if (order.pcConfig.bomItems.length === 0) {
+    throw new Error("NO_BOM");
   }
 
-  await prisma.$transaction(async (tx) => {
-    for (const item of requirements) {
-      await tx.inventory.update({
-        where: { componentId: item.componentId },
-        data: { quantityOnHand: { decrement: item.requiredQty } },
-      });
-    }
+  const stock = mapBomStock(order.quantityRequested, order.pcConfig.bomItems);
 
-    await tx.productionOrder.update({
-      where: { id: order.id },
+  await prisma.$transaction(async (tx) => {
+    const claimed = await tx.productionOrder.updateMany({
+      where: {
+        id: order.id,
+        deletedAt: null,
+        status: { not: "done" },
+      },
       data: {
         status: "done",
         completedAt: new Date(),
       },
     });
+
+    if (claimed.count !== 1) {
+      throw new Error("ORDER_DONE");
+    }
+
+    const latestMaterial = await tx.exportOrder.findFirst({
+      where: {
+        type: "material",
+        note: { startsWith: poNotePrefix(order.id) },
+      },
+      select: { status: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (latestMaterial?.status === "pending") {
+      throw new Error("MATERIAL_EXPORT_PENDING");
+    }
+
+    if (latestMaterial?.status !== "approved") {
+      for (const item of stock.items) {
+        await decrementComponentStock(tx, item.componentId, item.requiredQty);
+      }
+    }
+
+    await incrementProductStock(tx, order.pcConfigId, order.quantityRequested);
   });
 
   return { orderId: order.id, status: "done" as const };
@@ -350,7 +517,10 @@ export async function requestProductExport(accountId: number, orderId: number) {
 }
 
 const buildableQty = (
-  items: Array<{ quantity: number; component: { inventory: { quantityOnHand: number } | null } }>,
+  items: Array<{
+    quantity: number;
+    component: { inventory: { quantityOnHand: number } | null };
+  }>,
 ): number => {
   if (!items.length) {
     return 0;
@@ -498,9 +668,27 @@ export async function createProductionOrder(input: CreateProductionOrderInput) {
 }
 
 const INDEX_STAGES = [
-  { key: "wait", status: "pending" as const, variant: "wait", label: "Chờ sản xuất", progress: 0 },
-  { key: "assembly", status: "in_progress" as const, variant: "assembly", label: "Đang lắp ráp", progress: 50 },
-  { key: "done", status: "done" as const, variant: "done", label: "Hoàn thành", progress: 100 },
+  {
+    key: "wait",
+    status: "pending" as const,
+    variant: "wait",
+    label: "Chờ sản xuất",
+    progress: 0,
+  },
+  {
+    key: "assembly",
+    status: "in_progress" as const,
+    variant: "assembly",
+    label: "Đang lắp ráp",
+    progress: 50,
+  },
+  {
+    key: "done",
+    status: "done" as const,
+    variant: "done",
+    label: "Hoàn thành",
+    progress: 100,
+  },
 ];
 
 export async function countAllOrders() {
@@ -552,7 +740,9 @@ export async function getIndexData(skip: number, take: number) {
   });
 
   const orders = rows.map((row) => {
-    const stage = INDEX_STAGES.find((item) => item.status === row.status) ?? INDEX_STAGES[0];
+    const stage =
+      INDEX_STAGES.find((item) => item.status === row.status) ??
+      INDEX_STAGES[0];
     const ownerName = row.assignee?.fullName || row.assignee?.username || "";
 
     return {
@@ -637,7 +827,9 @@ export async function getOrderDetail(orderId: number) {
     findLatestExport(order.id, "finished_product"),
   ]);
 
-  const stage = INDEX_STAGES.find((item) => item.status === order.status) ?? INDEX_STAGES[0];
+  const stage =
+    INDEX_STAGES.find((item) => item.status === order.status) ??
+    INDEX_STAGES[0];
   const items = order.pcConfig.bomItems.map((bom) => {
     const requiredQty = bom.quantity * order.quantityRequested;
     const onHandQty = bom.component.inventory?.quantityOnHand ?? 0;
@@ -654,7 +846,8 @@ export async function getOrderDetail(orderId: number) {
     };
   });
 
-  const assigneeName = order.assignee?.fullName || order.assignee?.username || "";
+  const assigneeName =
+    order.assignee?.fullName || order.assignee?.username || "";
   const mapExport = (row: Awaited<ReturnType<typeof findLatestExport>>) => {
     if (!row) return null;
     return {

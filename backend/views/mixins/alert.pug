@@ -1,50 +1,30 @@
-mixin alert-success(time)
-    - if(messages.success)
-        .message.info
-            div(
-                class="alert alert-success"
-                show-alert
-                data-time = time
-            )
-                .alert-icon
+mixin flash-item(kind, title, text, time)
+    .flash-wrap
+        .flash(class=`flash-${kind}` show-alert data-time=time role="status")
+            .flash-icon
+                if kind == "success"
                     i.bi.bi-check-lg
-                .alert-body
-                    .alert-title Thành công
-                    .alert-text #{messages.success}
-                span.alert-close(close-alert)
-                    i.bi.bi-x-lg
-                .alert-progress(style=`animation-duration:${time}ms`)
+                else if kind == "warning"
+                    i.bi.bi-exclamation-triangle-fill
+                else
+                    i.bi.bi-exclamation-lg
+            .flash-body
+                .flash-title= title
+                .flash-text= text
+            button.flash-close(type="button" close-alert aria-label="Đóng")
+                i.bi.bi-x-lg
+
+mixin alert-success(time)
+    - if (messages.success)
+        - const successText = Array.isArray(messages.success) ? messages.success.join(". ") : messages.success
+        +flash-item("success", "Thành công", successText, time)
 
 mixin alert-error(time)
-    - if(messages.error)
-        .message.info
-            div(
-                class="alert alert-danger"
-                show-alert
-                data-time = time
-            )
-                .alert-icon
-                    i.bi.bi-exclamation-lg
-                .alert-body
-                    .alert-title Có lỗi xảy ra
-                    .alert-text #{messages.error}
-                span.alert-close(close-alert)
-                    i.bi.bi-x-lg
-                .alert-progress(style=`animation-duration:${time}ms`)
+    - if (messages.error)
+        - const errorText = Array.isArray(messages.error) ? messages.error.join(". ") : messages.error
+        +flash-item("error", "Có lỗi xảy ra", errorText, time)
 
 mixin alert-warning(time)
-    - if(messages.warning)
-        .message.info
-            div(
-                class="alert alert-warning"
-                show-alert
-                data-time = time
-            )
-                .alert-icon
-                    i.bi.bi-exclamation-triangle-fill
-                .alert-body
-                    .alert-title Cảnh báo
-                    .alert-text #{messages.warning}
-                span.alert-close(close-alert)
-                    i.bi.bi-x-lg
-                .alert-progress(style=`animation-duration:${time}ms`)
+    - if (messages.warning)
+        - const warningText = Array.isArray(messages.warning) ? messages.warning.join(". ") : messages.warning
+        +flash-item("warning", "Cảnh báo", warningText, time)

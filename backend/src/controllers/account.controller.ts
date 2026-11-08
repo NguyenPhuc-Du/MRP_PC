@@ -3,6 +3,39 @@ import { matchedData } from "express-validator";
 import { systemConfig } from "../config/system";
 import * as accountService from "../services/account.service";
 import { CreateAccountDto, UpdateAccountDto } from "../dtos/account.dto";
+import { AccountRole, AccountStatus } from "../generated/prisma";
+import { paginationHelper } from "../utils/pagination.utils";
+
+const ROLES = new Set<AccountRole>(["admin", "warehouse_manager", "staff"]);
+const STATUSES = new Set<AccountStatus>(["active", "locked"]);
+
+const queryText = (value: unknown): string => {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  if (Array.isArray(value) && typeof value[0] === "string") {
+    return value[0].trim();
+  }
+  return "";
+};
+
+const listFilterFromQuery = (query: Request["query"]): accountService.AccountListFilter => {
+  const role = queryText(query.role);
+  const status = queryText(query.status);
+
+  return {
+    keyword: queryText(query.keyword),
+    role: ROLES.has(role as AccountRole) ? (role as AccountRole) : "",
+    status: STATUSES.has(status as AccountStatus) ? (status as AccountStatus) : "",
+  };
+};
+
+const emptyPagination = () => ({
+  currentPage: 1,
+  countPage: 1,
+  limit: 10,
+  skipPage: 0,
+});
 
 const uniqueErrorMessage = (error: unknown): string | null => {
   if (!(error instanceof Error)) {
@@ -41,13 +74,34 @@ const storeOldInput = (req: Request): void => {
 };
 
 export const index = async (req: Request, res: Response): Promise<void> => {
-  const accounts = await accountService.getAllAccounts();
+  const filters = listFilterFromQuery(req.query);
 
-  res.render("pages/accounts/index", {
-    pageTitle: "Danh sách tài khoản",
-    accounts,
-    totalAccounts: accounts.length,
-  });
+  try {
+    const totalAccounts = await accountService.countAccounts(filters);
+    const pagination = paginationHelper(req.query, emptyPagination(), totalAccounts);
+    const accounts = await accountService.listAccounts(
+      filters,
+      pagination.skipPage,
+      pagination.limit,
+    );
+
+    res.render("pages/accounts/index", {
+      pageTitle: "Danh sách tài khoản",
+      accounts,
+      totalAccounts,
+      objectPagination: pagination,
+      filters,
+    });
+  } catch (error) {
+    console.error(error);
+    res.render("pages/accounts/index", {
+      pageTitle: "Danh sách tài khoản",
+      accounts: [],
+      totalAccounts: 0,
+      objectPagination: emptyPagination(),
+      filters,
+    });
+  }
 };
 
 export const create = async (req: Request, res: Response): Promise<void> => {

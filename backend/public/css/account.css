@@ -281,12 +281,30 @@
 .toolbar-row{
   display:flex;
   align-items:center;
+  flex-wrap:wrap;
   gap:12px;
   width:100%;
 }
+.toolbar-filters{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:0 1 auto;
+  flex-wrap:wrap;
+}
+.filter-select{
+  width:auto;
+  min-width:160px;
+  flex:0 0 auto;
+  background:#fff;
+  border:1px solid var(--border-color);
+  cursor:pointer;
+}
+.filter-select:focus{ background:#fff; }
 .search-input-wrap{
   position:relative;
-  flex:1 1 auto;
+  flex:1 1 280px;
+  min-width:0;
 }
 .search-input-wrap i{
   position:absolute;
@@ -309,6 +327,11 @@
 .btn-soft.icon-only{
   width:40px;
   padding:10px;
+}
+
+@media (max-width:1100px){
+  .search-input-wrap{ flex:1 1 100%; }
+  .toolbar-actions{ flex-wrap:wrap; }
 }
 
 /* ---- Table card ---- */
@@ -386,14 +409,22 @@
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  cursor:pointer;
 }
 .page-btn:hover{ background:var(--hover-bg); color:var(--text-main); }
-.page-btn.active{
+.page-btn.active,
+.page-btn.active:hover{
   background:linear-gradient(135deg,var(--brand-from),var(--brand-to));
   border-color:transparent;
   color:#fff;
 }
-.page-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.page-btn:disabled,
+.page-btn:disabled:hover{
+  opacity:.4;
+  cursor:not-allowed;
+  background:#fff;
+  color:var(--text-muted);
+}
 
 /* ---- User cell ---- */
 .user-cell{

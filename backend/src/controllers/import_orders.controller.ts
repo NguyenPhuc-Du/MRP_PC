@@ -149,8 +149,7 @@ export const createPost = async (
   res: Response,
 ): Promise<void> => {
   try {
-    // 1) Chặn role: middleware requireWarehouse đã chạy trước
-    // 2) Người tạo = session, không getDefaultCreator()
+    // Người tạo = session, không getDefaultCreator()
     const createdBy = req.session.account?.id;
     if (!createdBy) {
       res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
@@ -168,7 +167,6 @@ export const createPost = async (
     // 4) items[] từ form — componentId lấy từ DB picker, không id cứng
     const items = parseItems(req.body);
 
-    // 5) Service: status draft, chưa cộng kho
     const order = await importOrderService.createOrder({
       createdBy,
       supplierId,
@@ -177,16 +175,15 @@ export const createPost = async (
       code: String(req.body.code || ""),
     });
 
-    // 6) intent=draft → list; không thì sang detail để xác nhận
     const intent = String(req.body.intent || "create");
-    req.flash(
-      "success",
-      intent === "draft" ? "Đã lưu phiếu nháp" : "Tạo phiếu nhập thành công",
-    );
     if (intent === "draft") {
+      req.flash("success", "Đã lưu phiếu nháp. Tồn kho chưa đổi");
       res.redirect(BASE());
       return;
     }
+
+    await importOrderService.confirmOrder(order.id, createdBy);
+    req.flash("success", "Đã nhập kho và cộng số lượng vào tồn linh kiện");
     res.redirect(`${BASE()}/${order.id}`);
   } catch (error) {
     console.error(error);
@@ -273,11 +270,14 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
     });
 
     const intent = String(req.body.intent || "create");
-    req.flash("success", "Đã cập nhật phiếu nhập");
     if (intent === "draft") {
+      req.flash("success", "Đã lưu phiếu nháp. Tồn kho chưa đổi");
       res.redirect(`${BASE()}/${orderId}/edit`);
       return;
     }
+
+    await importOrderService.confirmOrder(orderId, accountId);
+    req.flash("success", "Đã nhập kho và cộng số lượng vào tồn linh kiện");
     res.redirect(`${BASE()}/${orderId}`);
   } catch (error) {
     console.error(error);
@@ -287,7 +287,7 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const confirm = async (req: Request, res: Response): Promise<void> => {
-  // Chỉ QL kho tới đây (requireWarehouse). Phiếu phải đang draft, SL > 0, rồi inventory.increment.
+  // Đã qua requirePermission("importOrders_edit"). Phiếu phải đang draft, SL > 0, rồi inventory.increment.
   const orderId = Number(req.params.orderId);
   try {
     const accountId = req.session.account?.id;

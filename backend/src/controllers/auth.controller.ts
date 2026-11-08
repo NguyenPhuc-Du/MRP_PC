@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import * as authService from "../services/auth.service";
 import { systemConfig } from "../config/system";
 import { UpdateProfileDto, ChangePasswordDto } from "../dtos/profile.dto";
+import { firstViewPath } from "../constants/permissions";
 
 
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -31,9 +32,16 @@ export const profile = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  const permissions = Array.isArray(res.locals.user?.permissions)
+    ? [...res.locals.user.permissions]
+    : [];
+  const prefix = res.locals.prefixAdmin || systemConfig.prefixAdmin;
+  const { passwordHash: _passwordHash, ...profile } = user;
+
   res.render("pages/auth/profile.pug", {
     pageTitle: "Thông tin cá nhân",
-    user,
+    profile,
+    backFallback: firstViewPath(permissions, prefix) || `${prefix}/dashboard`,
   });
 };
 

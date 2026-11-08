@@ -75,14 +75,12 @@ block main
                     )= supplier.name
 
               .col-md-4
-                label.form-label-custom(for="unit") Đơn vị tính
-                input#unit.form-control.input-custom(
-                  type="text"
-                  name="unit"
-                  maxlength="20"
-                  placeholder="vd: cái, thanh"
-                  value=component.unit
-                )
+                label.form-label-custom(for="unit")
+                  | Đơn vị tính
+                  span.required *
+                select#unit.form-select.input-custom(name="unit" required)
+                  each u in (units || ['cái', 'thanh', 'bộ', 'ổ', 'dây', 'mét', 'cuộn', 'hộp', 'cặp', 'tấm'])
+                    option(value=u selected=(u === component.unit))= u
               .col-md-4
                 label.form-label-custom(for="unitPrice")
                   | Giá nhập (đ)

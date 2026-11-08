@@ -40,9 +40,67 @@ export const REQUIRED_SLOTS = [
   { key: "case", label: "Case", categories: ["Case"], defaultQty: 1 },
 ] as const;
 
+export type BomFormDraft = {
+  configId?: number;
+  name: string;
+  description: string;
+  salePrice: string;
+  status: "active" | "inactive";
+  slots: Record<string, { componentId: string; quantity: number }>;
+  extras: Array<{ componentId: number; quantity: number }>;
+};
+
+export const bomFormDraftFromBody = (
+  body: Record<string, unknown>,
+  configId?: number,
+): BomFormDraft => {
+  const slotsRaw =
+    body.slots && typeof body.slots === "object"
+      ? (body.slots as Record<string, { componentId?: string; quantity?: string }>)
+      : {};
+  const slots: BomFormDraft["slots"] = {};
+
+  for (const slot of REQUIRED_SLOTS) {
+    const row = slotsRaw[slot.key] || {};
+    const quantity = Number(row.quantity || slot.defaultQty);
+    slots[slot.key] = {
+      componentId: String(row.componentId || ""),
+      quantity: Number.isInteger(quantity) && quantity > 0 ? quantity : slot.defaultQty,
+    };
+  }
+
+  const extrasRaw = body.extras;
+  const rows = !extrasRaw
+    ? []
+    : Array.isArray(extrasRaw)
+      ? extrasRaw
+      : Object.values(extrasRaw as Record<string, unknown>);
+
+  const extras = rows
+    .map((row) => {
+      const item = row as { componentId?: string; quantity?: string };
+      return {
+        componentId: Number(item.componentId),
+        quantity: Number(item.quantity || 1),
+      };
+    })
+    .filter((item) => Number.isInteger(item.componentId) && item.componentId > 0);
+
+  return {
+    configId,
+    name: String(body.name || ""),
+    description: String(body.description || ""),
+    salePrice:
+      body.salePrice === undefined || body.salePrice === null || body.salePrice === ""
+        ? ""
+        : String(body.salePrice),
+    status: body.status === "inactive" ? "inactive" : "active",
+    slots,
+    extras,
+  };
+};
+
 const EXTRA_CATEGORIES = ["GPU", "SSD", "HDD", "Fan", "Ram", "RAM"];
-const SINGLE_QTY_ONE = ["CPU", "Mainboard", "PSU", "Case"];
-const RAM_CATS = ["Ram", "RAM"];
 
 const CATEGORY_CODE: Record<string, string> = {
   CPU: "CP",
@@ -171,20 +229,19 @@ export const mapDetailConfig = (config: BomConfigRow) => {
     };
   });
 
+  const ordered = [...items].sort((a, b) => a.id - b.id);
   const used = new Set<number>();
   const slots: Record<string, { componentId: number | ""; quantity: number }> = {};
 
-  for (const slot of REQUIRED_SLOTS) {
-    const found = items.find(
-      (item) => !used.has(item.componentId) && slot.categories.includes(item.categoryName),
-    );
+  REQUIRED_SLOTS.forEach((slot, index) => {
+    const found = ordered[index];
     if (found) {
-      used.add(found.componentId);
+      used.add(found.id);
       slots[slot.key] = { componentId: found.componentId, quantity: found.quantity };
     } else {
       slots[slot.key] = { componentId: "", quantity: slot.defaultQty };
     }
-  }
+  });
 
   return {
     id: config.id,
@@ -206,7 +263,7 @@ export const mapDetailConfig = (config: BomConfigRow) => {
     marginText: `${margin.toFixed(1).replace(".", ",")}%`,
     items,
     slots,
-    extras: items.filter((item) => !used.has(item.componentId)),
+    extras: ordered.filter((item) => !used.has(item.id)),
   };
 };
 
@@ -219,49 +276,11 @@ const normalizeItems = (items: BomItemInput[]): BomItemInput[] => {
     .filter((item) => Number.isInteger(item.componentId) && item.componentId > 0);
 };
 
-type CompatComponent = {
-  category: { name: string };
-  attributes: { value: string; attributeDefinition: { name: string } }[];
-};
-
-const attrOf = (row: CompatComponent, name: string): string | null => {
-  const raw = row.attributes.find((item) => item.attributeDefinition.name === name)?.value;
-  return raw?.trim().toUpperCase() || null;
-};
-
-const ofCat = (rows: CompatComponent[], ...cats: string[]) =>
-  rows.filter((row) => cats.includes(row.category.name));
-
-const assertSlotCompatibility = (components: CompatComponent[]) => {
-  const cpu = ofCat(components, "CPU")[0];
-  const main = ofCat(components, "Mainboard")[0];
-  const rams = ofCat(components, ...RAM_CATS);
-
-  const cpuSocket = cpu ? attrOf(cpu, "socket") : null;
-  const mainSocket = main ? attrOf(main, "socket") : null;
-  const mainRamType = main ? attrOf(main, "ram_type") : null;
-  const ramTypes = rams.map((ram) => attrOf(ram, "ram_type"));
-
-  if (!cpuSocket || !mainSocket || !mainRamType || ramTypes.some((type) => !type)) {
-    throw new Error("MISSING_SPEC");
-  }
-
-  if (cpuSocket !== mainSocket) {
-    throw new Error("INCOMPATIBLE_SOCKET");
-  }
-
-  if (ramTypes.some((type) => type !== mainRamType)) {
-    throw new Error("INCOMPATIBLE_RAM");
-  }
-};
-
-const validateItems = async (
-  items: BomItemInput[],
-): Promise<{ items: BomItemInput[]; cost: number }> => {
+const validateItems = async (items: BomItemInput[]): Promise<BomItemInput[]> => {
   const normalized = normalizeItems(items);
 
-  if (normalized.length === 0) {
-    throw new Error("NO_ITEMS");
+  if (normalized.length < REQUIRED_SLOTS.length) {
+    throw new Error("NOT_ENOUGH_COMPONENTS");
   }
 
   if (normalized.some((item) => !Number.isInteger(item.quantity) || item.quantity < 1)) {
@@ -278,14 +297,6 @@ const validateItems = async (
     select: {
       id: true,
       status: true,
-      unitPrice: true,
-      category: { select: { name: true } },
-      attributes: {
-        select: {
-          value: true,
-          attributeDefinition: { select: { name: true } },
-        },
-      },
     },
   });
 
@@ -297,53 +308,7 @@ const validateItems = async (
     throw new Error("COMPONENT_INACTIVE");
   }
 
-  const byId = new Map(components.map((component) => [component.id, component]));
-
-  for (const slot of REQUIRED_SLOTS) {
-    const hasSlot = normalized.some((item) => {
-      const categoryName = byId.get(item.componentId)?.category.name;
-      return categoryName ? slot.categories.includes(categoryName) : false;
-    });
-    if (!hasSlot) {
-      throw new Error("MISSING_REQUIRED_SLOT");
-    }
-  }
-
-  const countByCat: Record<string, { rows: number; qty: number }> = {};
-  for (const item of normalized) {
-    const cat = byId.get(item.componentId)?.category.name || "";
-    if (!countByCat[cat]) countByCat[cat] = { rows: 0, qty: 0 };
-    countByCat[cat].rows += 1;
-    countByCat[cat].qty += item.quantity;
-  }
-
-  const rowsOf = (...cats: string[]) =>
-    cats.reduce((n, c) => n + (countByCat[c]?.rows || 0), 0);
-  const qtyOf = (...cats: string[]) =>
-    cats.reduce((n, c) => n + (countByCat[c]?.qty || 0), 0);
-
-  for (const cat of SINGLE_QTY_ONE) {
-    if (rowsOf(cat) !== 1 || qtyOf(cat) !== 1) {
-      throw new Error("SLOT_SINGLE_ONLY");
-    }
-  }
-
-  if (qtyOf(...RAM_CATS) < 1 || qtyOf(...RAM_CATS) > 4) {
-    throw new Error("INVALID_RAM");
-  }
-
-  if (rowsOf("GPU") > 1 || qtyOf("GPU") > 1) {
-    throw new Error("GPU_SINGLE_ONLY");
-  }
-
-  assertSlotCompatibility(components);
-
-  const cost = normalized.reduce((sum, item) => {
-    const price = toNumber(byId.get(item.componentId)?.unitPrice ?? 0);
-    return sum + price * item.quantity;
-  }, 0);
-
-  return { items: normalized, cost };
+  return normalized;
 };
 
 export const getComponentOptions = async () => {
@@ -391,17 +356,13 @@ export const createConfig = async (dto: CreateBomDto): Promise<BomConfigRow> => 
     throw new Error("NAME_REQUIRED");
   }
 
-  const { items, cost } = await validateItems(dto.items);
-  const salePrice = dto.salePrice && dto.salePrice > 0 ? dto.salePrice : 0;
-  if (salePrice > 0 && salePrice < cost) {
-    throw new Error("SALE_BELOW_COST");
-  }
+  const items = await validateItems(dto.items);
 
   return prisma.pcConfig.create({
     data: {
       name,
       description: dto.description?.trim() || null,
-      salePrice,
+      salePrice: 0,
       status: dto.status ?? "active",
       bomItems: {
         create: items,
@@ -418,22 +379,11 @@ export const updateConfig = async (id: number, dto: UpdateBomDto): Promise<BomCo
   if (name !== undefined && !name) {
     throw new Error("NAME_REQUIRED");
   }
-  if (dto.salePrice !== undefined && dto.salePrice < 0) {
-    throw new Error("INVALID_PRICE");
-  }
 
-  const validated = dto.items ? await validateItems(dto.items) : undefined;
-  const salePrice = dto.salePrice;
-  let cost = validated?.cost;
-  if (salePrice && salePrice > 0 && cost === undefined) {
-    cost = totalsOf(await getConfigById(id)).totalCost;
-  }
-  if (salePrice && salePrice > 0 && cost !== undefined && salePrice < cost) {
-    throw new Error("SALE_BELOW_COST");
-  }
+  const items = dto.items ? await validateItems(dto.items) : undefined;
 
   return prisma.$transaction(async (tx) => {
-    if (validated) {
+    if (items) {
       await tx.bomItem.deleteMany({ where: { pcConfigId: id } });
     }
 
@@ -442,9 +392,8 @@ export const updateConfig = async (id: number, dto: UpdateBomDto): Promise<BomCo
       data: {
         ...(name ? { name } : {}),
         ...(dto.description !== undefined ? { description: dto.description.trim() || null } : {}),
-        ...(dto.salePrice !== undefined ? { salePrice: dto.salePrice } : {}),
         ...(dto.status ? { status: dto.status } : {}),
-        ...(validated ? { bomItems: { create: validated.items } } : {}),
+        ...(items ? { bomItems: { create: items } } : {}),
       },
       select: bomSelect,
     });

@@ -1,0 +1,5 @@
+version: "3"
+tunnels:
+  mrp:
+    proto: http
+    addr: 3000

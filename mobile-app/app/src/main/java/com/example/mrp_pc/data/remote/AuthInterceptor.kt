@@ -15,6 +15,7 @@ class AuthInterceptor(
 
         val requestBuilder = chain.request()
             .newBuilder()
+            .header("ngrok-skip-browser-warning", "true")
 
         if (!token.isNullOrBlank()) {
             requestBuilder.addHeader(
