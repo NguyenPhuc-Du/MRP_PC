@@ -3,7 +3,8 @@ import { systemConfig } from "../config/system";
 import { ExportOrderFilter } from "../dtos/export-order.dto";
 import * as exportOrderService from "../services/export.service";
 
-const BASE = () => `${systemConfig.prefixAdmin}/exportOrders`;
+const BASE = (res: Response) =>
+  `${res.locals.prefixAdmin || systemConfig.prefixAdmin}/exportOrders`;
 
 const errorMessage = (error: unknown): string => {
   if (!(error instanceof Error)) return "Có lỗi xảy ra";
@@ -50,7 +51,7 @@ export const detail = async (req: Request, res: Response): Promise<void> => {
   const order = await exportOrderService.getDetail(orderId);
   if (!order) {
     req.flash("error", "Không tìm thấy phiếu xuất");
-    res.redirect(BASE());
+    res.redirect(BASE(res));
     return;
   }
   res.render("pages/exportOrders/detail", { pageTitle: order.code, order });
@@ -70,7 +71,7 @@ export const approve = async (req: Request, res: Response): Promise<void> => {
     console.error(error);
     req.flash("error", errorMessage(error));
   }
-  res.redirect(`${BASE()}/${orderId}`);
+  res.redirect(`${BASE(res)}/${orderId}`);
 };
 
 export const reject = async (req: Request, res: Response): Promise<void> => {
@@ -87,5 +88,5 @@ export const reject = async (req: Request, res: Response): Promise<void> => {
     console.error(error);
     req.flash("error", errorMessage(error));
   }
-  res.redirect(`${BASE()}/${orderId}`);
+  res.redirect(`${BASE(res)}/${orderId}`);
 };

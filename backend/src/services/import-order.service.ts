@@ -500,20 +500,6 @@ export const updateDraft = async (id: number, data: SaveImportOrderDto) => {
 };
 
 export const confirmOrder = async (id: number, accountId: number) => {
-  const existing = await getOrderById(id);
-  if (!existing) {
-    throw new Error("NOT_FOUND");
-  }
-  if (existing.status !== "draft") {
-    throw new Error("ALREADY_CONFIRMED");
-  }
-  if (
-    !existing.items.length ||
-    existing.items.some((item) => item.quantity <= 0)
-  ) {
-    throw new Error("INVALID_QTY");
-  }
-
   await prisma.$transaction(async (tx) => {
     // Optimistic lock: chỉ một request được chuyển draft → confirmed.
     const claimed = await tx.importOrder.updateMany({

@@ -61,7 +61,8 @@ export const profilePost = async (req: Request, res: Response): Promise<void> =>
     req.flash("error", "Cập nhật thông tin cá nhân thất bại");
   }
 
-  res.redirect(`${systemConfig.prefixAdmin}/auth/profile`);
+  const prefix = res.locals.prefixAdmin || systemConfig.prefixAdmin;
+  res.redirect(`${prefix}/auth/profile`);
 };
 
 export const profileChangePasswordPost = async (req: Request, res: Response): Promise<void> => {
@@ -80,5 +81,6 @@ export const profileChangePasswordPost = async (req: Request, res: Response): Pr
     req.flash("error", "Đổi mật khẩu thất bại");
   }
 
-  res.redirect(`${systemConfig.prefixAdmin}/auth/profile`);
+  const prefix = res.locals.prefixAdmin || systemConfig.prefixAdmin;
+  res.redirect(`${prefix}/auth/profile`);
 };
