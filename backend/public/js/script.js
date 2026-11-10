@@ -3,9 +3,24 @@
     el.classList.add('flash-hide');
     setTimeout(function () {
       var wrap = el.closest('.flash-wrap');
+      var stack = el.closest('.flash-stack');
       if (wrap) wrap.remove();
       else el.remove();
+      if (stack && !stack.querySelector('.flash-wrap')) stack.remove();
     }, 200);
+  }
+
+  var wraps = Array.prototype.slice.call(document.querySelectorAll('.flash-wrap'));
+  if (wraps.length) {
+    var stack = document.querySelector('.flash-stack');
+    if (!stack) {
+      stack = document.createElement('div');
+      stack.className = 'flash-stack';
+      document.body.appendChild(stack);
+    }
+    wraps.forEach(function (wrap) {
+      stack.appendChild(wrap);
+    });
   }
 
   document.querySelectorAll('[show-alert]').forEach(function (alertEl) {

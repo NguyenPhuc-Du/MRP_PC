@@ -34,6 +34,8 @@ const errorMessage = (error: unknown): string => {
       return "Linh kiện không tồn tại";
     case "COMPONENT_INACTIVE":
       return "Không gắn linh kiện đã ngừng kinh doanh";
+    case "COMPONENT_DELETED":
+      return "Không gắn linh kiện đã xóa";
     default:
       break;
   }
@@ -41,6 +43,11 @@ const errorMessage = (error: unknown): string => {
   if (error.message.startsWith("NOT_ENOUGH_COMPONENTS:")) {
     const labels = error.message.slice("NOT_ENOUGH_COMPONENTS:".length);
     return `Chưa chọn đủ linh kiện (${labels}). Hãy chọn đủ rồi tạo lại.`;
+  }
+
+  if (error.message.startsWith("SLOT_CATEGORY:")) {
+    const label = error.message.slice("SLOT_CATEGORY:".length);
+    return `Ô ${label} phải chọn linh kiện đúng danh mục ${label}`;
   }
 
   return "Thao tác thất bại";
