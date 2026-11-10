@@ -32,6 +32,8 @@ const errorMessage = (
       return "pg_dump thất bại. Kiểm tra Postgres còn chạy";
     case "PSQL_FAILED":
       return "Khôi phục thất bại khi chạy psql. Kiểm tra file .sql và Postgres";
+    case "RESTORE_FAILED_UNSAFE":
+      return "Khôi phục thất bại và không rollback được. Kiểm tra file safety-before-restore-*.sql trong thư mục backups";
     case "INVALID_FILE":
       return "Tên file sao lưu không hợp lệ";
     case "FILE_NOT_FOUND":

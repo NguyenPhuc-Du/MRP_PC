@@ -1,1123 +1,0 @@
- B? GIÁO D?C VÀ ÐÀO T?O TRÝ?NG Ð?I H?C SÀI G?N
-
-
-
-
-
-
-
-
-
-Môn: H? th?ng thông tin doanh nghi?p
-Ð? tài: Xây d?ng h? th?ng qu?n l? nhu c?u linh ki?n và l?p ráp máy tính - MRP PC
-
-
-Thành viên nhóm 7
-3123411231  Nguy?n Tr?n Hoàng Phúc 
-3123411089   Hu?nh Minh H?u
-3123411320  Nguy?n Ph?m Phýõng Trý?ng
-3123411187  Hoàng V? Minh M?n
-3123411050  Nguy?n T?n D?ng
-
-Gi?ng viên hý?ng d?n: Lê Nh? L?m Thúy
-M?c L?c
-M?c l?c h?nh ?nh	6
-M?c l?c b?ng	9
-L?i m? ð?u	12
-CHÝÕNG I: T?NG QUAN Ð? TÀI	13
-1. L? do ch?n ð? tài	13
-2. Phýõng pháp nghiên c?u	14
-3. Áp d?ng th?c ti?n	14
-CHÝÕNG II: CÕ S? L? LU?N	15
-1. Cõ s? l? lu?n c?a ð? tài	15
-1.1. T?ng quan v? h? th?ng Sound4You	15
-1.2. Mô t? chi ti?t h? th?ng	15
-1.2.1. Ðãng nh?p và qu?n l? tài kho?n	15
-1.2.2. Nghe nh?c tr?c tuy?n, thích và theo d?i nh?c c?a ngý?i dùng khác
-.	16
-1.2.3. Upload bài hát c?a b?n thân và chia s? v?i c?ng ð?ng	16
-1.2.4. T?m ki?m bài hát và ngý?i dùng	16
-1.2.5. Xem feed và ho?t ð?ng c?a ngý?i theo d?i	16
-1.2.6. Theo d?i s? lý?ng bài hát ð?/ðang ch? duy?t và ngý?i dùng hi?n có
-.	17
-1.2.7. Duy?t ho?c xóa bài hát c?a ngý?i dùng	17
-1.2.8. Qu?n l? tài kho?n ngý?i dùng	17
-1.2.9. Th?ng kê ðý?c th? lo?i mà ngý?i dùng yêu thích nh?t	17
-1.3. Xác ð?nh yêu c?u	17
-1.3.1. V?n ð?	17
-1.3.2. Yêu c?u ch?c nãng	17
-1.3.3. Yêu c?u phi ch?c nãng	18
-1.4. B?ng mô t? nghi?p v?	18
-1.5. M?c tiêu c?a h? th?ng Sound4You	18
-1.6. ? ngh?a và khó khãn c?a vi?c nghiên c?u ð? tài	19
-CHÝÕNG III: PHÂN TÍCH VÀ THI?T K? H? TH?NG	20
-1. Mô h?nh BFD	20
-2. Mô h?nh Usecase	20
-3. Ð?c t? Usecase	28
-4. Mô h?nh Sequence	37
-5. ERD và RDM	46
-6. Lý?c ð? cõ s? d? li?u và b?ng mô t?	47
-7. Sõ ð? l?p	50
-7.1. Sõ ð? l?p	50
-7.2. Danh sách sõ ð? l?p	51
-7.3. Mô t? sõ ð? l?p	52
-8. Mô t? giao di?n	59
-8.1. Ðãng nh?p	59
-8.1.1. Ðãng nh?p	59
-8.1.2. Ðãng k?	61
-8.1.3. Quên m?t kh?u	63
-8.2. Màn h?nh chính c?a User	65
-8.2.1. Màn h?nh chính c?a User	65
-8.2.2. Now Playing Bar	68
-8.2.3. Stream View	70
-8.3. Feed	72
-8.3.1. Feed	72
-8.3.2. Feed Following	74
-8.4. Profile	77
-8.4.1. Profile	77
-8.4.2. Edit Profile	81
-8.4.3. L?y ngu?n	83
-8.4.4. Track Uploaded	85
-8.4.5. Xóa nh?c	87
-8.4.6. Track Liked	89
-8.4.7. Followers	90
-8.4.8. Following	93
-8.4.9. Other user profile	95
-8.5. Search	98
-8.5.1. Search	98
-8.5.2. Search Track	100
-8.5.3. Search User	103
-8.5.4 Search Genre	106
-8.5.5. Genre	109
-8.6. Upload	111
-8.6.1. Upload	111
-8.6.2. Genre	113
-8.7. Admin	115
-8.7.1. Admin Dashboard	115
-8.7.2. List Track	117
-8.7.3. List User	120
-8.7.4. Stats	123
-CHÝÕNG IV: K?T LU?N VÀ HÝ?NG PHÁT TRI?N	125
-1. K?t lu?n	125
-2. H?n ch?	125
-3. Hý?ng phát tri?n	125
-M?c l?c h?nh ?nh
-1. 1. Mô H?nh BFD	20
-2. 1.Usecase T?ng Quát	20
-2. 2.Usecase Ðãng K?	21
-2. 3.Usecase Ðãng Nh?p	21
-2. 4.Usecase Quên M?t Kh?u	22
-2. 5.Usecase Nghe Nh?c	22
-2. 6. Usecase T?m Ki?m	23
-2. 7. Usecase Thích/Không Thích Bài Hát	23
-2. 8. Usecase Theo D?i Ngý?i Dùng	24
-2. 9. Usecase Upload Track	24
-2. 10. Usecase S?a Thông Tin	25
-2. 11. Usecase Th?ng Kê S? Li?u	25
-2. 12. Usecase Th?ng Kê Th? Lo?i Ðý?c Yêu Thích	26
-2. 13.Usecase Qu?n L? Ngý?i Dùng	26
-2. 14.Usecase Qu?n L? Bài Hát	27
-2. 15.Usecase Ðãng Xu?t	27
-2. 16.Usecase Xem Thông Tin	28
-
-3. 1. Ð?c t? usecase ðãng k?	28
-3. 2. Ð?c t? usecase ðãng nh?p	29
-3. 3. Ð?c t? usecase quên m?t kh?u	30
-3. 4. Ð?c t? usecase nghe nh?c	31
-3. 5. Ð?c t? usecase t?m ki?m	32
-3. 6. Ð?c t? usecase thích/không thích bài hát	33
-3. 7. Ð?c t? usecase theo d?i ngý?i dùng	33
-3. 8. Ð?c t? usecase upload track	34
-3. 9. Ð?c t? usecase s?a thông tin	34
-3. 10. Ð?c t? usecase th?ng kê s? li?u	35
-3. 11. Ð?c t? usecase th?ng kê th? lo?i ðý?c yêu thích	35
-3. 12. Ð?c t? usecase qu?n l? ngý?i dùng	36
-3. 13. Ð?c t? usecase qu?n l? bài hát	36
-3. 14. Ð?c t? usecase ðãng xu?t	37
-3. 15. Ð?c t? usecase xem thông tin	37
-4. 1. Sequence ðãng k?	38
-4. 2. Sequence ðãng nh?p	39
-4. 3. Sequence quên m?t kh?u	39
-4. 4. Sequence nghe nh?c	40
-4. 5. Sequence t?m ki?m	40
-4. 6. Sequence thích/không thích bài hát	41
-4. 7. Sequence theo d?i ngý?i dùng	41
-4. 8. Sequence upload track	42
-4. 9. Sequence duy?t bài hát	42
-4. 10. Sequence xóa bài hát	43
-4. 11. Sequence xóa ngý?i dùng	43
-4. 12. Sequence th?ng kê t? l? th? lo?i yêu thích	44
-4. 13. Sequence th?ng kê s? lý?ng	44
-4. 14. Sequence ðãng xu?t	45
-4. 15.Sequence xem thông tin	45
-5. 1. ERD	46
-5. 2. RDM	46
-6. 1. Lý?c ð? cõ s? d? li?u	47
-7. 1. Sõ ð? l?p	51
-8. 1.Giao di?n ðãng nh?p	59
-8. 2.Giao di?n ðãng k?	61
-8. 3.Giao di?n quên m?t kh?u	63
-8. 4.Giao di?n màn h?nh chính c?a user	65
-8. 5.Giao di?n Now Playing Bar	68
-8. 6.Giao di?n Stream View	70
-8. 7. Giao di?n Feed	72
-8. 8.Giao di?n Feed Following	74
-8. 9.Giao di?n Profile	77
-8. 10.Giao di?n Edit Profile	81
-8. 11.Giao di?n l?y ngu?n	83
-8. 12.Giao di?n upload track	85
-8. 13.Giao di?n xóa nh?c	87
-8. 14.Giao di?n track liked	89
-8. 15. Giao di?n Followers	91
-8. 16.Giao di?n Following	93
-8. 17. Giao di?n Other user profile	95
-8. 18.Giao di?n search	98
-8. 19. Giao di?n search track	100
-8. 20. Giao di?n search user	103
-8. 21. Giao di?n search genre	106
-8. 22. Giao di?n genre	109
-8. 23.Giao di?n upload	111
-8. 24. Giao di?n genre	113
-8. 25. Giao di?n Admin	115
-8. 26.Giao di?n list track	117
-8. 27.Giao di?n list user	120
-8. 28.Giao di?n th?ng kê	123
-M?c l?c b?ng
-B?ng 1. 1. B?ng mô t? nghi?p v?	18
-B?ng 6. 1.B?ng mô t? t?ng quát	48
-B?ng 6. 2.B?ng mô t? chi ti?t User	48
-B?ng 6. 3.B?ng mô t? chi ti?t Track	49
-B?ng 6. 4. B?ng mô t? chi ti?t Email	49
-B?ng 6. 5. B?ng mô t? chi ti?t Like	50
-B?ng 6. 6. B?ng mô t? chi ti?t Follower	50
-B?ng 6. 7. B?ng mô t? chi ti?t Role	50
-B?ng 6. 8. B?ng mô t? chi ti?t Genre	50
-
-B?ng 7. 1.B?ng danh sách sõ ð? l?p	52
-B?ng 7. 2.B?ng mô t? sõ ð? l?p User	53
-B?ng 7. 3. B?ng mô t? sõ ð? l?p Track	53
-B?ng 7. 4. B?ng mô t? sõ ð? l?p Email	54
-B?ng 7. 5. B?ng mô t? sõ ð? l?p Like	54
-B?ng 7. 6. B?ng mô t? sõ ð? l?p Follower	55
-B?ng 7. 7. B?ng mô t? sõ ð? l?p Role	55
-B?ng 7. 8. B?ng mô t? sõ ð? l?p Genre	55
-B?ng 7. 9. B?ng mô t? sõ ð? l?p AuthService	55
-B?ng 7. 10. B?ng mô t? sõ ð? l?p EmailService	56
-B?ng 7. 11. B?ng mô t? sõ ð? l?p ProfileService	56
-B?ng 7. 12. B?ng mô t? sõ ð? l?p TrackService	56
-B?ng 7. 13. B?ng mô t? sõ ð? l?p SearchService	56
-B?ng 7. 14. B?ng mô t? sõ ð? l?p FollowerService	57
-B?ng 7. 15. B?ng mô t? sõ ð? l?p LikeService	57
-B?ng 7. 16. B?ng mô t? sõ ð? l?p FeedService	57
-B?ng 7. 17. B?ng mô t? sõ ð? l?p UploadService	58
-B?ng 7. 18. B?ng mô t? sõ ð? l?p GenreService	58
-B?ng 7. 19. B?ng mô t? sõ ð? l?p AdminService	58
-
-B?ng 8. 1.B?ng danh sách thành ph?n c?a giao di?n ðãng nh?p	60
-B?ng 8. 2.B?ng danh sách các bi?n c? c?a giao di?n ðãng nh?p	61
-B?ng 8. 3.B?ng danh sách thành ph?n c?a giao di?n ðãng k?	62
-B?ng 8. 4.B?ng danh sách các bi?n c? c?a giao di?n ðãng k?	63
-B?ng 8. 5.B?ng danh sách thành ph?n c?a giao di?n quên m?t kh?u .64 B?ng 8. 6.B?ng danh sách các bi?n c? c?a giao di?n quên m?t kh?u.64 B?ng 8. 7.B?ng danh sách thành ph?n c?a giao di?n c?a màn h?nh chính user	66
-B?ng 8. 8.B?ng danh sách các bi?n c? c?a giao di?n màn h?nh chính user	67
-B?ng 8. 9.B?ng danh sách thành ph?n c?a giao di?n now playing bar
-.	69
-B?ng 8. 10.B?ng danh sách các bi?n c? c?a giao di?n now playing bar
-.	69
-B?ng 8. 11.B?ng danh sách các thành ph?n c?a giao di?n stream view
-.	71
-B?ng 8. 12. B?ng danh sách các bi?n c? c?a giao di?n stream view 71
-B?ng 8. 13.B?ng danh sách các thành ph?n c?a giao di?n feed	73
-B?ng 8. 14.B?ng danh sách các bi?n c? c?a giao di?n feed	74
-B?ng 8. 15.B?ng danh sách thành ph?n c?a giao di?n feed following
-.	75
-B?ng 8. 16.B?ng danh sách các bi?n c? c?a giao di?n feed following
-.	76
-B?ng 8. 17.B?ng danh sách các thành ph?n c?a giao di?n profile	79
-B?ng 8. 18. B?ng danh sách các bi?n c? c?a giao di?n profile	80
-B?ng 8. 19.B?ng danh sách thành ph?n c?a giao di?n edit profile	82
-B?ng 8. 20.B?ng danh sách các bi?n c? c?a giao di?n edit profile	82
-B?ng 8. 21.B?ng danh sách thành ph?n c?a giao di?n l?y ngu?n	84
-B?ng 8. 22.B?ng danh sách các bi?n c? c?a giao di?n l?y ngu?n	84
-B?ng 8. 23.B?ng danh sách thành ph?n c?a giao di?n upload track	86
-B?ng 8. 24.B?ng danh sách các bi?n c? c?a giao di?n upload track	86
-B?ng 8. 25.B?ng danh sách thành ph?n c?a giao di?n xóa nh?c	88
-B?ng 8. 26.B?ng danh sách các bi?n c? c?a giao di?n xóa nh?c	88
-B?ng 8. 27.B?ng danh sách thành ph?n c?a giao di?n track liked	90
-B?ng 8. 28.B?ng danh sách các bi?n c? c?a giao di?n track liked	90
-B?ng 8. 29.B?ng danh sách thành ph?n c?a giao di?n followers	92
-B?ng 8. 30. B?ng danh sách các bi?n c? c?a giao di?n followers	92
-B?ng 8. 31.B?ng danh sách thành ph?n c?a giao di?n following	94
-B?ng 8. 32.B?ng danh sách các bi?n c? c?a giao di?n following	94
-B?ng 8. 33.B?ng danh sách thành ph?n c?a giao di?n other user
-proflie	96
-B?ng 8. 34. B?ng danh sách các bi?n c? c?a giao di?n other user profile	97
-B?ng 8. 35.B?ng danh sách thành ph?n c?a giao di?n search	99
-B?ng 8. 36. B?ng danh sách các bi?n c? c?a giao di?n search	99
-B?ng 8. 37. B?ng danh sách thành ph?n c?a giao di?n search track 101 B?ng 8. 38.B?ng danh sách các bi?n c? c?a giao di?n search track .102 B?ng 8. 39.B?ng danh sách thành ph?n c?a giao di?n search user  104
-B?ng 8. 40. B?ng danh sách các bi?n c? c?a giao di?n search user .105 B?ng 8. 41. B?ng danh sách thành ph?n c?a giao di?n search genre107 B?ng 8. 42.B?ng danh sách các bi?n c? c?a giao di?n search genre 108 B?ng 8. 43.B?ng danh sách thành ph?n c?a giao di?n genre	110
-B?ng 8. 44.B?ng danh sách các bi?n c? c?a giao di?n genre	110
-B?ng 8. 45.B?ng danh sách thành ph?n c?a giao di?n upload	112
-B?ng 8. 46.B?ng danh sách các bi?n c? c?a giao di?n upload	112
-B?ng 8. 47. B?ng danh sách thành ph?n c?a giao di?n genre	113
-B?ng 8. 48.B?ng danh sách các bi?n c? c?a giao di?n genre	114
-B?ng 8. 49.B?ng danh sách thành ph?n c?a giao di?n admin	116
-B?ng 8. 50.B?ng danh sách các bi?n c? c?a giao di?n admin	117
-B?ng 8. 51.B?ng danh sách thành ph?n c?a giao di?n list track	118
-B?ng 8. 52.B?ng danh sách các bi?n c? c?a giao di?n list track	119
-B?ng 8. 53.B?ng danh sách thành ph?n c?a giao di?n list user	121
-B?ng 8. 54. B?ng danh sách các bi?n c? c?a giao di?n list user	122
-B?ng 8. 55. B?ng danh sách thành ph?n c?a giao di?n th?ng kê	124
-B?ng 8. 56. B?ng danh sách các bi?n c? c?a giao di?n th?ng kê	124
-L?i m? ð?u
-      Trong các cõ s? l?p ráp máy tính theo c?u h?nh, vi?c theo d?i linh ki?n, t?n kho và ti?n ð? l?p ráp ?nh hý?ng tr?c ti?p ð?n vi?c có ð? v?t tý ð? hoàn thành m?t ðõn máy hay không. Khi s? lý?ng c?u h?nh và l?nh l?p tãng lên, tính nhu c?u linh ki?n b?ng s? tay d? gây thi?u hàng, nh?p th?a ho?c không n?m ðý?c l?nh nào ðang ch?, ðang l?p hay ð? xong. T? nhu c?u ðó, nhóm chúng em quy?t ð?nh th?c hi?n ð? tài:
-      "Xây d?ng h? th?ng qu?n l? nhu c?u linh ki?n và l?p ráp máy tính - MRP PC"
-      M?c tiêu c?a ð? tài là th?c hành và c?ng c? ki?n th?c v? phân tích h? th?ng, l?p tr?nh web, phát tri?n ?ng d?ng di ð?ng và xây d?ng backend. H? th?ng có các ch?c nãng cõ b?n c?a m?t quy tr?nh l?p máy: qu?n l? linh ki?n và ð?nh m?c v?t tý (BOM), l?p phi?u nh?p kho, tính linh ki?n c?n thi?u, t?o l?nh s?n xu?t, ki?m tra t?n kho, yêu c?u xu?t linh ki?n, xác nh?n ð? l?p và yêu c?u xu?t thành ph?m. Ph?n web ph?c v? qu?n tr? viên và qu?n l? kho. ?ng d?ng Android ph?c v? nhân viên l?p ráp, ch? v?i nh?ng l?nh ðý?c giao cho ðúng tài kho?n ðó.
-      ?ng d?ng di ð?ng ðý?c vi?t b?ng Kotlin và Jetpack Compose. Ph?n máy ch? dùng Node.js, Express và TypeScript. D? li?u ðý?c lýu trên PostgreSQL. Phiên ðãng nh?p web ðý?c gi? b?ng Redis. Toàn b? h? th?ng ðý?c ðóng gói b?ng Docker, g?m cõ s? d? li?u, Redis, backend và Nginx. Qua quá tr?nh th?c hi?n, nhóm ð? rèn ðý?c cách thi?t k? cõ s? d? li?u cho t?n kho và BOM, cách vi?t API cho ?ng d?ng di ð?ng, và cách ph?i h?p gi?a giao di?n web, ?ng d?ng Android và máy ch?. Giao di?n, quy mô nghi?p v? và m?t s? t?nh hu?ng v?n hành v?n c?n h?n ch?, nhýng ðó là ph?n nhóm ti?p t?c hoàn thi?n sau ð? án.
-CHÝÕNG I: T?NG QUAN Ð? TÀI
-1. L? do ch?n ð? tài
-      Vi?c l?p ráp máy tính theo c?u h?nh ph? thu?c vào danh m?c linh ki?n, ð?nh m?c v?t tý (BOM) và t?n kho th?c t?. Khi s? lý?ng c?u h?nh và l?nh l?p tãng lên, vi?c tính nhu c?u linh ki?n b?ng s? tay d? d?n ð?n thi?u hàng, nh?p th?a ho?c không bi?t l?nh nào ðang ch? l?p, ðang l?p hay ð? xong.
-      Là sinh viên ngành công ngh? thông tin, nhóm ch?n ð? tài xây d?ng h? th?ng MRP PC (Material Requirements Planning cho l?p ráp máy tính). H? th?ng g?m ph?n web cho qu?n tr? và qu?n l? kho, cùng ?ng d?ng Android cho nhân viên l?p ráp. Ph?m vi t?p trung vào các nghi?p v? có th? ch?y ðý?c và qu?n l? ðý?c d? li?u:
-• Ðãng nh?p web và ðãng nh?p ?ng d?ng, phân quy?n vai tr?
-• Qu?n l? tài kho?n: t?o, s?a, khóa và m? khóa.
-• Qu?n l? linh ki?n, h?ng, nhà cung c?p, thu?c tính theo t?ng nhóm linh ki?n và ?nh linh ki?n.
-• L?p c?u h?nh máy tính và BOM.
-• L?p phi?u nh?p, lýu nháp, xác nh?n nh?p và c?ng t?n kho.
-• Tính linh ki?n thi?u cho các l?nh l?p ðang m?, h? tr? l?p phi?u nh?p theo nhà cung c?p.
-• T?o l?nh s?n xu?t và giao cho nhân viên l?p ráp.
-• Trên ði?n tho?i: xem l?nh ðý?c giao, ð?i chi?u t?n kho theo BOM, yêu c?u xu?t nguyên v?t li?u, xác nh?n ð? l?p và yêu c?u xu?t thành ph?m.
-• Qu?n l? kho duy?t ho?c t? ch?i phi?u xu?t.
-• Dashboard, xu?t báo cáo Excel và PDF.
-• Phân quy?n chi ti?t và sao lýu cõ s? d? li?u.
-      M?c tiêu c?a nhóm là ði h?t m?t quy tr?nh th?t: thi?t k? d? li?u, l?p tr?nh web và API, vi?t ?ng d?ng di ð?ng, r?i ðóng gói h? th?ng b?ng Docker.
-2. Phýõng pháp nghiên c?u
-      Kh?o sát nghi?p v? l?p ráp máy tính theo c?u h?nh: danh m?c linh ki?n, BOM, nh?p kho, xu?t kho, giao l?nh l?p và theo d?i ti?n ð?.
-      Phân tích và thi?t k? b?ng Use Case, lu?ng x? l? và sõ ð? th?c th? liên k?t, bám theo các vai tr? Qu?n tr? viên, Qu?n l? kho và Nhân viên l?p ráp.
-      L?a ch?n công ngh? và môi trý?ng:
-? Node.js, Express và TypeScript cho web qu?n tr? và API.
-? PostgreSQL và Prisma ð? lýu tài kho?n, linh ki?n, BOM, t?n kho, phi?u nh?p, phi?u xu?t và l?nh s?n xu?t.
-? Redis ð? gi? phiên ðãng nh?p web.
-? Pug cho giao di?n web.
-? JWT và bcrypt cho xác th?c. Web dùng cookie phiên. ?ng d?ng Android dùng access token.
-? Android, Kotlin, Jetpack Compose và Retrofit cho nhân viên l?p ráp.
-? Cloudflare R2 ð? lýu ?nh linh ki?n.
-? ExcelJS và PDFKit ð? xu?t báo cáo.
-? Docker Compose g?m PostgreSQL, Redis, backend và Nginx.
-      L?p tr?nh theo t?ng phân h?, ki?m th? ðãng nh?p, phân quy?n, c?ng và tr? t?n kho, r?i ch?nh ð?n khi lu?ng nh?p, xu?t và l?p ráp ch?y ?n ð?nh ? m?c ð? án.
-3. Áp d?ng th?c ti?n
-      ? quy mô m?t xý?ng l?p máy nh?, h? th?ng dùng ðý?c cho v?n hành h?ng ngày:
-? Qu?n tr? viên t?o tài kho?n, gán vai tr?, ch?nh quy?n, khóa tài kho?n và sao lýu d? li?u.
-? Qu?n l? kho khai báo linh ki?n và c?u h?nh máy, l?p phi?u nh?p, xem linh ki?n thi?u, t?o l?nh l?p, duy?t phi?u xu?t và xem dashboard.
-? Nhân viên l?p ráp ðãng nh?p trên ði?n tho?i, ch? th?y l?nh ðý?c giao, ki?m tra ð? linh ki?n hay không, g?i yêu c?u xu?t v?t tý, xác nh?n l?p xong và g?i yêu c?u xu?t máy thành ph?m.
-      Qua ð? tài, nhóm có kinh nghi?m thi?t k? cõ s? d? li?u cho t?n kho và BOM, vi?t API cho ?ng d?ng di ð?ng, và gom nhi?u d?ch v? trong Docker. Ph?n c?n h?n ch? là n?n ð? ch?nh ? các ð? án sau.
-CHÝÕNG II: CÕ S? L? LU?N
-1. Cõ s? l? lu?n c?a ð? tài
-1.1. T?ng quan v? h? th?ng MRP_PC
-      MRP_PC là h? th?ng qu?n l? kho linh ki?n và ði?u ph?i s?n xu?t l?p ráp máy tính (PC), ðý?c thi?t k? ð? ph?c v? nhu c?u qu?n l? v?t tý, theo d?i t?n kho và ki?m soát quy tr?nh l?p ráp trong doanh nghi?p. H? th?ng g?m hai ph?n: ?ng d?ng web qu?n tr? dành cho Admin và Qu?n l? kho, cùng ?ng d?ng di ð?ng Android dành cho nhân viên l?p ráp. H? th?ng hý?ng ð?n vi?c s? hóa toàn b? quy tr?nh t? nh?p linh ki?n, xây d?ng c?u h?nh (BOM), t?o l?nh s?n xu?t, xu?t kho nguyên v?t li?u cho ð?n nh?p kho và xu?t thành ph?m, nh?m h?n ch? sai sót và thi?u h?t v?t tý.
-      H? th?ng MRP_PC có 3 phân quy?n chính:
-? Qu?n tr? viên (Admin): 
-o Ðãng nh?p, ðãng xu?t và qu?n l? thông tin cá nhân.
-o T?o, ch?nh s?a, khóa/m? khóa tài kho?n ngý?i dùng trong h? th?ng.
-o Phân quy?n ch?c nãng cho t?ng vai tr?.
-o Xem dashboard t?ng quan v? t?nh h?nh ho?t ð?ng.
-o Sao lýu d? li?u h? th?ng.
-? Qu?n l? kho (Warehouse Manager): 
-o Qu?n l? danh m?c linh ki?n: thêm, s?a, xóa, kèm thýõng hi?u, nhà cung c?p, thu?c tính k? thu?t và ngý?ng t?n kho t?i thi?u.
-o L?p phi?u nh?p kho linh ki?n t? nhà cung c?p và c?p nh?t t?n kho.
-o Duy?t ho?c t? ch?i phi?u xu?t linh ki?n và phi?u xu?t thành ph?m do nhân viên l?p ráp yêu c?u; khi duy?t, h? th?ng t? ð?ng tr? t?n kho.
-o Xây d?ng c?u h?nh PC và ð?nh m?c linh ki?n (BOM) cho t?ng c?u h?nh.
-o T?o l?nh s?n xu?t, giao cho nhân viên l?p ráp và theo d?i ti?n ð?.
-o Theo d?i dashboard: linh ki?n s?p h?t ho?c h?t hàng, phi?u ch? duy?t, th?ng kê nh?p/xu?t và thành ph?m.
-? Nhân viên l?p ráp (Staff, dùng ?ng d?ng di ð?ng): 
-o Ðãng nh?p vào ?ng d?ng b?ng tài kho?n ðý?c c?p.
-o Xem danh sách các l?nh s?n xu?t ðý?c giao cho m?nh.
-o Ki?m tra t?n kho linh ki?n so v?i ð?nh m?c BOM c?a l?nh s?n xu?t.
-o G?i yêu c?u xu?t nguyên v?t li?u khi kho c?n thi?u linh ki?n.
-o Xác nh?n hoàn thành l?p ráp, sau ðó g?i yêu c?u xu?t thành ph?m.
-1.2. Mô t? chi ti?t h? th?ng
-1.2.1. Ðãng nh?p và qu?n l? thông tin cá nhân
-Ngý?i dùng ðãng nh?p vào h? th?ng b?ng tên ðãng nh?p và m?t kh?u do Admin c?p. H? th?ng không có ch?c nãng t? ðãng k?. Tài kho?n b? khóa s? không th? ðãng nh?p. Trên web, phiên ðãng nh?p ðý?c lýu trên máy ch? và t? h?t h?n sau 8 gi?. Ngý?i dùng có th? ðãng xu?t b?t c? lúc nào.
-Trên ?ng d?ng di ð?ng, nhân viên l?p ráp ðãng nh?p b?ng tài kho?n c?a m?nh. Sau khi ðãng nh?p, ?ng d?ng lýu l?i phiên làm vi?c ð? t? ðãng nh?p ? nh?ng l?n m? sau, cho ð?n khi nhân viên ch? ð?ng ðãng xu?t.
-Trong ph?n h? sõ cá nhân trên web, ngý?i dùng có th? c?p nh?t h? và tên, email, s? ði?n tho?i và ð?i m?t kh?u.
-1.2.2. Qu?n l? tài kho?n ngý?i dùng
-Admin có th? xem danh sách và chi ti?t các tài kho?n trong h? th?ng. Admin t?o tài kho?n m?i v?i vai tr? Admin, Qu?n l? kho ho?c Nhân viên l?p ráp, và ch?nh s?a thông tin c?a tài kho?n hi?n có.
-Khi c?n ng?ng cho m?t ngý?i dùng truy c?p, Admin có th? khóa tài kho?n ðó và m? khóa l?i khi c?n. H? th?ng ghi nh?n th?i ði?m ðãng nh?p g?n nh?t c?a t?ng tài kho?n.
-1.2.3. Phân quy?n theo vai tr?
-Admin có th? xem quy?n c?a t?ng vai tr? và ði?u ch?nh các quy?n ðó, ch?ng h?n xem, t?o, s?a, xóa ho?c duy?t trên t?ng ch?c nãng nhý linh ki?n, phi?u nh?p, phi?u xu?t, BOM, l?nh s?n xu?t, tài kho?n, sao lýu. Ngý?i dùng ch? nh?n th?y và truy c?p ðý?c nh?ng ch?c nãng mà vai tr? c?a m?nh ðý?c c?p quy?n.
-1.2.4. Sao lýu d? li?u h? th?ng
-Admin có th? t?o b?n sao lýu cõ s? d? li?u ngay trên giao di?n web. H? th?ng hi?n th? danh sách các b?n sao lýu ð? t?o ð? Admin t?i v? máy và lýu tr? khi c?n.
-1.2.5. Theo d?i dashboard t?ng quan
-Admin và Qu?n l? kho có th? xem dashboard t?ng quan c?a xý?ng l?p ráp, g?m s? lý?ng linh ki?n, phi?u nh?p trong ngày, phi?u xu?t ðang ch? duy?t ho?c quá h?n, và t?nh h?nh thành ph?m trong kho.
-Dashboard c?n có bi?u ð? nh?p, xu?t linh ki?n trong nh?ng ngày g?n nh?t, danh sách c?nh báo linh ki?n s?p h?t ho?c ð? h?t hàng, danh sách linh ki?n ðý?c s? d?ng nhi?u nh?t và các ho?t ð?ng g?n ðây. Ngý?i dùng có th? xu?t báo cáo dashboard ra file Excel ho?c PDF.
-1.2.6. Qu?n l? linh ki?n
-Qu?n l? kho có th? xem danh sách linh ki?n, t?m theo t? khóa và l?c theo tr?ng thái (ðang kinh doanh, ng?ng kinh doanh, h?t hàng).
-Khi thêm ho?c s?a linh ki?n, qu?n l? kho nh?p tên, lo?i linh ki?n, ðõn v? tính, giá nh?p, m?c t?n t?i thi?u, thýõng hi?u, nhà cung c?p, tr?ng thái, các thu?c tính k? thu?t theo t?ng lo?i và ?nh minh h?a (ð?nh d?ng JPEG, PNG ho?c WebP).
-Khi không c?n mu?n qu?n l? m?t linh ki?n, qu?n l? kho có th? xóa nó. Linh ki?n b? xóa s? không c?n hi?n th? trong danh sách, nhýng các phi?u và c?u h?nh c? liên quan v?n ðý?c gi? nguyên d? li?u.
-1.2.7. L?p và xác nh?n phi?u nh?p kho
-Qu?n l? kho t?o phi?u nh?p b?ng cách ch?n nhà cung c?p, sau ðó ch?n các linh ki?n thu?c nhà cung c?p ðó cùng s? lý?ng. Phi?u m?i ðý?c lýu ? tr?ng thái nháp, và có th? ch?nh s?a khi c?n ? tr?ng thái này.
-Khi xác nh?n phi?u, h? th?ng t? ð?ng c?ng s? lý?ng nh?p vào t?n kho c?a t?ng linh ki?n. Qu?n l? kho có th? xem chi ti?t và l?c danh sách phi?u theo tr?ng thái. Qu?n l? kho c?ng có th? in t?ng phi?u ra PDF ho?c xu?t danh sách phi?u ra file Excel ho?c PDF.
-1.2.8. Xây d?ng c?u h?nh PC và ð?nh m?c linh ki?n (BOM)
-Qu?n l? kho t?o c?u h?nh PC v?i tên, mô t?, giá bán và tr?ng thái. M?i c?u h?nh g?m các v? trí linh ki?n chính là CPU, Mainboard, RAM, ? c?ng, ngu?n, t?n nhi?t và case, cùng các linh ki?n b? sung n?u có. M?i linh ki?n ðý?c gán s? lý?ng c?n dùng cho m?t máy.
-H? th?ng không cho thêm trùng linh ki?n ho?c dùng linh ki?n ð? ng?ng kinh doanh. H? th?ng t? tính t?ng giá v?n, giá bán g?i ? và t? su?t l?i nhu?n c?a c?u h?nh. Qu?n l? kho có th? xem chi ti?t và ch?nh s?a c?u h?nh sau khi t?o.
-1.2.9. T?o và theo d?i l?nh s?n xu?t
-Qu?n l? kho t?o l?nh s?n xu?t b?ng cách ch?n c?u h?nh PC ðang ho?t ð?ng, nh?p s? lý?ng c?n l?p và giao cho m?t nhân viên l?p ráp ðang ho?t ð?ng.
-L?nh s?n xu?t có ba tr?ng thái là ch? làm, ðang l?p và hoàn thành. Qu?n l? kho xem ðý?c s? lý?ng l?nh ? t?ng giai ðo?n, xem chi ti?t t?ng l?nh, và có th? xóa l?nh không c?n c?n thi?t.
-1.2.10. Duy?t ho?c t? ch?i phi?u xu?t kho
-Phi?u xu?t do nhân viên l?p ráp g?i lên có hai lo?i là phi?u xu?t linh ki?n và phi?u xu?t thành ph?m. Qu?n l? kho xem danh sách, th?ng kê và chi ti?t các phi?u ðang ch? duy?t.
-Khi duy?t phi?u, h? th?ng t? ð?ng tr? t?n kho linh ki?n ho?c thành ph?m týõng ?ng và ghi l?i nh?t k? thao tác. Qu?n l? kho c?ng có th? t? ch?i phi?u không h?p l?.
-1.2.11. Xem danh sách l?nh s?n xu?t ðý?c giao (?ng d?ng di ð?ng)
-Nhân viên l?p ráp xem danh sách các l?nh s?n xu?t ðý?c giao cho m?nh trên ?ng d?ng. Danh sách hi?n th? tên c?u h?nh, s? lý?ng, m? l?nh và th?i ði?m giao l?nh. Nhân viên có th? l?c theo tr?ng thái ch? làm, ðang l?p ho?c hoàn thành, và làm m?i danh sách khi c?n.
-Khi ch?n m?t l?nh, nhân viên xem ðý?c chi ti?t l?nh cùng các bý?c th?c hi?n c?a quy tr?nh l?p ráp.
-1.2.12. Ki?m tra t?n kho và yêu c?u xu?t nguyên v?t li?u
-V?i m?i l?nh s?n xu?t, nhân viên có th? ki?m tra t?n kho linh ki?n so v?i ð?nh m?c BOM nhân v?i s? lý?ng c?n l?p, ð? bi?t linh ki?n nào c?n ð? và linh ki?n nào c?n thi?u.
-N?u kho chýa ð?, nhân viên g?i yêu c?u xu?t nguyên v?t li?u cho qu?n l? kho. M?i l?nh ch? có m?t phi?u xu?t nguyên v?t li?u ðang x? l?, tr? khi phi?u trý?c ðó b? t? ch?i. Khi g?i yêu c?u, l?nh s?n xu?t chuy?n sang tr?ng thái ðang l?p.
-1.2.13. Xác nh?n hoàn thành l?p ráp và yêu c?u xu?t thành ph?m
-Sau khi l?p xong, nhân viên xác nh?n hoàn thành l?nh. H? th?ng chuy?n l?nh sang tr?ng thái hoàn thành và c?ng s? lý?ng máy v?a l?p vào t?n kho thành ph?m. N?u phi?u xu?t nguyên v?t li?u c?a l?nh v?n ðang ch? duy?t th? chýa th? xác nh?n hoàn thành. N?u chýa có phi?u xu?t nguyên v?t li?u nào ðý?c duy?t, h? th?ng t? tr? t?n linh ki?n theo BOM.
-Sau ðó nhân viên g?i yêu c?u xu?t thành ph?m ð? qu?n l? kho duy?t và bàn giao máy.
-1.3. Xác ð?nh yêu c?u
-1.3.1. V?n ð?
-M?c tiêu c?a h? th?ng MRP-PC là cung c?p m?t n?n t?ng qu?n l? kho và s?n xu?t l?p ráp máy tính (PC) giúp doanh nghi?p ki?m soát linh ki?n, ð?nh m?c v?t tý và ti?n ð? l?p ráp. H? th?ng g?m ?ng d?ng web dành cho Admin và Qu?n l? kho, cùng ?ng d?ng Android dành cho Nhân viên l?p ráp, v?i các ch?c nãng cõ b?n nhý:
-? Ðãng nh?p, ðãng xu?t, qu?n l? h? sõ cá nhân và ð?i m?t kh?u.
-? Qu?n l? tài kho?n ngý?i dùng và phân quy?n theo vai tr?.
-? Qu?n l? linh ki?n kèm thu?c tính k? thu?t, h?ng, nhà cung c?p, h?nh ?nh và ngý?ng t?n t?i thi?u.
-? L?p phi?u nh?p kho, xác nh?n nh?p kho và ð? xu?t nh?p b? sung linh ki?n c?n thi?u theo nhà cung c?p.
-? L?p, duy?t và t? ch?i phi?u xu?t kho (xu?t linh ki?n và xu?t thành ph?m).
-? Qu?n l? c?u h?nh PC và ð?nh m?c v?t tý (BOM).
-? T?o l?nh s?n xu?t, giao vi?c cho nhân viên l?p ráp và theo d?i ti?n ð?.
-? Nh?n l?nh, ki?m tra t?n kho, ð? ngh? xu?t v?t tý và xác nh?n hoàn thành l?p ráp trên ?ng d?ng Android.
-? Dashboard th?ng kê t?n kho, c?nh báo và xu?t báo cáo Excel, PDF.
-? Sao lýu cõ s? d? li?u.
-1.3.2. Yêu c?u ch?c nãng
-H? th?ng MRP-PC c?n ðáp ?ng các yêu c?u ch?c nãng sau:
-? Ð?i v?i nhân viên l?p ráp (Staff - ?ng d?ng Android): 
-o Ðãng nh?p b?ng tài kho?n ðý?c c?p; phiên ðãng nh?p h?t h?n th? yêu c?u ðãng nh?p l?i.
-o Xem danh sách l?nh s?n xu?t ðý?c giao và l?c theo tr?ng thái (ch? làm, ðang l?p, hoàn thành).
-o Xem chi ti?t l?nh s?n xu?t: c?u h?nh PC, s? lý?ng c?n l?p, tr?ng thái.
-o Ki?m tra t?n kho linh ki?n theo BOM: s? lý?ng c?n, s? lý?ng t?n và s? lý?ng thi?u c?a t?ng linh ki?n.
-o G?i ð? ngh? xu?t nguyên v?t li?u t?i th? kho khi kho không ð? linh ki?n.
-o Xác nh?n hoàn thành l?p ráp; h? th?ng c?p nh?t t?n kho linh ki?n và t?n kho thành ph?m.
-o G?i ð? ngh? xu?t thành ph?m sau khi l?nh hoàn thành và theo d?i tr?ng thái phi?u.
-? Ð?i v?i qu?n l? kho (Warehouse Manager - ?ng d?ng web): 
-o Ðãng nh?p, c?p nh?t thông tin cá nhân và ð?i m?t kh?u.
-o Xem dashboard t?ng quan kho: s? linh ki?n, giá tr? t?n kho, c?nh báo s?p h?t/h?t hàng, phi?u nh?p trong ngày, phi?u xu?t ch? duy?t, bi?u ð? nh?p - xu?t và linh ki?n s? d?ng nhi?u; xu?t báo cáo Excel, PDF.
-o Qu?n l? linh ki?n: t?m ki?m, l?c theo tr?ng thái, thêm, s?a, ð?i tr?ng thái (ðang kinh doanh/ng?ng kinh doanh), xóa linh ki?n, t?i ?nh linh ki?n.
-o Qu?n l? phi?u nh?p kho: t?o phi?u nháp theo nhà cung c?p, s?a phi?u nháp, xác nh?n phi?u ð? c?ng t?n kho; t?m ki?m, l?c phi?u; xu?t danh sách ra Excel, PDF và in t?ng phi?u ra PDF.
-o Xem danh sách linh ki?n thi?u theo nhu c?u l?nh s?n xu?t, nhóm theo nhà cung c?p, ð? t?o nhanh phi?u nh?p b? sung.
-o Qu?n l? phi?u xu?t kho: xem danh sách, l?c theo lo?i, tr?ng thái, th?i gian; xem chi ti?t t?n trý?c và sau khi xu?t; duy?t phi?u (tr? t?n kho) ho?c t? ch?i phi?u.
-o Qu?n l? c?u h?nh PC và BOM: t?o, xem, c?p nh?t c?u h?nh g?m các v? trí b?t bu?c (CPU, Mainboard, RAM, ? c?ng, ngu?n, t?n nhi?t, case) và linh ki?n b? sung; xem t?ng giá v?n.
-o Qu?n l? l?nh s?n xu?t: t?o l?nh theo c?u h?nh PC và s? lý?ng, giao cho nhân viên l?p ráp, theo d?i các giai ðo?n (ch? s?n xu?t, ðang l?p ráp, hoàn thành), xem chi ti?t và xóa l?nh.
-? Ð?i v?i qu?n tr? viên (Admin - ?ng d?ng web): 
-o Ðãng nh?p, c?p nh?t thông tin cá nhân và ð?i m?t kh?u.
-o Qu?n l? tài kho?n ngý?i dùng: xem danh sách, xem chi ti?t, t?o m?i, ch?nh s?a, khóa và m? khóa tài kho?n.
-o Qu?n l? phân quy?n: xem và c?u h?nh quy?n truy c?p c?a t?ng vai tr? ð?i v?i các ch?c nãng c?a h? th?ng.
-o Sao lýu d? li?u: t?o b?n sao lýu cõ s? d? li?u, xem danh sách và t?i b?n sao lýu v?.
-o Xem dashboard t?ng quan và xu?t báo cáo th?ng kê.
-1.3.3. Yêu c?u phi ch?c nãng
-Các yêu c?u phi ch?c nãng c?a h? th?ng:
-? Giao di?n web và ?ng d?ng Android thân thi?n, d? s? d?ng; giao di?n web ðý?c tách riêng theo vai tr?, ?ng d?ng Android hý?ng d?n nhân viên l?p ráp theo t?ng bý?c th?c hi?n.
-? Ð?m b?o an toàn thông tin tài kho?n: m?t kh?u ðý?c m? hóa, xác th?c b?ng JWT có th?i h?n, phiên làm vi?c lýu trên Redis, tài kho?n b? khóa không th? ðãng nh?p.
-? Qu?n l? quy?n truy c?p ch?t ch? theo vai tr?, m?i ch?c nãng ch? ðý?c th?c hi?n khi vai tr? có quy?n týõng ?ng.
-? Ð?m b?o toàn v?n d? li?u kho: các thao tác nh?p, xu?t, hoàn thành l?p ráp ðý?c th?c hi?n trong giao d?ch, không cho phép t?n kho âm và không x? l? trùng m?t phi?u.
-? Ghi nh?t k? các thao tác quan tr?ng (t?o, xác nh?n phi?u nh?p, duy?t/t? ch?i phi?u xu?t).
-? H? tr? ?ng d?ng Android (t? Android 7.0 tr? lên) và truy c?p web trên tr?nh duy?t.
-? Cung c?p báo cáo th?ng kê và xu?t d? li?u ra Excel, PDF.
-? Có kh? nãng sao lýu d? li?u và tri?n khai nhanh b?ng Docker.
-1.4 Ð? tài và ph?m vi
-Ð? tài xây d?ng h? th?ng ho?ch ð?nh nhu c?u nguyên v?t li?u (MRP) cho xý?ng l?p ráp máy tính cá nhân, g?m 3 khâu: danh m?c linh ki?n và ð?nh m?c (BOM), kho nh?p - xu?t - t?n, l?nh s?n xu?t.
-• Không làm: bán hàng, k? toán công n?, t? ki?m tra týõng thích k? thu?t.
-• H? th?ng ch? lýu socket, lo?i RAM, công su?t ð? ngý?i l?p c?u h?nh t? ð?i chi?u.
-1.4.1. Ba tác nhân
-Phi?u nh?p do qu?n l? kho l?p. Phi?u xu?t do nhân viên l?p và qu?n l? kho duy?t.
-Tác nhânKênhVi?c chínhQu?n tr? viênWebTài kho?n, phân quy?n, sao lýu, xem b?ng ði?u khi?nQu?n l? khoWebLinh ki?n, c?u h?nh và ð?nh m?c, phi?u nh?p, duy?t phi?u xu?t, l?p l?nhNhân viên l?p rápÐi?n tho?iXem l?nh c?a m?nh, ki?m tra ð? hàng, l?p phi?u xu?t, xác nh?n l?p1.4.2. Quy ý?c t?n kho
-M?i linh ki?n c?a m?t l?nh ch? b? tr? kho ðúng m?t l?n; ðây là quy t?c quan tr?ng nh?t c?a h? th?ng.
-• Hai s? t?n tách riêng: s? linh ki?n (theo t?ng linh ki?n) và s? thành ph?m (theo t?ng c?u h?nh).
-• Không ð?i t?n: phi?u nháp, phi?u ch? duy?t, phi?u b? t? ch?i.
-• Thành ph?m: tãng khi nhân viên xác nh?n l?p xong, gi?m khi qu?n l? kho duy?t phi?u xu?t thành ph?m.
-• S? trên phi?u xu?t NVL = ð?nh m?c × s? máy c?a l?nh, t?c toàn b? s? c?n, không ph?i s? thi?u. S? thi?u ch? dùng ð? ch?n vi?c l?p phi?u khi kho ð? ð?.
-• Ví d?: c?n 10, kho có 6. Phi?u ghi 10, nh?p thêm 4 th? t?n là 10, duy?t phi?u th? t?n v? 0. N?u phi?u ch? ghi 4, phi?u duy?t ðý?c ngay, kho c?n dý 2 và không ai b? nh?c nh?p n?t.
-• L?nh s?n xu?t t?o ðý?c k? c? khi kho thi?u; s? máy l?p ðý?c ch? ð? tham kh?o.
-1.4.3. Lu?ng nghi?p v? chính
-1. C?u h?nh và ð?nh m?c: 7 v? trí b?t bu?c là CPU, mainboard, RAM (m?c ð?nh 2 thanh), ? c?ng, ngu?n, t?n nhi?t, v? case; có th? thêm linh ki?n kèm. Không khai trùng, ch? ch?n linh ki?n ðang kinh doanh. Giá bán g?i ? = giá v?n + biên 15%.
-2. Phi?u nh?p: nháp (s?a ðý?c, chýa c?ng t?n) ? xác nh?n (c?ng t?n, không s?a n?a). M? IMP-nãm-s?.
-3. L?nh s?n xu?t: ch? s?n xu?t ? ðang l?p ráp ? hoàn thành. Ch? l?nh c?n "ch?" m?i ðý?c h?y.
-4. Xu?t thành ph?m (PXP): ch? l?p sau khi l?nh hoàn thành. Duy?t th? tr? t?n thành ph?m, t? ch?i th? t?n gi? nguyên và ðý?c l?p l?i.
-Hai nhánh l?p (ch? khác nhau ? vi?c tr? linh ki?n):
-Nhánh A: kho ð? t? ð?uNhánh B: kho thi?uPhi?u NVLKhông l?pNhân viên l?p (PXM), qu?n l? kho duy?tTr? linh ki?nKhi xác nh?n l?pKhi duy?t phi?uKhi xác nh?n l?pTr? linh ki?n, r?i c?ng thành ph?mCh? c?ng thành ph?m, không tr? thêmCông th?c hàng c?n mua (ch? tính l?nh chýa xong và linh ki?n ðang kinh doanh, gom theo nhà cung c?p):
-C?n mua = nhu c?u c?a các l?nh ? t?n hi?n có ? hàng trên phi?u nh?p nháp + hàng trên phi?u xu?t NVL ðang ch? duy?t
-1.5. M?c tiêu h? th?ng
-Có 9 m?c tiêu c? th?, m?i m?c tiêu là m?t k?t qu? ki?m tra ðý?c:
-1. Qu?n l? danh m?c linh ki?n v?i thông s? theo nhóm.
-2. L?p c?u h?nh và ð?nh m?c, tính giá v?n.
-3. Phi?u nh?p hai bý?c, k?t xu?t Excel và PDF.
-4. Tính hàng c?n mua cho các l?nh chýa xong.
-5. Tách và ki?m soát hai lo?i phi?u xu?t.
-6. Ði?u hành l?nh s?n xu?t theo ba tr?ng thái.
-7. Ðýa vi?c c?a nhân viên lên ?ng d?ng ði?n tho?i.
-8. B?ng ði?u khi?n c?nh báo l?ch kho và l?ch ti?n ð? (dý?i ngý?ng t?n, phi?u ch? quá 2 ngày).
-9. Phân quy?n, nh?t k?, sao lýu.
-B?n ràng bu?c ph?i gi? trong m?i nhánh:
-• T?n không âm: thi?u hàng th? không duy?t và không tr? d?.
-• Thao tác ð?i t?n ph?i tr?n v?n: ho?c ð?i ð?, ho?c không ð?i g?.
-• Hai s? t?n không dùng chung.
-• Không có quy?n th? không làm ðý?c, k? c? khi bi?t ðý?ng d?n.
-1.6. ? ngh?a c?a ð? tài
-V?i xý?ng:
-• M?t quy t?c chung cho ð?nh m?c, phi?u và l?nh nên t?n s? sách kh?p hàng th?t.
-• Qu?n l? nh?n r? hàng ðang có, hàng s?p v?, hàng s?p ra.
-• Tách s? linh ki?n và thành ph?m.
-• Chia vi?c ðúng vai, có nh?t k? và sao lýu.
-V?i vi?c h?c: hi?u MRP ? quy mô nh?, phân bi?t ch?ng t? v?i t?n kho, ngý?i l?p v?i ngý?i duy?t, và thi?t k? thông s? theo nhóm linh ki?n.
-1.7. Khó khãn khi th?c hi?n
-Khó khãnÐi?m c?n nh?Tr? linh ki?n ðúng 1 l?nXác nh?n l?p có 2 nhánh; g?p làm m?t th? tr? hai l?n ho?c không tr?S? ghi trên phi?uPh?i là s? c?n c?a c? l?nh, không ph?i s? thi?uCông th?c hàng c?n muaPh?i tính c? phi?u nh?p nháp (s?p v?) và phi?u xu?t ch? (s?p ra)Khóa ðúng bý?c c?a l?nhCh?n ph?i gi?ng nhau trên web và ði?n tho?iHai s? trong cùng h? phi?u xu?tDùng nh?m s? th? tr? saiDanh m?c không ð?ng nh?tThông s? theo nhóm, không dùng m?t b?ng nhi?u c?t tr?ngHai ki?u "s?p h?t hàng"Ngý?ng t?n t?i thi?u (c?nh báo) khác s? c?n mua (cho l?nh); không dùng chung công th?cQuy?n không ð?i x?ngCh?n ? phía x? l?, không ch? ?n menuThao tác ð?ng th?iKi?m tra "ð? m?i tr?" ngay lúc tr?; ð?i tr?ng thái ði cùng ð?i t?nC?t ph?m viGi? ð?nh m?c, l?nh, phi?u, hai s? t?n; b? bán hàng, công n?, ki?m tra týõng thích t? ð?ngTiêu chí ki?m tra cu?i: v?i m?t l?nh b?t k?, gi?i thích ðý?c linh ki?n ra kho ? phi?u xu?t ho?c ? l?n xác nh?n l?p, không ph?i c? hai. Thành ph?m ch? tãng sau khi l?p xong và ch? gi?m sau khi phi?u xu?t thành ph?m ðý?c duy?t.
-
-
-
-
-
-
-
-
-
-
-
-CHÝÕNG III: PHÂN TÍCH VÀ THI?T K? H?
-TH?NG
-1. Mô h?nh BFD
-
-H?nh 1.1. Mô h?nh BFD
-Lu?ng nghi?p v? chính, ðúng hành vi m? ngu?n:
-
-H?nh 1.2. Lu?ng nghi?p v? chính
-Phi?u nh?p nháp khi xác nh?n ch? c?ng t?n linh ki?n. Xin xu?t linh ki?n ch? ðý?c khi t?n chýa ð? c? l?nh, và bý?c này chýa tr? kho. Duy?t phi?u material tr? inventory. Xác nh?n l?p ch? tr? linh ki?n khi phi?u linh ki?n m?i nh?t chýa ðý?c duy?t. M?i l?n xác nh?n thành công ð?u c?ng product_inventory. Duy?t phi?u finished_product tr? t?n thành ph?m. T? ch?i phi?u không ð?i t?n.
-
-
-2. Mô h?nh Use case
-
-H?nh 2.1. Use case t?ng quát
-
-H?nh 2.2. Use case ðãng nh?p web
-
-H?nh 2.3. Use case ðãng xu?t
-
-H?nh 2.4. Use case xem và s?a h? sõ
-
-H?nh 2.5. Use case ð?i m?t kh?u
-
-H?nh 2.6. Use case xem b?ng ði?u khi?n
-
-H?nh 2.7. Use case xu?t báo cáo
-
-H?nh 2.8. Use case qu?n l? linh ki?n
-
-H?nh 2.9. Use case qu?n l? phi?u nh?p
-
-H?nh 2.10. Use case duy?t phi?u xu?t
-
-H?nh 2.11. Use case qu?n l? BOM
-
-H?nh 2.12. Use case qu?n l? l?nh s?n xu?t
-
-H?nh 2.13. Use case qu?n l? tài kho?n
-
-H?nh 2.14. Use case phân quy?n
-
-H?nh 2.15. Use case sao lýu cõ s? d? li?u
-
-H?nh 2.16. Use case ðãng nh?p ?ng d?ng
-
-H?nh 2.17. Use case xem l?nh l?p ráp
-
-H?nh 2.18. Use case ki?m tra t?n kho
-
-H?nh 2.19. Use case yêu c?u xu?t linh ki?n
-
-H?nh 2.20. Use case xác nh?n l?p ráp
-
-H?nh 2.21. Use case yêu c?u xu?t thành ph?m
-3. Ð?c t? Use case
-M?cN?i dungM?UC01Tên use caseÐãng nh?p webTác nhânQu?n tr? viên, Qu?n l? khoMô t? ng?nUse case b?t ð?u khi ngý?i dùng m? trang ðãng nh?p web và g?i username cùng m?t kh?u. H? th?ng xác th?c tài kho?n ðang ho?t ð?ng, ghi cookie JWT và session, r?i m? trang quy?n xem ð?u tiên.Ti?n ði?u ki?nTài kho?n có tr?ng thái active. Vai tr? có ít nh?t m?t quy?n xem trong danh sách trang.Lu?ng chính1. Ngý?i dùng m? /admin/auth/login.
-2. Nh?p username và m?t kh?u r?i g?i form.
-3. loginValidate ki?m tra username t?n t?i và m?t kh?u ðúng.
-4. AuthService ki?m tra tài kho?n active, ghi cookie access_token trong 8 gi? và ghi session Redis.
-5. H? th?ng ð?c roles.permissions. N?u có quy?n xem th? c?p nh?t last_login_at.
-6. Qu?n tr? viên vào /admin/..., qu?n l? kho vào /warehouse/.... Trang ð?u là quy?n xem ð?u tiên.Lu?ng thay th?1. Không có username: báo ngý?i dùng không t?n t?i.
-2. Sai m?t kh?u: báo m?t kh?u không chính xác.
-3. Tài kho?n không active: quay v? trang ðãng nh?p, chýa ghi cookie.
-4. Không có quy?n xem: xóa cookie v?a ghi và báo chýa ðý?c c?p quy?n.H?u ði?u ki?nTr?nh duy?t gi? cookie JWT và Redis gi? session. Request sau ði theo phiên này.B?ng 3.1. Ð?c t? ðãng nh?p web
-M?cN?i dungM?UC02Tên use caseÐãng xu?tTác nhânQu?n tr? viên, Qu?n l? khoMô t? ng?nUse case b?t ð?u khi ngý?i dùng ð? ðãng nh?p web và g?i yêu c?u ðãng xu?t. H? th?ng xóa cookie phiên.Ti?n ði?u ki?nNgý?i dùng ð? ðãng nh?p web.Lu?ng chính1. Ngý?i dùng g?i POST ðãng xu?t.
-2. H? th?ng xóa cookie access_token.
-3. Tr?nh duy?t ðý?c chuy?n v? /admin/auth/login.Lu?ng thay th?Request sau không c?n cookie th? b? chuy?n v? trang ðãng nh?p.H?u ði?u ki?nCookie access_token không c?n. Request web sau ph?i ðãng nh?p l?i.B?ng 3.2. Ð?c t? ðãng xu?t
-M?cN?i dungM?UC03Tên use caseXem và s?a h? sõTác nhânQu?n tr? viên, Qu?n l? khoMô t? ng?nUse case b?t ð?u khi ngý?i dùng ð? ðãng nh?p và m? h? sõ c?a chính m?nh. Ngý?i dùng xem thông tin tài kho?n và s?a h? tên, email, ði?n tho?i.Ti?n ði?u ki?nNgý?i dùng ð? ðãng nh?p web.Lu?ng chính1. H? th?ng hi?n th? username, h? tên, email, ði?n tho?i và vai tr?.
-2. Ngý?i dùng s?a h? tên, email ho?c ði?n tho?i c?a chính m?nh r?i lýu.
-3. H? th?ng ghi các trý?ng ðó vào accounts.Lu?ng thay th?Email ð? thu?c tài kho?n khác: service ném EMAIL_TAKEN, controller không ghi và hi?n flash l?i chung.H?u ði?u ki?nB?n ghi accounts c?a ngý?i ðang ðãng nh?p ðý?c c?p nh?t. Username và vai tr? không ð?i ? màn này.B?ng 3.3. Ð?c t? xem và s?a h? sõ
-M?cN?i dungM?UC04Tên use caseÐ?i m?t kh?uTác nhânQu?n tr? viên, Qu?n l? khoMô t? ng?nUse case b?t ð?u khi ngý?i dùng ð? ðãng nh?p và g?i m?t kh?u hi?n t?i, m?t kh?u m?i và xác nh?n. H? th?ng ð?i chi?u m?t kh?u hi?n t?i r?i lýu hash m?i.Ti?n ði?u ki?nNgý?i dùng ð? ðãng nh?p web.Lu?ng chính1. Ngý?i dùng nh?p m?t kh?u hi?n t?i, m?t kh?u m?i và xác nh?n.
-2. Middleware yêu c?u ð? ba trý?ng, m?t kh?u m?i ít nh?t 8 k? t? và kh?p xác nh?n.
-3. Service ð?i chi?u m?t kh?u hi?n t?i.
-4. H? th?ng ghi password_hash m?i.Lu?ng thay th?1. Thi?u trý?ng.
-2. M?t kh?u m?i ng?n hõn 8 k? t?.
-3. Xác nh?n không kh?p.
-4. M?t kh?u hi?n t?i sai.H?u ði?u ki?nL?n ðãng nh?p sau dùng m?t kh?u m?i.B?ng 3.4. Ð?c t? ð?i m?t kh?u
-M?cN?i dungM?UC05Tên use caseXem b?ng ði?u khi?nTác nhânQu?n tr? viên, Qu?n l? khoMô t? ng?nUse case b?t ð?u khi ngý?i dùng ð? ðãng nh?p và m? b?ng ði?u khi?n. H? th?ng tính các s? li?u kho, phi?u và s?n xu?t r?i hi?n th?.Ti?n ði?u ki?nVai tr? có quy?n dashboard_view.Lu?ng chính1. Ngý?i dùng m? b?ng ði?u khi?n.
-2. H? th?ng ð?m linh ki?n chýa xóa, linh ki?n t?o trong tháng, giá tr? t?n, s? m?t hàng dý?i ngý?ng và s? m?t hàng t?n không dýõng.
-3. H? th?ng ð?m phi?u nh?p trong ngày, phi?u xu?t ðang ch? và phi?u ch? quá 2 ngày.
-4. H? th?ng ð?m s? máy ð? l?p, s? máy ð? xu?t theo phi?u thành ph?m ð? duy?t, s? c?u h?nh ðang dùng.
-5. H? th?ng v? bi?u ð? nh?p và xu?t 6 ngày, top linh ki?n xu?t, 5 phi?u nh?p và 5 phi?u xu?t m?i nh?t.Lu?ng thay th?Không có dashboard_view: route không m? b?ng ði?u khi?n.H?u ði?u ki?nD? li?u ch? ð?c. Không có b?ng nghi?p v? nào b? s?a.B?ng 3.5. Ð?c t? xem b?ng ði?u khi?n
-M?cN?i dungM?UC06Tên use caseXu?t báo cáoTác nhânQu?n tr? viên, Qu?n l? khoMô t? ng?nUse case b?t ð?u khi ngý?i dùng ch?n xu?t Excel ho?c PDF t? b?ng ði?u khi?n. File dùng cùng b? s? li?u v?i use case Xem b?ng ði?u khi?n, v? c? hai g?i getDashboardData. Quan h? là <<include>>.Ti?n ði?u ki?nVai tr? có quy?n dashboard_view.Lu?ng chính1. Ngý?i dùng ch?n xu?t Excel ho?c PDF.
-2. H? th?ng g?i getDashboardData (th?c hi?n b?i use case Xem b?ng ði?u khi?n).
-3. H? th?ng d?ng file .xlsx ho?c .pdf t? b? s? li?u ðó.
-4. Tr?nh duy?t nh?n file t?i v?.Lu?ng thay th?Không có dashboard_view: route xu?t file không ch?y.H?u ði?u ki?nKhông ð?i d? li?u nghi?p v?. Ngý?i dùng có file báo cáo.B?ng 3.6. Ð?c t? xu?t báo cáo
-M?cN?i dungM?UC07Tên use caseQu?n l? linh ki?nTác nhânQu?n l? khoMô t? ng?nUse case b?t ð?u khi qu?n l? kho m? danh m?c linh ki?n. Thêm linh ki?n luôn t?o m?t d?ng inventory s? lý?ng 0, quan h? <<include>>. T?i ?nh ch? ch?y khi request có file, quan h? <<extend>> c?a Thêm và S?a.Ti?n ði?u ki?nXem c?n components_view. Thêm c?n components_create. S?a c?n components_edit. Xóa c?n components_delete.Lu?ng chính1. Ngý?i dùng xem danh sách, t?m ki?m và l?c tr?ng thái.
-2. Thêm: nh?p tên, lo?i, ðõn v?, giá, t?n t?i thi?u, thýõng hi?u, nhà cung c?p, tr?ng thái. ?nh JPEG, PNG ho?c WebP t?i ða 2MB ch? khi có file.
-3. H? th?ng t?o b?n ghi components, t?o d?ng inventory s? lý?ng 0, r?i t?i ?nh lên R2 n?u request có file.
-4. S?a các trý?ng danh m?c. ?nh m?i ch? ðý?c t?i khi request có file.
-5. Xóa m?m: deleted = true và ghi deleted_at.Lu?ng thay th?1. Thi?u tên, giá, lo?i ho?c ðõn v?.
-2. ?nh sai ð?nh d?ng ho?c quá 2MB.
-3. G?i l?i cùng khóa idempotency trong 10 phút.H?u ði?u ki?nB?ng components thay ð?i theo thao tác. M?i linh ki?n m?i có m?t d?ng inventory s? lý?ng 0.B?ng 3.7. Ð?c t? qu?n l? linh ki?n
-M?cN?i dungM?UC08Tên use caseQu?n l? phi?u nh?pTác nhânQu?n l? khoMô t? ng?nUse case b?t ð?u khi qu?n l? kho m? phi?u nh?p. T?o và s?a phi?u nháp không ð?i t?n. Xác nh?n phi?u luôn c?ng inventory, quan h? <<include>>.Ti?n ði?u ki?nXem danh sách, chi ti?t, PDF m?t phi?u, Excel và PDF danh sách c?n importOrders_view. T?o c?n importOrders_create. S?a và xác nh?n c?n importOrders_edit.Lu?ng chính1. Ngý?i dùng xem danh sách, th?ng kê, chi ti?t và nhóm linh ki?n ðang thi?u cho l?nh chýa xong.
-2. T?o phi?u draft, m? IMP-nãm-xxx, ch?n nhà cung c?p và các d?ng cùng nhà cung c?p, s? lý?ng l?n hõn 0.
-3. S?a khi phi?u c?n nháp: xóa d?ng c? và ghi d?ng m?i.
-4. Xác nh?n: tr?ng thái confirmed, c?ng quantity_on_hand t?ng linh ki?n, ghi audit_logs.
-5. Xu?t Excel ho?c PDF danh sách, ho?c PDF m?t phi?u.Lu?ng thay th?1. Không có d?ng.
-2. S? lý?ng nh? hõn 1.
-3. Linh ki?n không thu?c nhà cung c?p ð? ch?n.
-4. Phi?u ð? xác nh?n th? không s?a.H?u ði?u ki?nPhi?u nháp chýa ð?i t?n. Phi?u ð? xác nh?n làm tãng t?n linh ki?n.B?ng 3.8. Ð?c t? qu?n l? phi?u nh?p
-M?cN?i dungM?UC09Tên use caseDuy?t phi?u xu?tTác nhânQu?n l? khoMô t? ng?nUse case b?t ð?u khi qu?n l? kho m? phi?u xu?t do nhân viên t?o t? ?ng d?ng. Duy?t phi?u ðang ch? luôn tr? t?n ðúng lo?i phi?u, quan h? <<include>>. T? ch?i không ð?i t?n.Ti?n ði?u ki?nXem c?n exportOrders_view. Duy?t ho?c t? ch?i c?n exportOrders_approve. Phi?u ðang pending.Lu?ng chính1. Ngý?i dùng xem danh sách và chi ti?t.
-2. Duy?t phi?u pending: ghi ngý?i duy?t, th?i ði?m duy?t, tr?ng thái approved.
-3. Lo?i material: tr? inventory t?ng d?ng linh ki?n.
-4. Lo?i finished_product: tr? product_inventory t?ng d?ng c?u h?nh.
-5. Tr? kho ch? thành công khi t?n hi?n t?i l?n hõn ho?c b?ng s? lý?ng d?ng.
-6. T? ch?i: tr?ng thái rejected, không ð?i t?n.
-7. C? duy?t và t? ch?i ð?u ghi nh?t k?.Lu?ng thay th?1. Phi?u không c?n ch? duy?t.
-2. D?ng thi?u component_id ho?c pc_config_id ðúng lo?i phi?u.
-3. T?n không ð?.H?u ði?u ki?nPhi?u h?t tr?ng thái ch?. T?n linh ki?n gi?m khi duy?t xu?t linh ki?n. T?n thành ph?m gi?m khi duy?t xu?t thành ph?m. T? ch?i gi? nguyên t?n.B?ng 3.9. Ð?c t? duy?t phi?u xu?t
-M?cN?i dungM?UC10Tên use caseQu?n l? BOMTác nhânQu?n l? khoMô t? ng?nUse case b?t ð?u khi qu?n l? kho m? c?u h?nh PC. Ngý?i dùng t?o ho?c s?a c?u h?nh cùng các d?ng ð?nh m?c theo ràng bu?c slot, socket, lo?i RAM và giá v?n.Ti?n ði?u ki?nXem c?n bom_view. T?o c?n bom_create. C?p nh?t c?n bom_edit.Lu?ng chính1. Ngý?i dùng xem danh sách và chi ti?t.
-2. T?o ho?c s?a tên, mô t?, giá bán và tr?ng thái active ho?c inactive.
-3. B?t bu?c có CPU, Mainboard, RAM, ? SSD ho?c HDD, PSU, Fan và Case.
-4. CPU, Mainboard, PSU và Case ðúng m?t d?ng, s? lý?ng 1. T?ng RAM t? 1 ð?n 4. GPU n?u có th? m?t d?ng, s? lý?ng 1.
-5. Linh ki?n ph?i ðang active và không trùng.
-6. N?u CPU và mainboard có thu?c tính socket th? hai socket ph?i gi?ng nhau. N?u RAM và mainboard có ram_type th? ph?i gi?ng nhau.
-7. Giá bán l?n hõn 0 không ðý?c th?p hõn t?ng giá v?n ð?nh m?c.Lu?ng thay th?1. Thi?u slot.
-2. Sai s? lý?ng.
-3. Linh ki?n t?t ho?c không t?n t?i.
-4. Socket ho?c lo?i RAM không kh?p.
-5. Giá bán th?p hõn giá v?n.H?u ði?u ki?npc_configs và bom_items ph?n ánh c?u h?nh v?a lýu.B?ng 3.10. Ð?c t? qu?n l? BOM
-M?cN?i dungM?UC11Tên use caseQu?n l? l?nh s?n xu?tTác nhânQu?n l? khoMô t? ng?nUse case b?t ð?u khi qu?n l? kho t?o ho?c xóa l?nh s?n xu?t. Gán nhân viên ch? ch?y khi form ch?n tài kho?n staff ðang ho?t ð?ng, quan h? <<extend>> c?a T?o l?nh.Ti?n ði?u ki?nXem c?n production_view. T?o c?n production_create. Xóa c?n production_delete.Lu?ng chính1. Ngý?i dùng xem danh sách, s? l?nh theo giai ðo?n và chi ti?t.
-2. T?o l?nh: ch?n c?u h?nh ðang active, s? lý?ng nguyên t? 1. Ngý?i t?o là tài kho?n ðang ðãng nh?p, ghi vào created_by.
-3. N?u form ch?n nhân viên staff ðang ho?t ð?ng th? ghi assigned_to.
-4. Tr?ng thái ban ð?u là pending.
-5. Xóa m?m ch? khi l?nh c?n pending, khi ðó ghi deleted_at.Lu?ng thay th?1. S? lý?ng không h?p l?.
-2. C?u h?nh không t?n t?i ho?c ðang t?t.
-3. Ngý?i ðý?c gán không ph?i nhân viên ðang ho?t ð?ng.
-4. Xóa l?nh ð? in_progress ho?c done.H?u ði?u ki?nCó l?nh m?i v?i created_by là tài kho?n hi?n t?i, ho?c l?nh pending b? ?n kh?i danh sách ðang dùng.B?ng 3.11. Ð?c t? qu?n l? l?nh s?n xu?t
-M?cN?i dungM?UC12Tên use caseQu?n l? tài kho?nTác nhânQu?n tr? viênMô t? ng?nUse case b?t ð?u khi qu?n tr? viên m? danh sách tài kho?n. Qu?n tr? viên t?o, s?a, khóa ho?c m? tài kho?n.Ti?n ði?u ki?nXem c?n account_view. T?o c?n account_create. S?a c?n account_edit. Khóa và m? c?n account_lock.Lu?ng chínhNgý?i dùng m? GET /admin/accounts.
-H? th?ng l?c theo keyword (username ho?c h? tên), role và status, ð?m s? b?n ghi kh?p, r?i tr? m?t trang 10 d?ng qua paginationHelper.
-role nh?n admin, warehouse_manager, staff. status nh?n active, locked. B? tr?ng ho?c all th? không l?c tiêu chí ðó.
-Ð?i trang g?i page và gi? keyword, role, status. Ngý?i dùng xem chi ti?t t? d?ng trên trang hi?n t?i.
-T?o username, m?t kh?u ít nh?t 6 k? t? r?i bãm, h? tên, email, ði?n tho?i, vai tr? và tr?ng thái.
-S?a các trý?ng ðó. M?t kh?u m?i ch? ðý?c ghi khi ngý?i dùng nh?p m?t kh?u m?i.
-Khóa ð?t tr?ng thái locked. M? l?i ð?t active.Lu?ng thay th?
-Không có b?n ghi kh?p b? l?c: b?ng hi?n "Chýa có tài kho?n nào."
-page nh? hõn 1 ho?c l?n hõn s? trang: h? th?ng v? trang h?p l?.
-Trùng username ho?c email.
-Ð? có admin th? không t?o ho?c ð?i thêm admin.
-Không khóa admin và không ð?i vai tr? admin.H?u ði?u ki?nTài kho?n locked không ðãng nh?p ðý?c. Request web sau c?a tài kho?n v?a khóa b? xóa cookie.B?ng 3.12. Ð?c t? qu?n l? tài kho?n
-M?cN?i dungM?UC13Tên use casePhân quy?nTác nhânQu?n tr? viênMô t? ng?nUse case b?t ð?u khi qu?n tr? viên m? màn phân quy?n. H? th?ng có ba vai tr? c? ð?nh. Qu?n tr? viên xem và ghi m?ng quy?n c?a t?ng vai tr?.Ti?n ði?u ki?nXem c?n roles_view. Lýu c?n roles_permissions.Lu?ng chính1. H? th?ng b?o ð?m ba vai tr? admin, warehouse_manager và staff.
-2. Qu?n tr? viên xem m?ng quy?n r?i g?i b?n c?p nh?t.
-3. H? th?ng ch? gi? khóa quy?n h?p l? và ghi vào roles.permissions.Lu?ng thay th?Khóa quy?n không h?p l? b? b? qua, không ghi vào m?ng.H?u ði?u ki?nL?n ðãng nh?p sau, menu và route tuân theo m?ng quy?n m?i.B?ng 3.13. Ð?c t? phân quy?n
-M?cN?i dungM?UC14Tên use caseSao lýu cõ s? d? li?uTác nhânQu?n tr? viênMô t? ng?nUse case b?t ð?u khi qu?n tr? viên m? màn sao lýu. H? th?ng ch?y pg_dump, lýu file và cho t?i l?i file ðúng tên.Ti?n ði?u ki?nXem c?n backup_view. T?o c?n backup_create.Lu?ng chính1. Ngý?i dùng xem các file sao lýu ð? có.
-2. T?o b?n m?i b?ng pg_dump theo DATABASE_URL, b? owner và ACL.
-3. File r?ng b? xóa.
-4. Thành công th? ghi nh?t k? create_backup.
-5. T?i file khi tên kh?p m?u cho phép.Lu?ng thay th?1. Thi?u chu?i k?t n?i.
-2. Máy không có pg_dump.
-3. Dump th?t b?i.
-4. Tên file t?i không h?p l?.H?u ði?u ki?nCó file dump trên ð?a và m?t d?ng audit_logs.B?ng 3.14. Ð?c t? sao lýu cõ s? d? li?u
-M?cN?i dungM?UC15Tên use caseÐãng nh?p ?ng d?ngTác nhânNhân viên l?p rápMô t? ng?nUse case b?t ð?u khi nhân viên nh?p username và m?t kh?u trên ?ng d?ng Android. Server ch? tr? JWT khi tài kho?n ðang ho?t ð?ng và vai tr? là staff.Ti?n ði?u ki?nTài kho?n có tr?ng thái active.Lu?ng chính1. ?ng d?ng g?i username và m?t kh?u t?i POST /api/auth/login.
-2. Service xác th?c tài kho?n active và c?p nh?t last_login_at.
-3. Service t?o JWT.
-4. Controller ch? tr? token khi vai tr? là staff.
-5. ?ng d?ng lýu token và g?n vào request sau.Lu?ng thay th?1. Sai m?t kh?u ho?c tài kho?n không active: HTTP 401.
-2. Vai tr? khác staff: HTTP 403, token không ðý?c tr? cho ?ng d?ng.
-3. GET /api/auth/me có trên server cho staff. ?ng d?ng Android hi?n không g?i API này.H?u ði?u ki?n?ng d?ng gi? JWT c?a nhân viên. B?ng refresh_tokens không ðý?c ghi.B?ng 3.15. Ð?c t? ðãng nh?p ?ng d?ng
-M?cN?i dungM?UC16Tên use caseXem l?nh l?p rápTác nhânNhân viên l?p rápMô t? ng?nUse case b?t ð?u khi nhân viên ð? ðãng nh?p ?ng d?ng và m? danh sách l?nh. H? th?ng ch? tr? l?nh ðý?c gán cho ðúng tài kho?n và chýa xóa m?m.Ti?n ði?u ki?nJWT c?n hi?u l?c và vai tr? là staff.Lu?ng chính1. ?ng d?ng g?i GET /api/production-orders/me.
-2. H? th?ng tr? các l?nh có assigned_to ðúng tài kho?n và deleted_at null.
-3. ?ng d?ng g?i GET /api/production-orders/:id ð? xem m?t l?nh.
-4. H? th?ng tr? l?nh khi ngý?i g?i là ngý?i ðý?c gán.Lu?ng thay th?1. Không ðãng nh?p.
-2. Id không h?p l?.
-3. L?nh không thu?c nhân viên này.H?u ði?u ki?nD? li?u ch? ð?c.B?ng 3.16. Ð?c t? xem l?nh l?p ráp
-M?cN?i dungM?UC17Tên use caseKi?m tra t?n khoTác nhânNhân viên l?p rápMô t? ng?nUse case b?t ð?u khi nhân viên m? ki?m tra t?n c?a m?t l?nh ðý?c gán. H? th?ng tính nhu c?u theo BOM và tr? s? thi?u. T?n không ð?i.Ti?n ði?u ki?nL?nh ðý?c gán cho nhân viên này.Lu?ng chính1. ?ng d?ng g?i GET /api/production-orders/:id/stock.
-2. V?i m?i d?ng BOM, nhu c?u b?ng ð?nh m?c nhân s? lý?ng l?nh.
-3. H? th?ng tr? t?n hi?n t?i, s? thi?u và c? ð? hàng toàn l?nh.Lu?ng thay th?L?nh không thu?c nhân viên này: h? th?ng không tr? s? li?u t?n.H?u ði?u ki?nKhông ð?i inventory và không ð?i product_inventory.B?ng 3.17. Ð?c t? ki?m tra t?n kho
-M?cN?i dungM?UC18Tên use caseYêu c?u xu?t linh ki?nTác nhânNhân viên l?p rápMô t? ng?nUse case b?t ð?u khi nhân viên xin xu?t linh ki?n cho l?nh ðý?c gán. H? th?ng luôn ki?m tra t?n trý?c, quan h? <<include>> Ki?m tra t?n kho. N?u ð? ð? hàng th? không t?o phi?u.Ti?n ði?u ki?nL?nh chýa done, c?n BOM, t?n chýa ð? c? l?nh, và chýa có phi?u xu?t linh ki?n ðang ch? ho?c ð? duy?t.Lu?ng chính1. ?ng d?ng g?i POST /api/production-orders/:id/request-material.
-2. H? th?ng tính nhu c?u BOM (th?c hi?n b?i use case Ki?m tra t?n kho).
-3. N?u m?i d?ng ð? ð? hàng th? t? ch?i v?i STOCK_ALREADY_ENOUGH.
-4. N?u l?nh ðang pending th? chuy?n in_progress.
-5. H? th?ng t?o phi?u m? PXM-ngày-s?, lo?i material, tr?ng thái pending, ghi chú b?t ð?u b?ng PO#id.
-6. M?i d?ng BOM có nhu c?u l?n hõn 0 ðý?c ghi v?i s? lý?ng b?ng ð?nh m?c nhân s? máy.Lu?ng thay th?1. L?nh ð? xong.
-2. T?n ð? ð? c? l?nh.
-3. Ð? có phi?u linh ki?n chýa b? t? ch?i.
-4. C?u h?nh không có BOM.H?u ði?u ki?nCó phi?u PXM ch? duy?t. T?n linh ki?n và t?n thành ph?m chýa ð?i.B?ng 3.18. Ð?c t? yêu c?u xu?t linh ki?n
-M?cN?i dungM?UC19Tên use caseXác nh?n l?p rápTác nhânNhân viên l?p rápMô t? ng?nUse case b?t ð?u khi nhân viên xác nh?n ð? l?p xong. H? th?ng luôn c?ng product_inventory, quan h? <<include>>. Tr? inventory ch? ch?y khi phi?u xu?t linh ki?n m?i nh?t chýa ðý?c duy?t, quan h? <<extend>>.Ti?n ði?u ki?nL?nh ðý?c gán, chýa done, c?n BOM. Phi?u xu?t linh ki?n m?i nh?t không ðý?c ðang pending. N?u phi?u ðó chýa approved th? t?n linh ki?n ph?i ð? nhu c?u.Lu?ng chính1. ?ng d?ng g?i POST /api/production-orders/:id/confirm trong m?t transaction.
-2. L?nh chuy?n done và ghi completed_at.
-3. N?u phi?u linh ki?n m?i nh?t ðang pending th? hoàn tác.
-4. N?u phi?u linh ki?n m?i nh?t ð? approved, h? th?ng không tr? linh ki?n.
-5. N?u chýa có phi?u ð? duy?t, h? th?ng tr? inventory t?ng d?ng b?ng nhu c?u.
-6. H? th?ng c?ng product_inventory ðúng s? máy c?a l?nh, t?o d?ng t?n thành ph?m n?u chýa có.Lu?ng thay th?1. L?nh ð? xong: ORDER_DONE.
-2. Không có BOM: NO_BOM.
-3. Phi?u linh ki?n ðang ch? duy?t: MATERIAL_EXPORT_PENDING.
-4. Tr? linh ki?n khi t?n không ð?: STOCK_NOT_ENOUGH.H?u ði?u ki?nL?nh hoàn thành. T?n thành ph?m tãng. T?n linh ki?n ch? gi?m khi phi?u linh ki?n m?i nh?t chýa ðý?c duy?t.B?ng 3.19. Ð?c t? xác nh?n l?p ráp
-M?cN?i dungM?UC20Tên use caseYêu c?u xu?t thành ph?mTác nhânNhân viên l?p rápMô t? ng?nUse case b?t ð?u khi nhân viên xin xu?t thành ph?m c?a l?nh ð? l?p xong. H? th?ng t?o phi?u ch? qu?n l? kho duy?t. Bý?c này chýa ð?i t?n.Ti?n ði?u ki?nL?nh ð? done. Chýa có phi?u xu?t thành ph?m ðang ch? ho?c ð? duy?t.Lu?ng chính1. ?ng d?ng g?i POST /api/production-orders/:id/request-product.
-2. H? th?ng t?o phi?u m? PXP-ngày-s?, lo?i finished_product, tr?ng thái pending.
-3. Phi?u có m?t d?ng là c?u h?nh PC v?i s? lý?ng c?a l?nh.
-4. Ghi chú phi?u là PO#id.Lu?ng thay th?1. L?nh chýa hoàn thành.
-2. Ð? có phi?u thành ph?m chýa b? t? ch?i.H?u ði?u ki?nCó phi?u PXP ch? duy?t. T?n linh ki?n và t?n thành ph?m không ð?i cho ð?n khi qu?n l? kho duy?t.B?ng 3.20. Ð?c t? yêu c?u xu?t thành ph?m
-
-4. Mô h?nh Sequence
-
-H?nh 4.1. Sequence ðãng nh?p web
-
-H?nh 4.2. Sequence ðãng xu?t
-
-
-
-H?nh 4.3. Sequence xem và s?a h? sõ
-
-H?nh 4.4. Sequence ð?i m?t kh?u
-
-H?nh 4.5. Sequence xem b?ng ði?u khi?n
-
-H?nh 4.6. Sequence xu?t báo cáo
-
-H?nh 4.7. Sequence qu?n l? linh ki?n
-
-H?nh 4.8. Sequence qu?n l? phi?u nh?p
-
-H?nh 4.9. Sequence duy?t và t? ch?i phi?u xu?t
-
-H?nh 4.10. Sequence qu?n l? BOM
-
-H?nh 4.11. Sequence qu?n l? l?nh s?n xu?t
-
-H?nh 4.12. Sequence qu?n l? tài kho?n
-
-H?nh 4.13. Sequence phân quy?n
-
-H?nh 4.14. Sequence sao lýu
-
-H?nh 4.15. Sequence ðãng nh?p ?ng d?ng
-
-H?nh 4.16. Sequence xem l?nh l?p ráp
-
-H?nh 4.17. Sequence ki?m tra t?n kho
-
-H?nh 4.18. Sequence yêu c?u xu?t linh ki?n
-
-H?nh 4.19. Sequence xác nh?n l?p ráp
-
-H?nh 4.20. Sequence yêu c?u xu?t thành ph?m
-5. ERD và RDM
-
-H?nh 5.1. ERD
-5.2. RDM
-
-6. Lý?c ð? cõ s? d? li?u và b?ng mô t?
-
-H?nh 6.1. Lý?c ð? cõ s? d? li?u
-B?ng mô t? t?ng quát
-STTTên b?ngMô t?1rolesQuy?n theo vai tr?2accountsTài kho?n3refresh_tokensToken làm m?i, hi?n chýa ðý?c lu?ng ðãng nh?p ghi4audit_logsNh?t k? phi?u nh?p, duy?t ho?c t? ch?i phi?u xu?t, sao lýu5component_categoriesLo?i linh ki?n6brandsThýõng hi?u7suppliersNhà cung c?p8componentsLinh ki?n9attribute_definitionsÐ?nh ngh?a thu?c tính EAV10component_attributesGiá tr? thu?c tính11inventoryT?n linh ki?n12product_inventoryT?n thành ph?m13pc_configsC?u h?nh PC14bom_itemsÐ?nh m?c15import_ordersPhi?u nh?p16import_order_itemsD?ng phi?u nh?p17export_ordersPhi?u xu?t18export_order_itemsD?ng phi?u xu?t19production_ordersL?nh l?pB?ng 6.1. B?ng mô t? t?ng quát
-B?ng mô t? chi ti?t
-roles
-STTThu?c tínhKi?u d? li?uMô t?1idAccountRoleKhóa chính: admin, warehouse_manager, staff2permissionstext[]M?ng khóa quy?n, m?c ð?nh r?ng3updated_attimestampL?n s?a, ðý?c phép nullB?ng 6.2. B?ng mô t? chi ti?t roles
-accounts
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính t? tãng2usernamevarchar(50)Tên ðãng nh?p, duy nh?t3password_hashvarchar(255)M?t kh?u ð? bãm4full_namevarchar(100)H? tên, null ðý?c5emailvarchar(100)Email, duy nh?t, null ðý?c6phonevarchar(20)Ði?n tho?i, null ðý?c7roleAccountRoleVai tr?, không có khóa ngo?i sang roles8statusAccountStatusactive ho?c locked, m?c ð?nh active9created_attimestampNgày t?o10updated_attimestampNgày s?a, null ðý?c11last_login_attimestampL?n ðãng nh?p cu?i, null ðý?cB?ng 6.3. B?ng mô t? chi ti?t accounts
-refresh_tokens
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2account_idintKhóa ngo?i accounts, xóa theo3tokenvarchar(500)Giá tr? token4revokedbooleanÐ? thu h?i, m?c ð?nh false5expires_attimestampH?t h?n6created_attimestampNgày t?oB?ng 6.4. B?ng mô t? chi ti?t refresh_tokens
-audit_logs
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2account_idintKhóa ngo?i accounts3actionvarchar(100)Tên hành ð?ng4target_tablevarchar(50)B?ng b? tác ð?ng, null ðý?c5target_idintM? b?n ghi, null ðý?c6detailtextMô t?, null ðý?c7created_attimestampTh?i ði?mB?ng 6.5. B?ng mô t? chi ti?t audit_logs
-component_categories
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2namevarchar(50)Tên lo?i, duy nh?t3descriptionvarchar(255)Mô t?, null ðý?cB?ng 6.6. B?ng mô t? chi ti?t component_categories
-brands
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2namevarchar(100)Tên h?ng, duy nh?t3created_attimestampNgày t?oB?ng 6.7. B?ng mô t? chi ti?t brands
-suppliers
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2namevarchar(150)Tên nhà cung c?p, duy nh?t3phonevarchar(20)Ði?n tho?i, null ðý?c4emailvarchar(100)Email, null ðý?c5addressvarchar(255)Ð?a ch?, null ðý?c6created_attimestampNgày t?oB?ng 6.8. B?ng mô t? chi ti?t suppliers
-components
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2category_idintKhóa ngo?i lo?i, c?m xóa lo?i ðang dùng3namevarchar(150)Tên4unitvarchar(20)Ðõn v?, null ðý?c5unit_pricenumeric(12,2)Ðõn giá6min_stock_thresholdintNgý?ng c?nh báo, m?c ð?nh 57image_urlvarchar(500)?nh R2, null ðý?c8brand_idintKhóa ngo?i h?ng, null khi xóa h?ng9supplier_idintKhóa ngo?i nhà cung c?p, null khi xóa nhà cung c?p10statusComponentStatusactive ho?c discontinued11created_attimestampNgày t?o12deletedbooleanXóa m?m, m?c ð?nh false13deleted_attimestampTh?i ði?m xóa m?m, null ðý?cB?ng 6.9. B?ng mô t? chi ti?t components
-attribute_definitions
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2category_idintKhóa ngo?i lo?i3namevarchar(50)Tên thu?c tính, duy nh?t trong lo?i4data_typeAttributeDataTypetext, integer, decimal, boolean5unitvarchar(20)Ðõn v?, null ðý?c6is_requiredbooleanB?t bu?c, m?c ð?nh falseB?ng 6.10. B?ng mô t? chi ti?t attribute_definitions
-component_attributes
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2component_idintKhóa ngo?i linh ki?n, xóa theo3attribute_definition_idintKhóa ngo?i ð?nh ngh?a4valuevarchar(255)Giá tr?B?ng 6.11. B?ng mô t? chi ti?t component_attributes
-inventory
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2component_idintKhóa ngo?i duy nh?t, xóa theo linh ki?n3quantity_on_handintT?n, m?c ð?nh 04updated_attimestampL?n ð?i t?nB?ng 6.12. B?ng mô t? chi ti?t inventory
-product_inventory
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2pc_config_idintKhóa ngo?i duy nh?t, xóa theo c?u h?nh3quantity_on_handintS? máy thành ph?m, m?c ð?nh 04updated_attimestampL?n ð?i t?nB?ng 6.13. B?ng mô t? chi ti?t product_inventory
-pc_configs
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2namevarchar(100)Tên c?u h?nh3descriptiontextMô t?, null ðý?c4sale_pricenumeric(12,2)Giá bán5statusPcConfigStatusactive ho?c inactive6created_attimestampNgày t?oB?ng 6.14. B?ng mô t? chi ti?t pc_configs
-bom_items
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2pc_config_idintKhóa ngo?i c?u h?nh, xóa theo3component_idintKhóa ngo?i linh ki?n4quantityintS? lý?ng cho m?t máyB?ng 6.15. B?ng mô t? chi ti?t bom_items
-import_orders
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2supplier_idintKhóa ngo?i nhà cung c?p, null ðý?c3codevarchar(30)M? duy nh?t, d?ng IMP-nãm-xxx4created_byintKhóa ngo?i ngý?i t?o5notetextGhi chú, null ðý?c6statusImportOrderStatusdraft ho?c confirmed7created_attimestampNgày t?oB?ng 6.16. B?ng mô t? chi ti?t import_orders
-import_order_items
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2import_order_idintKhóa ngo?i phi?u, xóa theo3component_idintKhóa ngo?i linh ki?n4quantityintS? lý?ng5unit_pricenumeric(12,2)Ðõn giá nh?pB?ng 6.17. B?ng mô t? chi ti?t import_order_items
-export_orders
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2codevarchar(30)M? duy nh?t PXM ho?c PXP3typeExportOrderTypematerial ho?c finished_product4requested_byintKhóa ngo?i ngý?i xin5approved_byintKhóa ngo?i ngý?i duy?t, null ðý?c6statusExportOrderStatuspending, approved, rejected7notetextGhi chú, ti?n t? PO#id n?i v?i l?nh8created_attimestampNgày t?o9approved_attimestampLúc duy?t ho?c t? ch?i, null ðý?cB?ng 6.18. B?ng mô t? chi ti?t export_orders
-export_order_items
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2export_order_idintKhóa ngo?i phi?u, xóa theo3component_idintLinh ki?n, null khi xu?t thành ph?m4pc_config_idintC?u h?nh, null khi xu?t linh ki?n5quantityintS? lý?ngB?ng 6.19. B?ng mô t? chi ti?t export_order_items
-production_orders
-STTThu?c tínhKi?u d? li?uMô t?1idintKhóa chính2pc_config_idintKhóa ngo?i c?u h?nh3quantity_requestedintS? máy4assigned_tointNhân viên ðý?c gán, null ðý?c5statusProductionOrderStatuspending, in_progress, done6created_byintNgý?i t?o7created_attimestampNgày t?o8completed_attimestampLúc xác nh?n l?p xong, null ðý?c9deleted_attimestampXóa m?m, null ðý?cB?ng 6.20. B?ng mô t? chi ti?t production_orders
-7. Sõ ð? l?p
-7.1. Sõ ð? l?p t?ng quan
-
-H?nh 7.1. Sõ ð? l?p t?ng quan
-7.2. Danh sách sõ ð? l?p
-STTTên l?pMô t?1RoleVai tr? và m?ng quy?n2AccountTài kho?n3RefreshTokenToken làm m?i4AuditLogNh?t k?5ComponentCategoryLo?i linh ki?n6BrandThýõng hi?u7SupplierNhà cung c?p8ComponentLinh ki?n9AttributeDefinitionKhuôn thu?c tính10ComponentAttributeGiá tr? thu?c tính11InventoryT?n linh ki?n12ProductInventoryT?n thành ph?m13PcConfigC?u h?nh14BomItemD?ng ð?nh m?c15ImportOrderPhi?u nh?p16ImportOrderItemD?ng nh?p17ExportOrderPhi?u xu?t18ExportOrderItemD?ng xu?t19ProductionOrderL?nh l?p20AuthServiceÐãng nh?p, h? sõ, m?t kh?u21AccountServiceTài kho?n qu?n tr?22PermissionServiceQuy?n vai tr?23ComponentServiceDanh m?c linh ki?n24BomServiceC?u h?nh và ð?nh m?c25ImportOrderServicePhi?u nh?p26ExportOrderServicePhi?u xu?t27ProductionServiceL?nh và l?p ráp28DashboardServiceB?ng ði?u khi?n29BackupServiceSao lýu30StockServiceC?ng tr? t?nB?ng 7.1. B?ng danh sách sõ ð? l?p
-7.3. Mô t? sõ ð? l?p
-Role
-STTThu?c tínhMô t?1idadmin, warehouse_manager, staff2permissionsM?ng khóa quy?n3updatedAtL?n s?aB?ng 7.2. B?ng mô t? sõ ð? l?p Role
-Account
-STTThu?c tínhMô t?1idM?2usernameTên ðãng nh?p3passwordHashM?t kh?u ð? bãm4fullNameH? tên5emailEmail6phoneÐi?n tho?i7roleVai tr?, cùng enum v?i Role.id8statusactive ho?c locked9lastLoginAtL?n ðãng nh?p cu?iB?ng 7.3. B?ng mô t? sõ ð? l?p Account
-RefreshToken
-STTThu?c tínhMô t?1tokenGiá tr?2revokedÐ? thu h?i3expiresAtH?t h?nB?ng 7.4. B?ng mô t? sõ ð? l?p RefreshToken
-AuditLog
-STTThu?c tínhMô t?1actionHành ð?ng2targetTableB?ng3targetIdM? b?n ghi4detailMô t?B?ng 7.5. B?ng mô t? sõ ð? l?p AuditLog
-ComponentCategory
-STTThu?c tínhMô t?1nameCPU, Mainboard, RAM, SSD, HDD, PSU, Fan, Case, GPUB?ng 7.6. B?ng mô t? sõ ð? l?p ComponentCategory
-Brand
-STTThu?c tínhMô t?1nameTên h?ngB?ng 7.7. B?ng mô t? sõ ð? l?p Brand
-Supplier
-STTThu?c tínhMô t?1nameTên nhà cung c?p2phoneÐi?n tho?i3emailEmail4addressÐ?a ch?B?ng 7.8. B?ng mô t? sõ ð? l?p Supplier
-Component
-STTThu?c tínhMô t?1nameTên2unitPriceÐõn giá3minStockThresholdNgý?ng t?n4statusactive ho?c discontinued5deletedXóa m?mB?ng 7.9. B?ng mô t? sõ ð? l?p Component
-AttributeDefinition
-STTThu?c tínhMô t?1nameVí d? socket, ram_type2dataTypetext, integer, decimal, boolean3isRequiredB?t bu?c hay khôngB?ng 7.10. B?ng mô t? sõ ð? l?p AttributeDefinition
-ComponentAttribute
-STTThu?c tínhMô t?1valueGiá tr? d?ng ch?B?ng 7.11. B?ng mô t? sõ ð? l?p ComponentAttribute
-Inventory
-STTThu?c tínhMô t?1quantityOnHandT?n linh ki?nB?ng 7.12. B?ng mô t? sõ ð? l?p Inventory
-ProductInventory
-STTThu?c tínhMô t?1quantityOnHandT?n thành ph?m c?a m?t c?u h?nhB?ng 7.13. B?ng mô t? sõ ð? l?p ProductInventory
-PcConfig
-STTThu?c tínhMô t?1nameTên c?u h?nh2salePriceGiá bán3statusactive ho?c inactiveB?ng 7.14. B?ng mô t? sõ ð? l?p PcConfig
-BomItem
-STTThu?c tínhMô t?1quantityS? linh ki?n cho m?t máyB?ng 7.15. B?ng mô t? sõ ð? l?p BomItem
-ImportOrder
-STTThu?c tínhMô t?1codeIMP-nãm-xxx2statusdraft ho?c confirmedB?ng 7.16. B?ng mô t? sõ ð? l?p ImportOrder
-ImportOrderItem
-STTThu?c tínhMô t?1quantityS? lý?ng nh?p2unitPriceÐõn giá nh?pB?ng 7.17. B?ng mô t? sõ ð? l?p ImportOrderItem
-ExportOrder
-STTThu?c tínhMô t?1codePXM ho?c PXP2typematerial ho?c finished_product3statuspending, approved, rejectedB?ng 7.18. B?ng mô t? sõ ð? l?p ExportOrder
-ExportOrderItem
-STTThu?c tínhMô t?1componentIdD?ng xu?t linh ki?n2pcConfigIdD?ng xu?t thành ph?m3quantityS? lý?ngB?ng 7.19. B?ng mô t? sõ ð? l?p ExportOrderItem
-ProductionOrder
-STTThu?c tínhMô t?1quantityRequestedS? máy2statuspending, in_progress, done3deletedAtXóa m?m, ch? khi c?n pendingB?ng 7.20. B?ng mô t? sõ ð? l?p ProductionOrder
-AuthService
-STTPhýõng th?cMô t?1loginÐãng nh?p web2loginForApiÐãng nh?p API3logoutXóa cookie4getProfileByIdÐ?c h? sõ5updateProfileByIdS?a h? sõ6changePasswordByIdÐ?i m?t kh?uB?ng 7.21. B?ng mô t? sõ ð? l?p AuthService
-AccountService
-STTPhýõng th?cMô t?1createAccountT?o tài kho?n2updateAccountByIdS?a tài kho?n3lockAccountByIdKhóa4unlockAccountByIdM? khóa5getAllAccountsM?t trang danh sách sau khi l?c keyword, role, status; nh?n skip và limit6hasAdminAccountÐ? có admin hay chýaB?ng 7.22. B?ng mô t? sõ ð? l?p AccountService
-PermissionService
-STTPhýõng th?cMô t?1ensureDefaultRolesT?o ba vai tr? n?u thi?u2getRolesÐ?c quy?n3updatePermissionsGhi m?ng quy?n ð? l?cB?ng 7.23. B?ng mô t? sõ ð? l?p PermissionService
-ComponentService
-STTPhýõng th?cMô t?1getAllComponentsDanh sách2createComponentT?o linh ki?n và t?n 03updateComponentS?a4deleteComponentXóa m?m5changeComponentStatusÐ?i active ho?c discontinuedB?ng 7.24. B?ng mô t? sõ ð? l?p ComponentService
-BomService
-STTPhýõng th?cMô t?1getAllConfigsDanh sách c?u h?nh2getConfigByIdChi ti?t3createConfigT?o c?u h?nh và ð?nh m?c4updateConfigS?a c?u h?nh và thay d?ng ð?nh m?c5getComponentOptionsLinh ki?n ðang bán theo slotB?ng 7.25. B?ng mô t? sõ ð? l?p BomService
-ImportOrderService
-STTPhýõng th?cMô t?1createOrderT?o nháp2updateDraftS?a nháp3confirmOrderXác nh?n và c?ng t?n4getShortageComponentsLinh ki?n thi?u cho l?nh chýa xong5generateCodeSinh m? IMPB?ng 7.26. B?ng mô t? sõ ð? l?p ImportOrderService
-ExportOrderService
-STTPhýõng th?cMô t?1listOrdersDanh sách2getDetailChi ti?t3approveDuy?t và tr? t?n ðúng lo?i phi?u4rejectT? ch?i, không ð?i t?nB?ng 7.27. B?ng mô t? sõ ð? l?p ExportOrderService
-ProductionService
-STTPhýõng th?cMô t?1createProductionOrderT?o l?nh2softDeleteProductionOrderXóa m?m l?nh pending3getMyOdersL?nh c?a nhân viên4getOrderStockCheckÐ?i chi?u t?n5requestMaterialExportT?o PXM khi c?n thi?u6confirmAssembleHoàn thành l?nh và c?ng t?n thành ph?m7requestProductExportT?o PXPB?ng 7.28. B?ng mô t? sõ ð? l?p ProductionService
-DashboardService
-STTPhýõng th?cMô t?1getDashboardDataB? s? li?u màn h?nh và file xu?tB?ng 7.29. B?ng mô t? sõ ð? l?p DashboardService
-BackupService
-STTPhýõng th?cMô t?1listBackupsDanh sách file2createBackupCh?y pg_dump3resolveBackupFileKi?m tra tên file trý?c khi t?iB?ng 7.30. B?ng mô t? sõ ð? l?p BackupService
-StockService
-STTPhýõng th?cMô t?1decrementComponentStockTr? inventory n?u t?n ð?2incrementProductStockC?ng ho?c t?o product_inventory3decrementProductStockTr? product_inventory n?u t?n ð?B?ng 7.31. B?ng mô t? sõ ð? l?p StockService
-
-Mô t? giao di?n
-Ðãng nh?p
-Ðãng nh?p
-• Danh sách thành ph?n c?a giao di?n
-
-STTTênKi?u? ngh?aMi?n giá tr?Giá tr? m?c ð?nhGhi chú1Tiêu ð?Text ViewTên mànChu?i "Ðãng nh?p h? th?ng"Ðãng nh?p h? th?ng2D?ng mô t?Text ViewNh?c dùng tài kho?n ðý?c c?pChu?iS? d?ng tài kho?n ðý?c c?p ð? ti?p t?c.3Tên ðãng nh?pEdit TextNh?p usernameString, b?t bu?cKhôngname=username, t?i ða theo c?t varchar(50)4M?t kh?uEdit TextNh?p m?t kh?uString, b?t bu?cKhôngtype=password5Hi?n ho?c ?n m?t kh?uButtonÐ?i ki?u ô m?t kh?uNullKhôngCh? ð?i trên tr?nh duy?t6Ðãng nh?pButtonG?i form ðãng nh?pNullKhôngPOST /admin/auth/login7D?ng h? tr?Text ViewNh?c liên h? qu?n tr? viênChu?ic?n h? tr? truy c?p · liên h? qu?n tr? viên h? th?ngB?ng 8.1. B?ng danh sách thành ph?n c?a giao di?n ðãng nh?p
-• Danh sách các bi?n c?
-
-STTÐi?u ki?n kích ho?tX? l?1B?m Ðãng nh?p khi username không có trong accounts? l?i trang ðãng nh?p. Flash "Ngý?i dùng không t?n t?i".2B?m Ðãng nh?p khi m?t kh?u không kh?p? l?i trang ðãng nh?p. Flash "M?t kh?u không chính xác".3B?m Ðãng nh?p khi tài kho?n không ? tr?ng thái activeQuay l?i trang ðãng nh?p. Cookie chýa ðý?c ghi.4B?m Ðãng nh?p khi tài kho?n active và vai tr? c?n ít nh?t m?t quy?n xemGhi cookie access_token 1 gi?, ghi session Redis, c?p nh?t last_login_at, chuy?n t?i trang quy?n xem ð?u tiên. Qu?n tr? viên m?c ð?nh vào /admin/dashboard.5B?m Ðãng nh?p khi tài kho?n active nhýng không có quy?n xemXóa cookie v?a ghi. Flash "Tài kho?n chýa ðý?c c?p quy?n xem b?t k? trang nào". ? l?i trang ðãng nh?p.B?ng 8.2. B?ng danh sách các bi?n c? c?a giao di?n ðãng nh?p
-1.2. Qu?n l? ngý?i dùng
-1.2.1. Danh sách ngý?i dùng
-• Danh sách thành ph?n c?a giao di?n
-
-STTTênKi?u? ngh?aMi?n giá tr?Giá tr? m?c ð?nhGhi chú1Tiêu ð?Text ViewTên mànChu?iQu?n l? ngý?i dùng2S? tài kho?nText ViewT?ng b?n ghi kh?p b? l?cS?S? tài kho?n kh?p keyword, role, statusKhông ph?i s? d?ng c?a riêng trang ðang xem3Thêm ngý?i dùngLinkM? form t?oNullKhôngHi?n v? có account_create4Ô t?m ki?mEdit TextT?m username ho?c h? tênStringGiá tr? keyword trên URLname=keyword, g?i GET /admin/accounts5Vai tr?DropdownL?c theo vai tr?all, admin, warehouse_manager, staffallname=role. all không l?c vai tr?6Tr?ng tháiDropdownL?c theo tr?ng tháiall, active, lockedallname=status. all không l?c tr?ng thái7Ð?i ch? ð? xemButtonNút ð?i b? c?cNullKhôngtype=button, trang không g?n x? l?8Xu?tButtonNút xu?t trên thanh công c?NullKhôngtype=button, trang không g?n x? l?9B?ng tài kho?nTableNgý?i dùng, email, vai tr?, tr?ng thái, ðãng nh?p cu?iString và ngàyM?t trang, t?i ða 10 d?ngR?ng th? "Chýa có tài kho?n nào."10Phân trangButtonCh?n trangS? trang t? 1 ð?n s? trangTrang 1Query page, m?i trang 10 d?ng. Gi? keyword, role, status11Chi ti?tLinkM? trang chi ti?tNullKhôngBi?u tý?ng m?t12S?aLinkM? form s?aNullKhôngHi?n v? có account_edit13Khóa tài kho?nButtonKhóa tài kho?n ðang ho?t ð?ngNullKhôngCh? hi?n khi tài kho?n active và không ph?i adminB?ng 8.3. B?ng danh sách thành ph?n c?a giao di?n danh sách ngý?i dùng
-• Danh sách các bi?n c?
-
-STTÐi?u ki?n kích ho?tX? l?1Ch?n Thêm ngý?i dùngM? /admin/accounts/create.2Ch?n Chi ti?tM? /admin/accounts/:id.3Ch?n S?aM? /admin/accounts/edit/:id.4Ch?n Khóa tài kho?n và ð?ng ? h?p tho?iPATCH khóa. Flash "Ð? khóa tài kho?n" r?i m? trang chi ti?t. T? ch?i h?p tho?i th? danh sách gi? nguyên.5G?i ô t?m ki?mGET /admin/accounts v?i keyword. Kh?p username ho?c h? tên. Gi? role và status. B?ng hi?n trang týõng ?ng, m?i trang 10 tài kho?n.6Ð?i vai tr? ho?c tr?ng tháiGET l?i v?i role ho?c status. all ho?c b? tr?ng th? không l?c tiêu chí ðó. Không kh?p th? b?ng hi?n "Chýa có tài kho?n nào."7Ch?n m?t s? trangGET v?i page và gi? keyword, role, status. page vý?t s? trang th? v? trang cu?i.8B?m Ð?i ch? ð? xem ho?c Xu?tDanh sách không ð?i v? hai nút này không g?i server.B?ng 8.4. B?ng danh sách các bi?n c? c?a giao di?n danh sách ngý?i dùng
-1.2.2. T?o tài kho?n m?i
-• Danh sách thành ph?n c?a giao di?n
-
-STTTênKi?u? ngh?aMi?n giá tr?Giá tr? m?c ð?nhGhi chú1Quay l?iLinkV? danh sáchNullKhông2Tên ðãng nh?pEdit TextUsername m?iString, b?t bu?c, t?i ða 50Không3EmailEdit TextEmail liên h?Email, t?i ða 100KhôngCh? g?i ? trên form nói khôi ph?c m?t kh?u. Email ch? ðý?c lýu trên tài kho?n.4M?t kh?uEdit TextM?t kh?u ban ð?uString, t?i thi?u 6KhôngCó nút hi?n m?t kh?u5Xác nh?n m?t kh?uEdit TextNh?p l?i m?t kh?uString, t?i thi?u 6Không6H? và tênEdit TextTên hi?n th?String, t?i ða 100Không7S? ði?n tho?iEdit TextS? liên h?String, t?i ða 20Không8Qu?n tr? viênRadioCh?n vai tr? adminadminKhông ch?nCh? hi?n khi h? th?ng chýa có admin9Qu?n l? khoRadioCh?n vai tr? khowarehouse_managerÐý?c ch?nNh?n trên form: "Duy?t phi?u nh?p, xu?t và t?n kho." Quy?n m?c ð?nh c?a vai tr? là các màn v?n hành.10Nhân viênRadioCh?n vai tr? staffstaffKhông ch?nQuy?n web m?c ð?nh c?a staff là r?ng.11Tr?ng tháiDropdownActive ho?c khóaactive, lockedÐang ho?t ð?ng12T?o tài kho?nButtonG?i formNullKhôngPOST /admin/accounts/create13Nh?p l?iButtonXóa n?i dung formNullKhôngtype=resetB?ng 8.5. B?ng danh sách thành ph?n c?a giao di?n t?o tài kho?n
-• Danh sách các bi?n c?
-
-STTÐi?u ki?n kích ho?tX? l?1Ch?n T?o tài kho?n khi d? li?u h?p l?Bãm m?t kh?u, t?o b?n ghi, flash "T?o m?i tài kho?n thành công", ? l?i trang t?o.2Username tr?ng, dài hõn 50 k? t? ho?c ð? t?n t?iFlash l?i týõng ?ng và gi? l?i các ô tr? m?t kh?u.3M?t kh?u ng?n hõn 6 k? t? ho?c xác nh?n không kh?pFlash l?i và gi? l?i các ô tr? m?t kh?u.4Email sai ð?nh d?ng ho?c ð? ðý?c dùngFlash "Email không ðúng ð?nh d?ng", "Email t?i ða 100 k? t?" ho?c "Email ð? ðý?c s? d?ng".5Ch?n qu?n tr? viên khi ð? có m?t adminFlash "H? th?ng ch? ðý?c có m?t qu?n tr? viên".6Ch?n Nh?p l?iÐýa form v? giá tr? m?c ð?nh c?a tr?nh duy?t.7Ch?n Quay l?iM? danh sách ngý?i dùng.B?ng 8.6. B?ng danh sách các bi?n c? c?a giao di?n t?o tài kho?n
-1.2.3. Ch?nh s?a tài kho?n
-• Danh sách thành ph?n c?a giao di?n
-
-STTTênKi?u? ngh?aMi?n giá tr?Giá tr? m?c ð?nhGhi chú1Quay l?iLinkV? danh sáchNullKhông2Tên ðãng nh?pEdit TextUsernameString, b?t bu?c, t?i ða 50Username hi?n t?i3EmailEdit TextEmailEmail, t?i ða 100Email hi?n t?i4M?t kh?uEdit TextM?t kh?u m?iString, t?i thi?u 6, ho?c ð? tr?ngKhôngÐ? tr?ng th? gi? hash c?5Xác nh?n m?t kh?uEdit TextNh?p l?i m?t kh?u m?iStringKhôngCh? ð?i chi?u khi có m?t kh?u m?i6H? và tênEdit TextTên hi?n th?String, t?i ða 100H? tên hi?n t?i7S? ði?n tho?iEdit TextS? liên h?String, t?i ða 20S? hi?n t?i8Vai tr?RadioAdmin, qu?n l? kho ho?c nhân viênBa giá tr? enumVai tr? hi?n t?iTài kho?n admin b? khóa ? Qu?n tr? viên9Tr?ng tháiDropdownActive ho?c khóaactive, lockedTr?ng thái hi?n t?iTài kho?n admin b? khóa ? Ðang ho?t ð?ng10Lýu thay ð?iButtonG?i b?n s?aNullKhôngPATCH /admin/accounts/edit/:id11Hu?LinkB? form và v? danh sáchNullKhôngB?ng 8.7. B?ng danh sách thành ph?n c?a giao di?n s?a tài kho?n
-• Danh sách các bi?n c?
-
-STTÐi?u ki?n kích ho?tX? l?1Ch?n Lýu thay ð?i khi d? li?u h?p l? và ô m?t kh?u tr?ngC?p nh?t h? sõ, vai tr? và tr?ng thái. Hash c? ðý?c gi?. Flash "C?p nh?t tài kho?n thành công".2Có m?t kh?u m?i ð? 6 k? t? và kh?p xác nh?nGhi password_hash m?i cùng các trý?ng c?n l?i.3H? vai tr? adminFlash "Không th? ð?i vai tr? c?a qu?n tr? viên".4Gán admin khi ð? có adminFlash "H? th?ng ch? ðý?c có m?t qu?n tr? viên".5Username ho?c email b? trùngFlash "Tên ðãng nh?p ð? t?n t?i" ho?c "Email ð? ðý?c s? d?ng".6Ch?n Hu?V? danh sách. B?n ghi không ð?i.B?ng 8.8. B?ng danh sách các bi?n c? c?a giao di?n s?a tài kho?n
-1.2.4. Khóa tài kho?n
-
-
-Nút khóa n?m trên danh sách ngý?i dùng. Trang chi ti?t có nút khóa ho?c m? khóa.
-• Danh sách thành ph?n c?a giao di?n
-
-STTTênKi?u? ngh?aMi?n giá tr?Giá tr? m?c ð?nhGhi chú1Khóa tài kho?n trên danh sáchButtonKhóa tài kho?n ðang ho?t ð?ngNullKhôngCh? hi?n khi có account_lock, tài kho?n active và không ph?i admin2H?p tho?i xác nh?n khóaText ViewH?i trý?c khi khóaChu?iKhóa tài kho?n này? Ngý?i dùng s? không ðãng nh?p ðý?c.H?p tho?i c?a tr?nh duy?t3Khóa tài kho?n trên chi ti?tButtonKhóa t? trang chi ti?tNullKhôngCùng ði?u ki?n v?i nút trên danh sách4M? khóa tài kho?nButtonÐýa tài kho?n ð? khóa v? activeNullKhôngHi?n trên trang chi ti?t khi có account_lock, tài kho?n không ph?i admin và ðang khóaB?ng 8.9. B?ng danh sách thành ph?n c?a giao di?n khóa và m? khóa tài kho?n
-• Danh sách các bi?n c?
-
-STTÐi?u ki?n kích ho?tX? l?1Ch?n Khóa trên danh sách và ð?ng ? h?p tho?iPATCH /admin/accounts/lock/:id. status thành locked. Flash "Ð? khóa tài kho?n" r?i m? trang chi ti?t.2Ch?n H?y trên h?p tho?iDanh sách gi? nguyên.3Ch?n Khóa trên trang chi ti?t và ð?ng ?Cùng l?nh khóa. L?n ðãng nh?p web sau c?a tài kho?n ðó b? t? ch?i.4Ch?n M? khóa trên trang chi ti?tPATCH /admin/accounts/unlock/:id. status thành active. Flash "Ð? m? khóa tài kho?n".5Tài kho?n là adminHai nút không hi?n. Server c?ng t? ch?i b?ng "Không th? khóa tài kho?n admin".B?ng 8.10. B?ng danh sách các bi?n c? c?a giao di?n khóa và m? khóa tài kho?n
-1.2.5. Chi ti?t tài kho?n
-• Danh sách thành ph?n c?a giao di?n
-
-STTTênKi?u? ngh?aMi?n giá tr?Giá tr? m?c ð?nhGhi chú1Quay l?iLinkV? danh sáchNullKhông2S?a tài kho?nLinkM? form s?aNullKhôngHi?n v? có account_edit3Avatar và tênText ViewHai ch? cái, h? tên, usernameStringD? li?u tài kho?n4Huy hi?u vai tr? và tr?ng tháiText ViewAdmin, Qu?n l? kho ho?c Nhân viên; Ho?t ð?ng ho?c Ð? khóaEnumD? li?u tài kho?n5Khóa tài kho?nButtonKhóa tài kho?n activeNullKhôngHi?n khi có account_lock, tài kho?n không ph?i admin và ðang active6M? khóa tài kho?nButtonM? tài kho?n ð? khóaNullKhôngHi?n khi có account_lock, tài kho?n không ph?i admin và ðang khóa7Lý?i thông tinText ViewM?, username, h? tên, email, ði?n tho?i, vai tr?, tr?ng thái, ngày t?o, c?p nh?t, ðãng nh?p cu?iString và ngàyD? li?u tài kho?nÔ tr?ng hi?n "-"B?ng 8.11. B?ng danh sách thành ph?n c?a giao di?n chi ti?t tài kho?n
-• Danh sách các bi?n c?
-
-STTÐi?u ki?n kích ho?tX? l?1Ch?n S?a tài kho?nM? form s?a.2Ch?n Khóa tài kho?n và ð?ng ?status thành locked. Flash "Ð? khóa tài kho?n". L?n ðãng nh?p web sau b? t? ch?i.3Ch?n M? khóa tài kho?nstatus thành active. Flash "Ð? m? khóa tài kho?n".4M? m?t id không cóFlash "ID không h?p l?" ho?c "Không t?i ðý?c tài kho?n", r?i v? danh sách.B?ng 8.12. B?ng danh sách các bi?n c? c?a giao di?n chi ti?t tài kho?n
-1.3. Phân quy?n
-1.3.1. Ma tr?n quy?n
-• Danh sách thành ph?n c?a giao di?n
-
-STTTênKi?u? ngh?aMi?n giá tr?Giá tr? m?c ð?nhGhi chú1Tiêu ð?Text ViewTên mànChu?iPhân quy?n2Hoàn tácButtonTr? checkbox v? d? li?u ð? t?iNullKhông3C?p nh?tButtonG?i ma tr?n quy?nNullKhôngHi?n v? có roles_permissions4C?t vai tr?Text ViewBa c?tAdmin, Qu?n l? kho, Nhân viên l?p rápNh?n ROLE_LABELS5Checkbox quy?nCheckboxB?t ho?c t?t m?t khóa quy?n24 khóa trong PERMISSION_KEYSQuy?n ðang lýuNhóm: Dashboard, Linh ki?n, Phi?u nh?p, Phi?u xu?t, BOM, S?n xu?t, Ngý?i dùng, Nhóm quy?n, Sao lýuB?ng 8.13. B?ng danh sách thành ph?n c?a giao di?n phân quy?n
-• Danh sách các bi?n c?
-
-STTÐi?u ki?n kích ho?tX? l?1B? tick quy?n Xem c?a m?t nhómCác quy?n c?n l?i c?a nhóm ? c?t ðó b? b? tick và b? khóa.2Tick l?i quy?n XemCác ô c?n l?i c?a nhóm ðý?c m?.3Ch?n Hoàn tácCheckbox tr? v? d? li?u lúc m? trang.4Ch?n C?p nh?tPATCH /admin/permissions. Ch? khóa h?p l? ðý?c ghi. Thành công th? flash "C?p nh?t phân quy?n thành công".B?ng 8.14. B?ng danh sách các bi?n c? c?a giao di?n phân quy?n
-1.4. Sao lýu
-1.4.1. Sao lýu d? li?u
-• Danh sách thành ph?n c?a giao di?n
-
-STTTênKi?u? ngh?aMi?n giá tr?Giá tr? m?c ð?nhGhi chú1Tiêu ð?Text ViewTên mànChu?iSao lýu d? li?u2Mô t?Text ViewPh?m vi file dumpChu?iCh?p toàn b? PostgreSQL thành file .sql3T?o b?n sao lýuButtonCh?y pg_dumpNullKhôngHi?n v? có backup_create. POST /admin/backup4Kh?i hý?ng d?nText ViewV? trí file và cách gi? b?n saoChu?iBackup th? công b?ng pg_dump, file n?m thý m?c backups5B?ng fileTableTên file, dung lý?ng, th?i ði?mStringDanh sách fileR?ng th? "Chýa có b?n sao lýu."6T?i v?LinkT?i m?t file dumpNullKhông/admin/backup/download/:filenameB?ng 8.15. B?ng danh sách thành ph?n c?a giao di?n sao lýu
-• Danh sách các bi?n c?
-
-STTÐi?u ki?n kích ho?tX? l?1Ch?n T?o b?n sao lýu và pg_dump thành côngCó file .sql m?i, m?t d?ng audit, flash tên file và dung lý?ng.2Thi?u DATABASE_URL, thi?u pg_dump, file r?ng ho?c pg_dump l?iFlash thông báo týõng ?ng. File r?ng b? xóa.3Ch?n T?i v? v?i tên file h?p l?Tr?nh duy?t t?i file.4Tên file không có trong thý m?c backupFlash "Không t?m th?y file sao lýu".B?ng 8.16. B?ng danh sách các bi?n c? c?a giao di?n sao lýu
-
-	
-CHÝÕNG IV: K?T LU?N VÀ HÝ?NG PHÁT
-TRI?N
-1. K?t lu?n
-Ð? tài "Xây d?ng h? th?ng qu?n l? nhu c?u linh ki?n và l?p ráp máy tính - MRP PC" ð? ði h?t m?t quy tr?nh l?p máy ? m?c ð? án: phân tích nghi?p v?, thi?t k? d? li?u, l?p tr?nh web, vi?t API, làm ?ng d?ng Android và ðóng gói b?ng Docker.
-Các ch?c nãng ð? ch?y ðý?c:
-? Ðãng nh?p web (cookie JWT và phiên Redis) và ðãng nh?p ?ng d?ng (access token). Ðãng xu?t, xem và s?a h? sõ, ð?i m?t kh?u.
-? Phân quy?n theo vai tr? Qu?n tr? viên, Qu?n l? kho và Nhân viên l?p ráp. Qu?n l? tài kho?n: t?o, s?a, khóa và m? khóa.
-? Qu?n l? linh ki?n, h?ng, nhà cung c?p, thu?c tính theo nhóm linh ki?n và ?nh linh ki?n.
-? L?p c?u h?nh máy và ð?nh m?c v?t tý (BOM).
-? Phi?u nh?p: lýu nháp, xác nh?n và c?ng t?n kho. Tính linh ki?n c?n thi?u cho các l?nh l?p ðang m?.
-? T?o l?nh s?n xu?t, giao cho nhân viên l?p ráp, xóa m?m l?nh ðang ch?.
-? Trên Android, nhân viên ch? th?y l?nh ðý?c giao: ð?i chi?u t?n theo BOM, yêu c?u xu?t linh ki?n, xác nh?n ð? l?p, yêu c?u xu?t thành ph?m.
-? Qu?n l? kho duy?t ho?c t? ch?i phi?u xu?t. Duy?t phi?u linh ki?n th? tr? t?n linh ki?n. Duy?t phi?u thành ph?m th? tr? t?n máy ð? l?p. T? ch?i phi?u không ð?i t?n.
-? B?ng ði?u khi?n, xu?t báo cáo Excel và PDF, phân quy?n chi ti?t và sao lýu cõ s? d? li?u b?ng pg_dump.
-Ph?n web dùng Node.js, Express, TypeScript và Pug. D? li?u n?m trên PostgreSQL qua Prisma. ?ng d?ng l?p ráp vi?t b?ng Kotlin và Jetpack Compose. H? th?ng ðý?c gom trong Docker Compose, g?m PostgreSQL, Redis, backend và Nginx.
-Qua ð? án, nhóm ð? thi?t k? ðý?c cõ s? d? li?u cho t?n kho và BOM, vi?t API cho ?ng d?ng di ð?ng, và n?i ðý?c giao di?n web, Android và máy ch? trên cùng m?t lu?ng nh?p, xu?t và l?p ráp.
-2. H?n ch?
-V? th?i gian ð? án có h?n, h? th?ng d?ng ? quy mô m?t xý?ng l?p máy nh?.
-? Cách tính linh ki?n thi?u bám theo BOM c?a các l?nh ðang m?. Chýa có ho?ch ð?nh theo k?, th?i gian giao hàng c?a nhà cung c?p, t?n an toàn hay ði?m ð?t hàng.
-? Phi?u nh?p sau khi xác nh?n ch? c?ng t?n. Chýa có nh?p m?t ph?n, phi?u tr? hàng hay s?a phi?u ð? xác nh?n.
-? Xin xu?t linh ki?n khi c? l?nh chýa ð? t?n, và bý?c xin chýa tr? kho. T?n ch? gi?m khi qu?n l? kho duy?t. Xác nh?n l?p ch? tr? linh ki?n trong trý?ng h?p phi?u linh ki?n m?i nh?t chýa ðý?c duy?t. Hai quy t?c này ðúng v?i thi?t k? hi?n t?i, nhýng ngý?i dùng d? thao tác nh?m n?u màn h?nh không gi?i thích r?.
-? Chýa có nhi?u kho, v? trí k?, m? v?ch, thông báo khi ðý?c giao l?nh ho?c khi phi?u ðý?c duy?t.
-? ?ng d?ng Android ch? ph?c v? nhân viên l?p ráp. Qu?n l? kho v?n làm vi?c trên web.
-? Sao lýu t?o file .sql ð? t?i v?. Chýa khôi ph?c b?n sao lýu ngay trên giao di?n, c?ng chýa ð?t l?ch sao lýu.
-? Ki?m th? ch? y?u ði tay theo t?ng lu?ng ðãng nh?p, phân quy?n, c?ng và tr? t?n. Chýa có b? ki?m th? t? ð?ng.
-? Giao di?n ð? ð? thao tác nghi?p v?, chýa ðý?c ch?nh cho thao tác kho liên t?c và cho màn h?nh nh?.
-3. Hý?ng phát tri?n
-? B? sung ho?ch ð?nh theo th?i gian: th?i gian giao c?a nhà cung c?p, t?n an toàn và g?i ? s? lý?ng c?n ð?t cho t?ng linh ki?n.
-? Tách phi?u ð?t hàng kh?i phi?u nh?p, cho phép nh?n hàng nhi?u l?n.
-? Thêm phi?u ði?u ch?nh t?n, phi?u tr? và quy tr?nh h?y ho?c s?a l?nh ðang l?p, có ghi nh?t k?.
-? H? tr? nhi?u kho, v? trí lýu tr? và quét m? v?ch khi nh?p, xu?t.
-? G?i thông báo khi l?nh ðý?c giao, khi thi?u linh ki?n và khi phi?u xu?t ðý?c duy?t ho?c t? ch?i.
-? Thêm báo cáo giá v?n và l?i theo t?ng c?u h?nh máy.
-? Cho phép khôi ph?c b?n sao lýu trên giao di?n và sao lýu theo l?ch.
-? M? thêm màn h?nh tra c?u t?n kho trên ði?n tho?i cho qu?n l? kho.
-? Vi?t ki?m th? cho các bý?c c?ng tr? t?n, r?i ch?nh giao di?n web và Android cho d? thao tác hõn.
-B?ng phân công và theo d?i ti?n ð? hoàn thành công vi?c
-
-STTHO?T Ð?NGTU?N B?T Ð?U D?
-KI?NTH?I GIAN D? KI?N (TU?N)TU?N B?T Ð?U TH?C
-T?Ð? DÀI TH?I GIAN
-TH?C T?
-(NGÀY)Ð? HOÀN THÀNHNGÝ?I TH?C HI?N1Ch?n ð? tài MRP PC và l?p k? ho?ch1117100%C? nhóm2Kh?o sát nghi?p v?, mô t? ch?c nãng, yêu c?u và b?ng mô t? nghi?p v?2127100%Nguy?n Tr?n Hoàng
-Phúc3Thi?t k? giao di?n web và Android32314100%C? nhóm4Thi?t k? cõ s? d? li?u3137100%Nguy?n Tr?n Hoàng
-Phúc5T?o d? li?u m?u4145100%Nguy?n Tr?n Hoàng
-Phúc6V? BFD và lu?ng nghi?p v? chính4144100%Nguy?n Tr?n Hoàng
-Phúc
-
-V? Usecase Diagram
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-7Use case ðãng nh?p web7171100%Lê Nguy?n
-Qu?c B?oUse case duy?t phi?u xu?t7171100%Lê Nguy?n Qu?c B?oUse case ðãng xu?t5151100%Lê Nguy?n Qu?c B?oUse case qu?n l? tài kho?n7171100%Lê Nguy?n Qu?c B?o, Hu?nh
-Minh H?uUse case t?ng quát7171100%Hu?nh
-Minh H?uUse case ðãng nh?p ?ng d?ng8181100%Hu?nh
-Minh H?uUse case qu?n l? linh ki?n8181100% Hu?nh Minh H?uUse case qu?n l? phi?u nh?p8181100% Hu?nh Minh H?uUse case qu?n l? BOM8181100%Hu?nh
-Minh H?uUse case xem l?nh l?p ráp9191100% Hu?nh Minh H?uUse case ki?m tra t?n kho9191100%Hu?nh
-Minh H?u
-
-Use case xác nh?n l?p ráp9191100% Hu?nh Minh H?uUse case xem và s?a h? sõ9191100%Hu?nh
-Minh H?uUse case ðãng xu?t9191100%Lê Nguy?n Qu?c B?oUse case xem b?ng ði?u khi?n9191100%Lê Nguy?n Qu?c B?oUse case xu?t báo cáo9191100%Ð?c t? UC
-
-
-
-
-
-
-
-
-8Ðãng nh?p web7171100%Lê Nguy?n
-Qu?c B?oDuy?t phi?u xu?t7171100%Lê Nguy?n
-Qu?c B?oQu?n l? tài kho?n7171100%Lê Nguy?n
-Qu?c B?oÐãng nh?p ?ng d?ng8181100%Hu?nh
-Minh H?uQu?n l? linh ki?n8181100%Hu?nh
-
-Minh H?uQu?n l? phi?u nh?p8181100%Hu?nh
-Minh H?uQu?n l? BOM8181100%Hu?nh
-Minh H?uXem l?nh l?p ráp9191100%Hu?nh
-Minh H?uKi?m tra t?n kho9191100%Hu?nh
-Minh H?uXác nh?n l?p ráp9191100%Hu?nh
-Minh H?uXem và s?a h? sõ9191100%Hu?nh
-Minh H?uÐãng xu?t9191100%Hu?nh
-Minh H?uXem b?ng ði?u khi?n101105100%Lê Nguy?n Qu?c B?oXu?t báo cáo101102100%Lê Nguy?n Qu?c B?oV? Sequence DiagramÐãng nh?p web8181100%Lê Nguy?n
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-9Qu?c B?oDuy?t phi?u xu?t8181100%Lê Nguy?n
-Qu?c B?oQu?n l? tài kho?n8181100%Lê Nguy?n
-Qu?c B?oÐãng nh?p ?ng d?ng9191100%Hu?nh
-Minh H?uQu?n l? linh ki?n9191100%Hu?nh
-Minh H?uQu?n l? phi?u nh?p9191100%Hu?nh
-Minh H?uQu?n l? BOM9191100%Hu?nh
-Minh H?uXem l?nh l?p ráp101101100%Hu?nh
-Minh H?uKi?m tra t?n kho101101100%Hu?nh
-Minh H?uXác nh?n l?p ráp101101100%Hu?nh
-Minh H?uXem và s?a h? sõ101101100%Hu?nh
-Minh H?uÐãng xu?t101101100%Hu?nh
-Minh H?uXem b?ng ði?u khi?n101105100%Lê Nguy?n Qu?c B?oXu?t báo cáo101105100%Lê Nguy?n
-Qu?c B?o
-
-hát ð?i duy?t, ð? ðý?c duy?t và ngý?i dùng hi?n
-t?i11V? Class Diagram111117100%Nguy?n Tr?n Hoàng
-Phúc12Mô t? Class Diagram111117100%Nguy?n Tr?n Hoàng
-Phúc13V? ERD111111100%Lê Nguy?n
-Qu?c B?o14V? RDM111111100%Lê Nguy?n
-Qu?c B?o15Mô t? giao
-di?n111112100%C? nhómTh?c thi ch?ng nãng chính
-
-
-
-
-
-
-16Ðãng nh?p web4147100%Lê Nguy?n
-Qu?c B?oDuy?t phi?u xu?t82810100%Lê Nguy?n
-Qu?c B?oQu?n l? tài kho?n8183100%Lê Nguy?n
-Qu?c B?oÐãng nh?p ?ng d?ng9194100%Lê Nguy?n
-Qu?c B?oQu?n l? linh ki?n9194100%Hu?nh
-
-Minh H?u, Nguy?n Tr?n Hoàng
-PhúcQu?n l? phi?u nh?p9192100%Lê Nguy?n
-Qu?c B?oQu?n l? BOM9195100%Hu?nh Minh H?u, Nguy?n Tr?n Hoàng
-PhúcXem l?nh l?p ráp101106100%Hu?nh Minh H?u, Nguy?n Tr?n Hoàng
-PhúcKi?m tra t?n kho101107100%Hu?nh Minh H?u, Nguy?n Tr?n Hoàng
-PhúcXác nh?n l?p ráp101108100%Hu?nh Minh H?u, Nguy?n Tr?n
-Hoàng
-
-PhúcXem và s?a h? sõ101106100%Hu?nhMinh H?u,Nguy?nTr?nHoàngPhúcÐãng xu?t101102100%Lê Nguy?nQu?c B?oXem b?ng ði?u khi?n101105100%Lê Nguy?nQu?c B?oXu?t báo cáo101105100%Lê Nguy?nQu?c B?oTh?c thi giao di?n17Qu?n l? linh ki?n và BOM1021014Nguy?n100%Tr?nHoàngPhúcNguy?nQu?n l? phi?u nh?p và phi?u xu?t1021014100%Tr?n
-
-Hoàng
-PhúcQu?n l? l?nh s?n xu?t1021014100%Nguy?n Tr?n Hoàng
-PhúcGiao di?n ?ng d?ng l?p ráp1021014
-100%Nguy?n Tr?n Hoàng
-Phúc18Làm báo
-cáo1021014100%C? nhóm
-Hý?ng d?n s? d?ng và cái ð?t
-Bý?c 1: Cài ð?t môi trý?ng
-Máy tính c?n cài các ph?n m?m sau:
-1. Docker Desktop, b?n có Docker Compose. PostgreSQL, Redis, backend và Nginx n?m trong docker-compose.yml, không c?n cài MySQL.
-2. Android Studio, ð? m? thý m?c mobile-app và ch?y ?ng d?ng cho nhân viên l?p ráp. ?ng d?ng yêu c?u Android t? API 24 tr? lên.
-3. ngrok ch? c?n khi ði?n tho?i ? m?ng khác máy ch?. Trong ð? án ð? có file ngrok.yml và scripts/ngrok.ps1.
-Bý?c 2: C?u h?nh
-T?i thý m?c g?c c?a ð? án, copy file m?u thành file môi trý?ng b?ng l?nh:
-copy .env.example .env
-Các giá tr? m?u dùng ðý?c ngay khi ch?y b?ng Docker:
-POSTGRES_USER=mrp POSTGRES_PASSWORD=mrp123 POSTGRES_DB=mrp_pc DATABASE_URL=postgresql://mrp:mrp123@postgres:5432/mrp_pc REDIS_URL=redis://redis:6379 PORT=3000
-SESSION_SECRET và JWT_SECRET gi? nhý trong file m?u khi demo trên máy local. Host postgres và redis là tên service trong Docker. Không ð?i hai host này thành localhost khi ch?y b?ng docker compose.
-?nh linh ki?n n?m trên Cloudflare R2. Mu?n hi?n ?nh th? ði?n R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET và R2_PUBLIC_URL. Chýa có R2 th? web v?n ðãng nh?p và thao tác ðý?c. L?nh t?o d? li?u m?u có th? báo l?i ? bý?c cu?i khi kéo ?nh.
-Trong ?ng d?ng Android, m? file NetworkModule.kt và s?a BASE_URL. Ð?a ch? ph?i có d?u / ? cu?i.
-Máy ?o Android Studio dùng ð?a ch?: http://10.0.2.2:3000/
-Ði?n tho?i th?t, cùng m?ng Wi-Fi v?i máy tính, dùng ð?a ch?: http://<IPv4 c?a máy tính>:3000/
-Trên Windows, xem IPv4 b?ng l?nh ipconfig. Ði?n tho?i và máy tính ph?i cùng m?t m?ng. N?u dùng ngrok, gán BASE_URL b?ng ðý?ng d?n https mà ngrok c?p, v?n có d?u / ? cu?i.
-Bý?c 3: Ch?y ð? án
-M? terminal t?i thý m?c g?c, r?i ch?y l?n lý?t:
-docker compose up -d --build
-docker compose exec backend npx prisma migrate deploy
-docker compose exec backend npm run prisma:seed
-L?nh ð?u d?ng PostgreSQL c?ng 5432, Redis c?ng 6379, backend c?ng 3000 và Nginx c?ng 80. L?nh th? hai t?o b?ng. L?nh th? ba t?o d? li?u m?u.
-Ki?m tra máy ch? b?ng cách m? http://localhost:3000/health. K?t qu? ðúng là {"ok":true,"service":"mrp-pc-backend"}.
-Web qu?n tr? m? t?i http://localhost/admin/auth/login. Vào th?ng backend th? dùng http://localhost:3000/admin/auth/login.
-Tài kho?n m?u, m?t kh?u c? ba tài kho?n là admin123:
-admin là Qu?n tr? viên, dùng trên web.
-warehouse là Qu?n l? kho, dùng trên web, ðý?ng d?n /warehouse.
-staff là Nhân viên l?p ráp, dùng trên ?ng d?ng Android. Tài kho?n này không có quy?n trên web.
-Ch?y ?ng d?ng: m? thý m?c mobile-app b?ng Android Studio, ch?n máy ?o ho?c ði?n tho?i ð? b?t g? l?i USB, r?i b?m Run.
-Khi ði?n tho?i không cùng m?ng v?i máy ch?, ? thý m?c g?c ch?y:
-powershell -File scripts\ngrok.ps1
-Máy c?n ð? có authtoken c?a ngrok. L?nh này m? ðý?ng d?n t?i c?ng 3000.
-Bý?c 4: S? d?ng
-Qu?n tr? viên ðãng nh?p b?ng tài kho?n admin.
-1. Ðãng nh?p web.
-2. Vào Tài kho?n ð? t?o, s?a, khóa ho?c m? khóa tài kho?n. Gán ðúng vai tr? admin, warehouse_manager ho?c staff.
-3. Vào Phân quy?n ð? b?t ho?c t?t quy?n xem, t?o, s?a, xóa c?a t?ng vai tr?.
-4. Vào Sao lýu, ch?n T?o b?n sao lýu. H? th?ng t?o file .sql và cho t?i v?.
-Qu?n l? kho ðãng nh?p b?ng tài kho?n warehouse.
-1. Khai báo h?ng, nhà cung c?p và linh ki?n. Có th? g?n thu?c tính theo nhóm linh ki?n.
-2. L?p c?u h?nh máy và ð?nh m?c v?t tý (BOM).
-3. L?p phi?u nh?p ? tr?ng thái nháp. Xác nh?n phi?u th? t?n linh ki?n ðý?c c?ng.
-4. Xem linh ki?n c?n thi?u c?a các l?nh l?p ðang m?, r?i l?p phi?u nh?p theo nhà cung c?p.
-5. T?o l?nh s?n xu?t, ch?n c?u h?nh và giao cho tài kho?n nhân viên ðang ho?t ð?ng.
-6. Khi nhân viên g?i phi?u xu?t, vào Phi?u xu?t ð? duy?t ho?c t? ch?i. Duy?t phi?u linh ki?n th? tr? t?n linh ki?n. Duy?t phi?u thành ph?m th? tr? t?n máy ð? l?p. T? ch?i th? t?n không ð?i.
-7. ? B?ng ði?u khi?n có th? xu?t Excel ho?c PDF.
-Nhân viên l?p ráp ðãng nh?p b?ng tài kho?n staff trên Android.
-1. Ðãng nh?p. ?ng d?ng ch? hi?n l?nh ðý?c giao cho ðúng tài kho?n ðó.
-2. M? m?t l?nh, ch?n ki?m tra t?n ð? ð?i chi?u BOM v?i kho.
-3. N?u chýa ð? linh ki?n, g?i yêu c?u xu?t linh ki?n. Bý?c này t?o phi?u ch? duy?t, chýa tr? kho.
-4. Sau khi kho duy?t và ð? l?p xong, xác nh?n l?p. T?n thành ph?m ðý?c c?ng.
-5. G?i yêu c?u xu?t thành ph?m ð? kho duy?t xu?t máy.
-Th? t? demo: warehouse t?o l?nh và giao cho staff. Staff ki?m tra t?n r?i xin xu?t linh ki?n. Warehouse duy?t phi?u. Staff xác nh?n l?p r?i xin xu?t thành ph?m. Warehouse duy?t phi?u thành ph?m.
-
-
-
-
-
-

@@ -285,7 +285,69 @@ const runPsql = (
   });
 };
 
-/** Khôi phục DB từ file .sql trong thư mục backups (xóa schema public rồi nạp lại). */
+const dumpToFile = async (
+  db: ReturnType<typeof parseDatabaseUrl>,
+  filePath: string,
+): Promise<void> => {
+  await new Promise<void>((resolve, reject) => {
+    const out = fs.createWriteStream(filePath);
+    const child = spawn(
+      "pg_dump",
+      [
+        "-h",
+        db.host,
+        "-p",
+        db.port,
+        "-U",
+        db.user,
+        "-d",
+        db.database,
+        "--no-owner",
+        "--no-acl",
+      ],
+      {
+        env: {
+          ...process.env,
+          PGPASSWORD: db.password,
+        },
+      },
+    );
+
+    child.stdout.pipe(out);
+
+    let stderr = "";
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+
+    child.on("error", (error) => {
+      out.destroy();
+      const code = (error as NodeJS.ErrnoException).code;
+      reject(code === "ENOENT" ? new Error("PG_DUMP_MISSING") : error);
+    });
+
+    child.on("close", (code) => {
+      out.end(() => {
+        if (code === 0) {
+          resolve();
+          return;
+        }
+        reject(new Error(stderr.trim() || "PG_DUMP_FAILED"));
+      });
+    });
+  });
+};
+
+const resetPublicSchema = async (
+  db: ReturnType<typeof parseDatabaseUrl>,
+): Promise<void> => {
+  await runPsql(db, [
+    "-c",
+    "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO public; GRANT ALL ON SCHEMA public TO CURRENT_USER;",
+  ]);
+};
+
+/** Khôi phục DB từ file .sql: snapshot an toàn trước, lỗi thì cố rollback snapshot. */
 export const restoreBackup = async (
   accountId: number,
   filename: string,
@@ -298,22 +360,48 @@ export const restoreBackup = async (
   const filePath = resolveBackupFile(filename);
   const db = parseDatabaseUrl(databaseUrl);
   const stat = await fsp.stat(filePath);
+  const dir = getBackupDir();
+  await fsp.mkdir(dir, { recursive: true });
 
-  await runPsql(db, [
-    "-c",
-    "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO public; GRANT ALL ON SCHEMA public TO CURRENT_USER;",
-  ]);
+  // Snapshot trước khi DROP SCHEMA — không ghi audit (DB sắp bị ghi đè).
+  const safetyName = `safety-before-restore-${timestampName()}`;
+  const safetyPath = path.join(dir, safetyName);
+  await dumpToFile(db, safetyPath);
+  const safetyStat = await fsp.stat(safetyPath);
+  if (safetyStat.size < 10) {
+    await fsp.unlink(safetyPath).catch(() => undefined);
+    throw new Error("EMPTY_BACKUP");
+  }
 
-  await runPsql(db, ["-f", filePath]);
+  try {
+    await resetPublicSchema(db);
+    await runPsql(db, ["-f", filePath]);
+  } catch (error) {
+    try {
+      await resetPublicSchema(db);
+      await runPsql(db, ["-f", safetyPath]);
+    } catch (rollbackError) {
+      console.error("RESTORE_ROLLBACK_FAILED", rollbackError);
+      throw new Error("RESTORE_FAILED_UNSAFE");
+    }
+    throw error instanceof Error ? error : new Error("PSQL_FAILED");
+  } finally {
+    // Giữ safety file vài lần gần nhất; xóa nếu trùng tên pattern không khớp listBackups.
+    // safety-* không hiện trên UI (FILE_PATTERN), vẫn nằm trên đĩa để cứu hộ thủ công.
+  }
 
-  await prisma.auditLog.create({
-    data: {
-      accountId,
-      action: "restore_backup",
-      targetTable: "database",
-      detail: filename,
-    },
-  });
+  try {
+    await prisma.auditLog.create({
+      data: {
+        accountId,
+        action: "restore_backup",
+        targetTable: "database",
+        detail: `${filename}; safety=${safetyName}`,
+      },
+    });
+  } catch (auditError) {
+    console.error("RESTORE_AUDIT_FAILED", auditError);
+  }
 
   return {
     filename,

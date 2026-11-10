@@ -18,6 +18,8 @@ const errorMessage = (error: unknown): string => {
       return "Cấu hình PC đang ngừng sử dụng";
     case "STAFF_INVALID":
       return "Chỉ giao việc cho nhân viên lắp ráp đang hoạt động";
+    case "STAFF_REQUIRED":
+      return "Phải chọn nhân viên lắp ráp để giao lệnh";
     case "INVALID_QUANTITY":
       return "Số lượng phải lớn hơn 0";
     case "ORDER_NOT_FOUND":
@@ -94,10 +96,11 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
 
   try {
     const assignedRaw = Number(req.body.assignedTo);
+    const qtyRaw = Number(req.body.quantityRequested ?? req.body.quantity ?? 1);
     const order = await productionService.createProductionOrder({
       createdBy,
       pcConfigId: Number(req.body.pcConfigId),
-      quantityRequested: 1,
+      quantityRequested: Number.isFinite(qtyRaw) ? qtyRaw : 1,
       assignedTo: assignedRaw > 0 ? assignedRaw : undefined,
     });
 

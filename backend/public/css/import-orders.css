@@ -166,6 +166,10 @@
 .io-filter-item {
   min-width: 160px;
 }
+.io-filter-item:has(.io-dates) {
+  min-width: 300px;
+  flex: 1 1 300px;
+}
 .io-filters label,
 .io-label {
   display: block;
@@ -185,8 +189,12 @@
   border-radius: 12px;
   background: #fff;
 }
+.io-dates {
+  gap: 6px;
+  min-width: 280px;
+  max-width: 360px;
+}
 .io-search input,
-.io-dates input,
 select.io-input,
 .io-input,
 .io-filters select,
@@ -197,6 +205,29 @@ select.io-input,
   width: 100%;
   font-size: 14px;
   color: #1e1f26;
+}
+.io-dates input[type="date"] {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  max-width: 148px;
+  font-size: 13px;
+  color: #1e1f26;
+  line-height: 1.2;
+}
+.io-dates span {
+  flex: 0 0 auto;
+  color: #98a0b3;
+  font-weight: 600;
+}
+.io-dates input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  padding: 0;
+  margin-left: 2px;
 }
 .io-filters select,
 .io-limit,
