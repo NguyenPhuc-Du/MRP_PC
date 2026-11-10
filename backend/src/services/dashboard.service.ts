@@ -130,6 +130,7 @@ export const getDashboardData = async () => {
     finishedThisMonthAgg,
     finishedShippedAgg,
     finishedShippedThisMonthAgg,
+    finishedOnHandAgg,
     pcConfigCount,
     importItemsInRange,
     exportItemsInRange,
@@ -188,6 +189,9 @@ export const getDashboardData = async () => {
         },
       },
       _sum: { quantity: true },
+    }),
+    prisma.productInventory.aggregate({
+      _sum: { quantityOnHand: true },
     }),
     prisma.pcConfig.count({ where: { status: "active" } }),
     prisma.importOrderItem.findMany({
@@ -412,7 +416,8 @@ export const getDashboardData = async () => {
 
   const produced = finishedAgg._sum.quantityRequested ?? 0;
   const shipped = finishedShippedAgg._sum.quantity ?? 0;
-  const finishedOnHand = Math.max(0, produced - shipped);
+  // Đồng bộ với kho thành phẩm dùng khi duyệt xuất TP.
+  const finishedOnHand = Math.max(0, finishedOnHandAgg._sum.quantityOnHand ?? 0);
   const finishedThisMonth = finishedThisMonthAgg._sum.quantityRequested ?? 0;
   const shippedThisMonth = finishedShippedThisMonthAgg._sum.quantity ?? 0;
 

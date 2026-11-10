@@ -1,4 +1,5 @@
 import { prisma } from "../config/db";
+import type { Prisma } from "../generated/prisma";
 import {
   decrementComponentStock,
   incrementProductStock,
@@ -181,11 +182,14 @@ function poNotePrefix(orderId: number): string {
   return `PO#${orderId}`;
 }
 
+type DbClient = Prisma.TransactionClient | typeof prisma;
+
 async function findLatestExport(
   orderId: number,
   type: "material" | "finished_product",
+  db: DbClient = prisma,
 ) {
-  return prisma.exportOrder.findFirst({
+  return db.exportOrder.findFirst({
     where: {
       type,
       note: { startsWith: poNotePrefix(orderId) },
@@ -328,11 +332,6 @@ export async function requestMaterialExport(
     throw new Error("ORDER_DONE");
   }
 
-  const existing = await findLatestExport(orderId, "material");
-  if (existing && existing.status !== "rejected") {
-    throw new Error("MATERIAL_EXPORT_EXISTS");
-  }
-
   if (order.pcConfig.bomItems.length === 0) {
     throw new Error("NO_BOM");
   }
@@ -350,6 +349,14 @@ export async function requestMaterialExport(
     }));
 
   const created = await prisma.$transaction(async (tx) => {
+    // Khóa lệnh để chặn race tạo 2 phiếu xuất NVL.
+    await tx.$queryRaw`SELECT id FROM production_orders WHERE id = ${order.id} FOR UPDATE`;
+
+    const existing = await findLatestExport(orderId, "material", tx);
+    if (existing && existing.status !== "rejected") {
+      throw new Error("MATERIAL_EXPORT_EXISTS");
+    }
+
     if (order.status === "pending") {
       await tx.productionOrder.update({
         where: { id: order.id },
@@ -457,7 +464,11 @@ export async function confirmAssemble(accountId: number, orderId: number) {
         type: "material",
         note: { startsWith: poNotePrefix(order.id) },
       },
-      select: { status: true },
+      select: {
+        id: true,
+        status: true,
+        items: { select: { componentId: true, quantity: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -465,9 +476,24 @@ export async function confirmAssemble(accountId: number, orderId: number) {
       throw new Error("MATERIAL_EXPORT_PENDING");
     }
 
-    if (latestMaterial?.status !== "approved") {
-      for (const item of stock.items) {
-        await decrementComponentStock(tx, item.componentId, item.requiredQty);
+    // Trừ theo BOM hiện tại. Nếu đã duyệt phiếu NVL, chỉ trừ phần chênh
+    // (BOM tăng sau khi duyệt) để tránh trừ trùng / bỏ sót khi đổi BOM.
+    const alreadyIssued = new Map<number, number>();
+    if (latestMaterial?.status === "approved") {
+      for (const line of latestMaterial.items) {
+        if (line.componentId == null) continue;
+        alreadyIssued.set(
+          line.componentId,
+          (alreadyIssued.get(line.componentId) ?? 0) + line.quantity,
+        );
+      }
+    }
+
+    for (const item of stock.items) {
+      const issued = alreadyIssued.get(item.componentId) ?? 0;
+      const remain = item.requiredQty - issued;
+      if (remain > 0) {
+        await decrementComponentStock(tx, item.componentId, remain);
       }
     }
 
@@ -487,32 +513,36 @@ export async function requestProductExport(accountId: number, orderId: number) {
     throw new Error("ORDER_NOT_DONE");
   }
 
-  const existing = await findLatestExport(orderId, "finished_product");
-  if (existing && existing.status !== "rejected") {
-    throw new Error("PRODUCT_EXPORT_EXISTS");
-  }
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM production_orders WHERE id = ${order.id} FOR UPDATE`;
 
-  return prisma.exportOrder.create({
-    data: {
-      code: makeExportCode("P"),
-      type: "finished_product",
-      requestedBy: accountId,
-      status: "pending",
-      note: `${poNotePrefix(order.id)} Xuất thành phẩm ${order.pcConfig.name}`,
-      items: {
-        create: [
-          {
-            pcConfigId: order.pcConfigId,
-            quantity: order.quantityRequested,
-          },
-        ],
+    const existing = await findLatestExport(orderId, "finished_product", tx);
+    if (existing && existing.status !== "rejected") {
+      throw new Error("PRODUCT_EXPORT_EXISTS");
+    }
+
+    return tx.exportOrder.create({
+      data: {
+        code: makeExportCode("P"),
+        type: "finished_product",
+        requestedBy: accountId,
+        status: "pending",
+        note: `${poNotePrefix(order.id)} Xuất thành phẩm ${order.pcConfig.name}`,
+        items: {
+          create: [
+            {
+              pcConfigId: order.pcConfigId,
+              quantity: order.quantityRequested,
+            },
+          ],
+        },
       },
-    },
-    select: {
-      id: true,
-      code: true,
-      status: true,
-    },
+      select: {
+        id: true,
+        code: true,
+        status: true,
+      },
+    });
   });
 }
 
@@ -623,23 +653,24 @@ export async function createProductionOrder(input: CreateProductionOrderInput) {
     throw new Error("CONFIG_INACTIVE");
   }
 
-  let assignedTo: number | null = null;
-  if (input.assignedTo) {
-    const staff = await prisma.account.findFirst({
-      where: {
-        id: input.assignedTo,
-        role: "staff",
-        status: "active",
-      },
-      select: { id: true },
-    });
-
-    if (!staff) {
-      throw new Error("STAFF_INVALID");
-    }
-
-    assignedTo = staff.id;
+  if (!input.assignedTo) {
+    throw new Error("STAFF_REQUIRED");
   }
+
+  const staff = await prisma.account.findFirst({
+    where: {
+      id: input.assignedTo,
+      role: "staff",
+      status: "active",
+    },
+    select: { id: true },
+  });
+
+  if (!staff) {
+    throw new Error("STAFF_INVALID");
+  }
+
+  const assignedTo = staff.id;
 
   return prisma.productionOrder.create({
     data: {

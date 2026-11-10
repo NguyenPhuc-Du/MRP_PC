@@ -515,10 +515,14 @@ export const confirmOrder = async (id: number, accountId: number) => {
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.importOrder.update({
-      where: { id },
+    // Optimistic lock: chỉ một request được chuyển draft → confirmed.
+    const claimed = await tx.importOrder.updateMany({
+      where: { id, status: "draft" },
       data: { status: "confirmed" },
     });
+    if (claimed.count !== 1) {
+      throw new Error("ALREADY_CONFIRMED");
+    }
 
     for (const item of existing.items) {
       await tx.inventory.upsert({

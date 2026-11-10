@@ -11,6 +11,13 @@ export async function decrementComponentStock(
     return;
   }
 
+  // Bảo đảm có dòng inventory (dữ liệu cũ/seed có thể thiếu).
+  await tx.inventory.upsert({
+    where: { componentId },
+    create: { componentId, quantityOnHand: 0 },
+    update: {},
+  });
+
   const updated = await tx.inventory.updateMany({
     where: {
       componentId,
@@ -48,6 +55,12 @@ export async function decrementProductStock(
   if (quantity <= 0) {
     return;
   }
+
+  await tx.productInventory.upsert({
+    where: { pcConfigId },
+    create: { pcConfigId, quantityOnHand: 0 },
+    update: {},
+  });
 
   const updated = await tx.productInventory.updateMany({
     where: {
