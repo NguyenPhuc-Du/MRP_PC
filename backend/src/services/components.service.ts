@@ -163,9 +163,38 @@ export const changeComponentStatus = async (
     },
   });
 };
-export const deleteComponent= async (id:number) =>{
-  return await prisma.component.update({
-    where:{id:id},
-    data:{deleted:true,deletedAt: new Date()}
+export const deleteComponent = async (id: number) => {
+  const component = await prisma.component.findUnique({
+    where: { id },
+    select: {
+      deleted: true,
+      inventory: { select: { quantityOnHand: true } },
+      _count: {
+        select: {
+          bomItems: true,
+          importOrderItems: true,
+          exportOrderItems: true,
+        },
+      },
+    },
   });
-}
+
+  if (!component || component.deleted) {
+    throw new Error("NOT_FOUND");
+  }
+
+  const inStock = (component.inventory?.quantityOnHand ?? 0) > 0;
+  const inBom = component._count.bomItems > 0;
+  const inOrder =
+    component._count.importOrderItems > 0 ||
+    component._count.exportOrderItems > 0;
+
+  if (inStock || inBom || inOrder) {
+    throw new Error("COMPONENT_IN_USE");
+  }
+
+  return prisma.component.update({
+    where: { id },
+    data: { deleted: true, deletedAt: new Date() },
+  });
+};

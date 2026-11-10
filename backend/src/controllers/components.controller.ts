@@ -22,7 +22,8 @@ const LIST_STATUSES = new Set<ListStatus>([
   "discontinued",
   "out_of_stock",
 ]);
-const listUrl = () => `${systemConfig.prefixAdmin}/components`;
+const listUrl = (res: Response) =>
+  `${res.locals.prefixAdmin || systemConfig.prefixAdmin}/components`;
 
 const parseListStatus = (value: unknown): ListStatus => {
   const status = String(value ?? "all");
@@ -162,11 +163,15 @@ export const deleteComponent = async (
       await componentService.deleteComponent(Number(req.params.id));
       req.flash("success", "Xoá linh kiện thành công");
     }
-    res.redirect(listUrl());
+    res.redirect(listUrl(res));
   } catch (error) {
     console.error(error);
-    req.flash("error", "Xoá linh kiện thất bại");
-    res.redirect(listUrl());
+    const message =
+      error instanceof Error && error.message === "COMPONENT_IN_USE"
+        ? "Không xóa được: linh kiện đang nằm trong BOM, còn tồn kho hoặc đang có trong phiếu"
+        : "Xoá linh kiện thất bại";
+    req.flash("error", message);
+    res.redirect(listUrl(res));
   }
 };
 
@@ -177,7 +182,7 @@ export const editComponent = async (
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) {
-      res.redirect(listUrl());
+      res.redirect(listUrl(res));
       return;
     }
 
@@ -187,7 +192,7 @@ export const editComponent = async (
     ]);
 
     if (!row || row.deleted) {
-      res.redirect(listUrl());
+      res.redirect(listUrl(res));
       return;
     }
 
@@ -228,7 +233,7 @@ export const editComponent = async (
     });
   } catch (error) {
     console.error(error);
-    res.redirect(listUrl());
+    res.redirect(listUrl(res));
   }
 };
 
@@ -237,7 +242,7 @@ export const editComponentPatch = async (
   res: Response,
 ): Promise<void> => {
   const id = Number(req.params.id);
-  const redirectList = listUrl();
+  const redirectList = listUrl(res);
 
   if (!Number.isInteger(id) || id <= 0) {
     res.redirect(redirectList);
@@ -305,7 +310,7 @@ export const createComponent = async (
   } catch (error) {
     console.error(error);
     req.flash("error", "Không tải được form thêm linh kiện");
-    res.redirect(listUrl());
+    res.redirect(listUrl(res));
   }
 };
 
@@ -313,7 +318,7 @@ export const createComponentPost = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const redirectList = listUrl();
+  const redirectList = listUrl(res);
   const createUrl = `${redirectList}/create`;
   const data = matchedData(req, { locations: ["body"] });
   const idempotencyKey = String(data.idempotencyKey || "").trim();

@@ -8,7 +8,8 @@ import {
   writeImportOrdersPdf,
 } from "../utils/import-order-export";
 
-const BASE = () => `${systemConfig.prefixAdmin}/importOrders`;
+const BASE = (res: Response) =>
+  `${res.locals.prefixAdmin || systemConfig.prefixAdmin}/importOrders`;
 
 const errorMessage = (error: unknown): string => {
   if (!(error instanceof Error)) {
@@ -140,7 +141,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(BASE());
+    res.redirect(BASE(res));
   }
 };
 
@@ -160,7 +161,7 @@ export const createPost = async (
     const supplierId = Number(req.body.supplierId);
     if (!supplierId) {
       req.flash("error", "Chọn nhà cung cấp");
-      res.redirect(`${BASE()}/create`);
+      res.redirect(`${BASE(res)}/create`);
       return;
     }
 
@@ -178,17 +179,17 @@ export const createPost = async (
     const intent = String(req.body.intent || "create");
     if (intent === "draft") {
       req.flash("success", "Đã lưu phiếu nháp. Tồn kho chưa đổi");
-      res.redirect(BASE());
+      res.redirect(BASE(res));
       return;
     }
 
     await importOrderService.confirmOrder(order.id, createdBy);
     req.flash("success", "Đã nhập kho và cộng số lượng vào tồn linh kiện");
-    res.redirect(`${BASE()}/${order.id}`);
+    res.redirect(`${BASE(res)}/${order.id}`);
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(`${BASE()}/create`);
+    res.redirect(`${BASE(res)}/create`);
   }
 };
 
@@ -198,7 +199,7 @@ export const detail = async (req: Request, res: Response): Promise<void> => {
     const order = await importOrderService.getOrderById(orderId);
     if (!order) {
       req.flash("error", "Không tìm thấy phiếu nhập");
-      res.redirect(BASE());
+      res.redirect(BASE(res));
       return;
     }
 
@@ -209,7 +210,7 @@ export const detail = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(BASE());
+    res.redirect(BASE(res));
   }
 };
 
@@ -219,12 +220,12 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
     const order = await importOrderService.getOrderById(orderId);
     if (!order) {
       req.flash("error", "Không tìm thấy phiếu nhập");
-      res.redirect(BASE());
+      res.redirect(BASE(res));
       return;
     }
     if (order.status !== "draft") {
       req.flash("error", "Chỉ sửa được phiếu đang ở trạng thái nháp");
-      res.redirect(`${BASE()}/${orderId}`);
+      res.redirect(`${BASE(res)}/${orderId}`);
       return;
     }
 
@@ -244,7 +245,7 @@ export const edit = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(BASE());
+    res.redirect(BASE(res));
   }
 };
 
@@ -259,7 +260,7 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
     const supplierId = Number(req.body.supplierId);
     if (!Number.isInteger(supplierId) || supplierId <= 0) {
       req.flash("error", "Chọn nhà cung cấp");
-      res.redirect(`${BASE()}/${orderId}/edit`);
+      res.redirect(`${BASE(res)}/${orderId}/edit`);
       return;
     }
     await importOrderService.updateDraft(orderId, {
@@ -272,17 +273,17 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
     const intent = String(req.body.intent || "create");
     if (intent === "draft") {
       req.flash("success", "Đã lưu phiếu nháp. Tồn kho chưa đổi");
-      res.redirect(`${BASE()}/${orderId}/edit`);
+      res.redirect(`${BASE(res)}/${orderId}/edit`);
       return;
     }
 
     await importOrderService.confirmOrder(orderId, accountId);
     req.flash("success", "Đã nhập kho và cộng số lượng vào tồn linh kiện");
-    res.redirect(`${BASE()}/${orderId}`);
+    res.redirect(`${BASE(res)}/${orderId}`);
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(`${BASE()}/${orderId}/edit`);
+    res.redirect(`${BASE(res)}/${orderId}/edit`);
   }
 };
 
@@ -298,11 +299,11 @@ export const confirm = async (req: Request, res: Response): Promise<void> => {
     await importOrderService.confirmOrder(orderId, accountId);
 
     req.flash("success", "Đã xác nhận phiếu nhập và cập nhật tồn kho");
-    res.redirect(`${BASE()}/${orderId}`);
+    res.redirect(`${BASE(res)}/${orderId}`);
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(`${BASE()}/${orderId}`);
+    res.redirect(`${BASE(res)}/${orderId}`);
   }
 };
 
@@ -314,7 +315,7 @@ export const exportExcel = async (req: Request, res: Response): Promise<void> =>
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(BASE());
+    res.redirect(BASE(res));
   }
 };
 
@@ -326,7 +327,7 @@ export const exportPdf = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(BASE());
+    res.redirect(BASE(res));
   }
 };
 
@@ -336,7 +337,7 @@ export const exportOrderPdf = async (req: Request, res: Response): Promise<void>
     const found = await importOrderService.getOrderById(orderId);
     if (!found) {
       req.flash("error", "Không tìm thấy phiếu nhập");
-      res.redirect(BASE());
+      res.redirect(BASE(res));
       return;
     }
     const order = await importOrderService.mapDetailOrder(found);
@@ -344,6 +345,6 @@ export const exportOrderPdf = async (req: Request, res: Response): Promise<void>
   } catch (error) {
     console.error(error);
     req.flash("error", errorMessage(error));
-    res.redirect(BASE());
+    res.redirect(BASE(res));
   }
 };

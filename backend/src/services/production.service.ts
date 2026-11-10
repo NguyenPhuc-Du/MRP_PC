@@ -343,10 +343,10 @@ export async function requestMaterialExport(
   }
 
   const exportLines = stock.items
-    .filter((item) => item.requiredQty > 0)
+    .filter((item) => item.missingQty > 0)
     .map((item) => ({
       componentId: item.componentId,
-      quantity: item.requiredQty,
+      quantity: item.missingQty,
     }));
 
   const created = await prisma.$transaction(async (tx) => {
@@ -457,7 +457,10 @@ export async function confirmAssemble(accountId: number, orderId: number) {
         type: "material",
         note: { startsWith: poNotePrefix(order.id) },
       },
-      select: { status: true },
+      select: {
+        status: true,
+        items: { select: { componentId: true, quantity: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -465,9 +468,21 @@ export async function confirmAssemble(accountId: number, orderId: number) {
       throw new Error("MATERIAL_EXPORT_PENDING");
     }
 
-    if (latestMaterial?.status !== "approved") {
-      for (const item of stock.items) {
-        await decrementComponentStock(tx, item.componentId, item.requiredQty);
+    const issued = new Map<number, number>();
+    if (latestMaterial?.status === "approved") {
+      for (const line of latestMaterial.items) {
+        if (!line.componentId) continue;
+        issued.set(
+          line.componentId,
+          (issued.get(line.componentId) ?? 0) + line.quantity,
+        );
+      }
+    }
+
+    for (const item of stock.items) {
+      const remain = item.requiredQty - (issued.get(item.componentId) ?? 0);
+      if (remain > 0) {
+        await decrementComponentStock(tx, item.componentId, remain);
       }
     }
 
