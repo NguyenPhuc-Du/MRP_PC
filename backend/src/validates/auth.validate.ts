@@ -15,7 +15,7 @@ export const loginValidate = async (req: Request, res: Response, next: NextFunct
 
     if(!isExistUsername) {
         req.flash("error", "Người dùng không tồn tại");
-        res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+        res.redirect(systemConfig.loginPath);
         return;
     }
 
@@ -23,7 +23,7 @@ export const loginValidate = async (req: Request, res: Response, next: NextFunct
 
     if(!checkPass) {
         req.flash("error", "Mật khẩu không chính xác");
-        res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+        res.redirect(systemConfig.loginPath);
         return;
     }
 

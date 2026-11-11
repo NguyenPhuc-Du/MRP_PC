@@ -90,7 +90,7 @@ export const detail = async (req: Request, res: Response): Promise<void> => {
 export const createPost = async (req: Request, res: Response): Promise<void> => {
   const createdBy = req.session.account?.id;
   if (!createdBy) {
-    res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+    res.redirect(systemConfig.loginPath);
     return;
   }
 

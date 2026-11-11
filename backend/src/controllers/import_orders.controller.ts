@@ -111,7 +111,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const account = req.session.account;
     if (!account) {
-      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      res.redirect(systemConfig.loginPath);
       return;
     }
 
@@ -153,7 +153,7 @@ export const createPost = async (
     // Người tạo = session, không getDefaultCreator()
     const createdBy = req.session.account?.id;
     if (!createdBy) {
-      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      res.redirect(systemConfig.loginPath);
       return;
     }
 
@@ -254,7 +254,7 @@ export const editPost = async (req: Request, res: Response): Promise<void> => {
   try {
     const accountId = req.session.account?.id;
     if (!accountId) {
-      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      res.redirect(systemConfig.loginPath);
       return;
     }
     const supplierId = Number(req.body.supplierId);
@@ -293,7 +293,7 @@ export const confirm = async (req: Request, res: Response): Promise<void> => {
   try {
     const accountId = req.session.account?.id;
     if (!accountId) {
-      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      res.redirect(systemConfig.loginPath);
       return;
     }
     await importOrderService.confirmOrder(orderId, accountId);

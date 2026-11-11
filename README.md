@@ -31,8 +31,8 @@ docker compose exec backend npm run prisma:seed
 Kiểm tra:
 
 - Health: http://localhost:3000/health
-- Web (qua Nginx): http://localhost/admin/auth/login
-- Backend trực tiếp: http://localhost:3000/admin/auth/login
+- Web (qua Nginx): http://localhost/auth/login
+- Backend trực tiếp: http://localhost:3000/auth/login
 
 Tài khoản mẫu (mật khẩu `admin123`):
 

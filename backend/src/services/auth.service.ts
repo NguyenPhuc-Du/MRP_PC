@@ -83,7 +83,7 @@ export async function login(
   });
 
   if (!account || account.status !== "active") {
-    res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+    res.redirect(systemConfig.loginPath);
     return;
   }
 
@@ -120,7 +120,7 @@ export async function login(
       sameSite: "lax",
     });
     req.flash("error", "Tài khoản chưa được cấp quyền xem bất kỳ trang nào");
-    res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+    res.redirect(systemConfig.loginPath);
     return;
   }
 

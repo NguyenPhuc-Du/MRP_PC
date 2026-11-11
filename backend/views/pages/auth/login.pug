@@ -25,7 +25,7 @@ html(lang="vi")
                 h1.login-title Đăng nhập hệ thống
                 p.login-sub Sử dụng tài khoản được cấp để tiếp tục.
 
-                form#form-login(action=`${prefixAdmin}/auth/login` method="POST")
+                form#form-login(action=loginPath method="POST")
                     .form-group-custom
                         label.form-label-custom(for="username") Tên đăng nhập
                         .input-icon-wrap

@@ -16,7 +16,7 @@ export const loginPost = async (req: Request, res: Response): Promise<void> => {
 export const logout = async (req: Request, res: Response): Promise<void> => {
   await authService.logout(res);
 
-  res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+  res.redirect(systemConfig.loginPath);
 };
 
 export const profile = async (req: Request, res: Response): Promise<void> => {
@@ -25,7 +25,7 @@ export const profile = async (req: Request, res: Response): Promise<void> => {
 
   if (!user) {
     req.flash("error", "Không tìm thấy tài khoản");
-    res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+    res.redirect(systemConfig.loginPath);
     return;
   }
 

@@ -63,6 +63,7 @@ const startServer = async () => {
 
   app.locals.prefixAdmin = systemConfig.prefixAdmin;
   app.locals.prefixWarehouse = systemConfig.prefixWarehouse;
+  app.locals.loginPath = systemConfig.loginPath;
   app.locals.formatDate = formatDate;
 
   app.get("/health", (_req, res) => {

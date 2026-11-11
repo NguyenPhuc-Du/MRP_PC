@@ -7,12 +7,15 @@ import { importOrderRoutes } from "./import_orders.route";
 import { exportOrderRoutes } from "./export_orders.route";
 import { bomRoutes } from "./bom.route";
 import { permissionRoutes } from "./permissions.route";
-import { authRoutes } from "./auth.route";
+import { authRoutes, loginRoutes } from "./auth.route";
 import { requireAuth } from "../middlewares/auth.middleware";
 import { productionRoutes } from "./production.route";
 import { backupRoutes } from "./backup.route";
 
 const mountPanel = (app: Express, prefix: string): void => {
+  app.get(`${prefix}/auth/login`, (_req, res) => {
+    res.redirect(systemConfig.loginPath);
+  });
   app.use(`${prefix}/auth`, authRoutes);
   app.use(prefix, requireAuth);
   app.use(`${prefix}/dashboard`, dashboardRoutes);
@@ -27,6 +30,7 @@ const mountPanel = (app: Express, prefix: string): void => {
 };
 
 const adminRoutes = (app: Express): void => {
+  app.use("/auth", loginRoutes);
   mountPanel(app, systemConfig.prefixAdmin);
   mountPanel(app, systemConfig.prefixWarehouse);
 };

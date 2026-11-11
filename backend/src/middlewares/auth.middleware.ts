@@ -27,7 +27,7 @@ export const requireAuth = async (
     const accessToken = req.cookies?.["access_token"];
 
     if (!accessToken || typeof accessToken !== "string") {
-      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      res.redirect(systemConfig.loginPath);
       return;
     }
 
@@ -36,7 +36,7 @@ export const requireAuth = async (
 
     if (!Number.isInteger(accountId) || accountId <= 0) {
       res.clearCookie("access_token");
-      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      res.redirect(systemConfig.loginPath);
       return;
     }
 
@@ -53,7 +53,7 @@ export const requireAuth = async (
 
     if (!account || account.status === "locked") {
       res.clearCookie("access_token");
-      res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+      res.redirect(systemConfig.loginPath);
       return;
     }
 
@@ -100,7 +100,7 @@ export const requireAuth = async (
     next();
   } catch {
     res.clearCookie("access_token");
-    res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+    res.redirect(systemConfig.loginPath);
   }
 };
 
@@ -195,7 +195,7 @@ export const requirePermission = (permissionKey: string) => {
     const backUrl =
       referrer && !referrer.includes("/auth/login")
         ? referrer
-        : home ?? `${systemConfig.prefixAdmin}/auth/login`;
+        : home ?? systemConfig.loginPath;
     return res.redirect(backUrl);
   }
 }

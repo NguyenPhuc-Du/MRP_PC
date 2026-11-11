@@ -61,7 +61,7 @@ export const approve = async (req: Request, res: Response): Promise<void> => {
   const orderId = Number(req.params.orderId);
   const accountId = req.session.account?.id;
   if (!accountId) {
-    res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+    res.redirect(systemConfig.loginPath);
     return;
   }
   try {
@@ -78,7 +78,7 @@ export const reject = async (req: Request, res: Response): Promise<void> => {
   const orderId = Number(req.params.orderId);
   const accountId = req.session.account?.id;
   if (!accountId) {
-    res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+    res.redirect(systemConfig.loginPath);
     return;
   }
   try {

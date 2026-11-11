@@ -4,6 +4,7 @@ const PREFIX_WAREHOUSE = "/warehouse";
 export const systemConfig = {
   prefixAdmin: PREFIX_ADMIN,
   prefixWarehouse: PREFIX_WAREHOUSE,
+  loginPath: "/auth/login",
 };
 
 export const prefixForRole = (role?: string | null): string => {
