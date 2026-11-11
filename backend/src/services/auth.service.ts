@@ -1,7 +1,6 @@
-// import { Response } from "express";
 import { Request, Response } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { prisma } from "../config/db";
+import { prisma } from "../config/database";
 import { prefixForRole, systemConfig } from "../config/system";
 import { comparePassword, hashPassword } from "../utils/password.util";
 import { Account, AccountRole, Prisma } from "../generated/prisma";

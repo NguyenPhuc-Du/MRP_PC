@@ -1,4 +1,4 @@
-import { prisma } from "../config/db";
+import { prisma } from "../config/database";
 import type { Prisma } from "../generated/prisma";
 import {
   decrementComponentStock,
@@ -143,22 +143,6 @@ export async function getOrderStockCheck(accountId: number, orderId: number) {
     return null;
   }
 
-  // const items = order.pcConfig.bomItems.map((bom) => {
-  //   const requiredQty = bom.quantity * order.quantityRequested;
-  //   const onHandQty = bom.component.inventory?.quantityOnHand ?? 0;
-  //   const missingQty = Math.max(0, requiredQty - onHandQty);
-
-  //   return {
-  //     componentId: bom.component.id,
-  //     componentName: bom.component.name,
-  //     unit: bom.component.unit,
-  //     bomQtyPerUnit: bom.quantity,
-  //     requiredQty,
-  //     onHandQty,
-  //     missingQty,
-  //     isEnough: onHandQty >= requiredQty,
-  //   };
-  // });
   const stock = mapBomStock(order.quantityRequested, order.pcConfig.bomItems);
 
   return {
@@ -168,14 +152,6 @@ export async function getOrderStockCheck(accountId: number, orderId: number) {
     allEnough: stock.allEnough,
     items: stock.items,
   };
-
-  // return {
-  //   orderId: order.id,
-  //   configName: order.pcConfig.name,
-  //   quantityRequested: order.quantityRequested,
-  //   allEnough: items.every((item) => item.isEnough),
-  //   items,
-  // };
 }
 
 function poNotePrefix(orderId: number): string {
@@ -249,36 +225,6 @@ function mapExportSummary(
   };
 }
 
-// export async function getAssembleStatus(accountId: number, orderId: number) {
-//   const order = await getAssignedOrder(accountId, orderId);
-//   if (!order) {
-//     return null;
-//   }
-
-//   const stock = await getOrderStockCheck(accountId, orderId);
-//   const materialExport = await findLatestExport(orderId, "material");
-//   const productExport = await findLatestExport(orderId, "finished_product");
-//   const isDone = order.status === "done";
-
-//   return {
-//     order: {
-//       id: order.id,
-//       configName: order.pcConfig.name,
-//       description: order.pcConfig.description,
-//       quantityRequested: order.quantityRequested,
-//       status: order.status,
-//     },
-//     allEnough: stock?.allEnough ?? false,
-//     missingCount: stock?.items.filter((item) => !item.isEnough).length ?? 0,
-//     materialExport: mapExportSummary(materialExport),
-//     productExport: mapExportSummary(productExport),
-//     canRequestMaterial:
-//       !isDone && (!materialExport || materialExport.status === "rejected"),
-//     canConfirmAssemble: !isDone && (stock?.allEnough ?? false),
-//     canRequestProduct:
-//       isDone && (!productExport || productExport.status === "rejected"),
-//   };
-// }
 export async function getAssembleStatus(accountId: number, orderId: number) {
   const order = await getAssignedOrder(accountId, orderId);
   if (!order) {
@@ -385,46 +331,6 @@ export async function requestMaterialExport(
 
   return created;
 }
-
-// export async function confirmAssemble(accountId: number, orderId: number) {
-//   const order = await getAssignedOrder(accountId, orderId);
-//   if (!order) {
-//     return null;
-//   }
-
-//   if (order.status === "done") {
-//     throw new Error("ORDER_DONE");
-//   }
-
-//   const requirements = order.pcConfig.bomItems.map((bom) => ({
-//     componentId: bom.componentId,
-//     requiredQty: bom.quantity * order.quantityRequested,
-//     onHand: bom.component.inventory?.quantityOnHand ?? 0,
-//   }));
-
-//   if (requirements.some((item) => item.onHand < item.requiredQty)) {
-//     throw new Error("STOCK_NOT_ENOUGH");
-//   }
-
-//   await prisma.$transaction(async (tx) => {
-//     for (const item of requirements) {
-//       await tx.inventory.update({
-//         where: { componentId: item.componentId },
-//         data: { quantityOnHand: { decrement: item.requiredQty } },
-//       });
-//     }
-
-//     await tx.productionOrder.update({
-//       where: { id: order.id },
-//       data: {
-//         status: "done",
-//         completedAt: new Date(),
-//       },
-//     });
-//   });
-
-//   return { orderId: order.id, status: "done" as const };
-// }
 
 export async function confirmAssemble(accountId: number, orderId: number) {
   const order = await getAssignedOrder(accountId, orderId);

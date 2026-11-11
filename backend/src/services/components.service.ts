@@ -1,4 +1,3 @@
-// src/services/component.service.ts
 import { prisma } from "../config/database";
 import { Prisma } from "../generated/prisma"; // Import type nếu cần định nghĩa kiểu dữ liệu chính xác
 
