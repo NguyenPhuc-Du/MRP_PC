@@ -36,7 +36,7 @@ function createAccessToken(account: {
     getJwtSecret(),
     {
       expiresIn: (process.env.JWT_EXPIRES_IN ??
-        "1h") as SignOptions["expiresIn"],
+        "8h") as SignOptions["expiresIn"],
     },
   );
 }
@@ -57,7 +57,9 @@ export async function loginForApi(username: string, password: string) {
   }
 
   const accessToken = createAccessToken(account);
-  await markLastLogin(account.id);
+  if (account.role === "staff") {
+    await markLastLogin(account.id);
+  }
 
   return {
     accessToken,
@@ -91,7 +93,7 @@ export async function login(
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 1000,
+    maxAge: 8 * 60 * 60 * 1000,
   });
 
   req.session.account = {

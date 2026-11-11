@@ -288,10 +288,10 @@ export async function requestMaterialExport(
   }
 
   const exportLines = stock.items
-    .filter((item) => item.requiredQty > 0)
+    .filter((item) => item.missingQty > 0)
     .map((item) => ({
       componentId: item.componentId,
-      quantity: item.requiredQty,
+      quantity: item.missingQty,
     }));
 
   const created = await prisma.$transaction(async (tx) => {

@@ -233,15 +233,18 @@ export const mapDetailConfig = (config: BomConfigRow) => {
   const used = new Set<number>();
   const slots: Record<string, { componentId: number | ""; quantity: number }> = {};
 
-  REQUIRED_SLOTS.forEach((slot, index) => {
-    const found = ordered[index];
+  for (const slot of REQUIRED_SLOTS) {
+    const found = ordered.find(
+      (item) =>
+        !used.has(item.id) && slotCategoriesMatch(slot.categories, item.categoryName),
+    );
     if (found) {
       used.add(found.id);
       slots[slot.key] = { componentId: found.componentId, quantity: found.quantity };
     } else {
       slots[slot.key] = { componentId: "", quantity: slot.defaultQty };
     }
-  });
+  }
 
   return {
     id: config.id,
@@ -265,6 +268,14 @@ export const mapDetailConfig = (config: BomConfigRow) => {
     slots,
     extras: ordered.filter((item) => !used.has(item.id)),
   };
+};
+
+const slotCategoriesMatch = (
+  categories: readonly string[],
+  categoryName: string,
+): boolean => {
+  const name = categoryName.trim().toLowerCase();
+  return categories.some((category) => category.toLowerCase() === name);
 };
 
 const normalizeItems = (items: BomItemInput[]): BomItemInput[] => {
@@ -297,15 +308,30 @@ const validateItems = async (items: BomItemInput[]): Promise<BomItemInput[]> => 
     select: {
       id: true,
       status: true,
+      deleted: true,
+      category: { select: { name: true } },
     },
   });
+  const byId = new Map(components.map((component) => [component.id, component]));
 
-  if (components.length !== ids.length) {
+  if (ids.some((id) => !byId.has(id))) {
     throw new Error("COMPONENT_NOT_FOUND");
+  }
+
+  if (components.some((component) => component.deleted)) {
+    throw new Error("COMPONENT_DELETED");
   }
 
   if (components.some((component) => component.status !== "active")) {
     throw new Error("COMPONENT_INACTIVE");
+  }
+
+  for (let index = 0; index < REQUIRED_SLOTS.length; index += 1) {
+    const slot = REQUIRED_SLOTS[index];
+    const component = byId.get(normalized[index].componentId);
+    if (!component || !slotCategoriesMatch(slot.categories, component.category.name)) {
+      throw new Error(`SLOT_CATEGORY:${slot.label}`);
+    }
   }
 
   return normalized;
@@ -313,7 +339,7 @@ const validateItems = async (items: BomItemInput[]): Promise<BomItemInput[]> => 
 
 export const getComponentOptions = async () => {
   const rows = await prisma.component.findMany({
-    where: { status: "active" },
+    where: { status: "active", deleted: false },
     select: {
       id: true,
       name: true,
@@ -334,7 +360,9 @@ export const getComponentOptions = async () => {
 
   const grouped: Record<string, typeof all> = {};
   for (const slot of REQUIRED_SLOTS) {
-    grouped[slot.key] = all.filter((item) => slot.categories.includes(item.category));
+    grouped[slot.key] = all.filter((item) =>
+      slotCategoriesMatch(slot.categories, item.category),
+    );
   }
   grouped.extra = all.filter((item) => EXTRA_CATEGORIES.includes(item.category));
 

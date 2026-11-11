@@ -214,8 +214,12 @@ a {
   text-transform: uppercase;
 }
 
+.sider > .section-label:not(:first-child) {
+  margin-top: 18px;
+}
+
 .side-nav {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -649,19 +653,25 @@ a {
   color: var(--text-main);
 }
 
-.flash-wrap{
-  width:100%;
-  margin:0 0 14px;
+.flash-stack{
+  position:fixed;
+  top:calc(var(--header-height) + 16px);
+  right:20px;
+  z-index:1040;
+  width:min(380px, calc(100vw - 40px));
+  max-width:calc(100vw - 40px);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  pointer-events:none;
 }
 
-body > .flash-wrap{
-  position:fixed;
-  top:16px;
-  left:50%;
-  z-index:30;
-  width:min(440px, calc(100% - 32px));
+.flash-wrap{
+  width:100%;
+  max-width:100%;
+  min-width:0;
   margin:0;
-  transform:translateX(-50%);
+  pointer-events:auto;
 }
 
 .flash{
@@ -669,12 +679,27 @@ body > .flash-wrap{
   align-items:flex-start;
   gap:12px;
   width:100%;
+  max-width:100%;
+  min-width:0;
   margin:0;
+  overflow:hidden;
   padding:12px 12px 12px 14px;
   border:1px solid transparent;
   border-radius:12px;
   background:#fff;
-  box-shadow:none;
+  box-shadow:0 12px 32px rgba(24, 24, 40, 0.14);
+  animation:flash-in .28s ease;
+}
+
+@keyframes flash-in{
+  from{
+    opacity:0;
+    transform:translateX(16px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
 }
 
 .flash-icon{
@@ -708,7 +733,7 @@ body > .flash-wrap{
   line-height:1.45;
   color:#3f4453;
   white-space:normal;
-  overflow:visible;
+  overflow-wrap:anywhere;
   word-break:break-word;
 }
 
@@ -754,7 +779,7 @@ body > .flash-wrap{
 
 .flash.flash-hide{
   opacity:0;
-  transform:translateY(-6px);
+  transform:translateX(16px);
   transition:opacity .2s ease, transform .2s ease;
 }
 
