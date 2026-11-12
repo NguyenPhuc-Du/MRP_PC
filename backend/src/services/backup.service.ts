@@ -235,7 +235,7 @@ export const saveUploadedBackup = async (
 const runPsql = (
   db: ReturnType<typeof parseDatabaseUrl>,
   args: string[],
-  input?: NodeJS.ReadableStream,
+  input?: NodeJS.ReadableStream | string,
 ): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const child = spawn(
@@ -271,6 +271,8 @@ const runPsql = (
       reject(code === "ENOENT" ? new Error("PSQL_MISSING") : error);
     });
 
+    child.stdin.on("error", () => undefined);
+
     child.on("close", (code) => {
       if (code === 0) {
         resolve();
@@ -279,10 +281,37 @@ const runPsql = (
       reject(new Error(stderr.trim() || "PSQL_FAILED"));
     });
 
+    if (typeof input === "string") {
+      child.stdin.end(input);
+      return;
+    }
+
     if (input) {
       input.pipe(child.stdin);
     }
   });
+};
+
+// pg_dump 17+ ghi SET transaction_timeout. Server Postgres 16 từ chối dòng này
+// và ON_ERROR_STOP làm psql dừng sau khi schema đã bị DROP.
+const stripIncompatibleDumpLines = (sql: string): string => {
+  return sql
+    .split(/\r?\n/)
+    .filter((line) => !/^SET\s+transaction_timeout\s*=/i.test(line))
+    .join("\n");
+};
+
+const applyDump = async (
+  db: ReturnType<typeof parseDatabaseUrl>,
+  filePath: string,
+): Promise<void> => {
+  const raw = await fsp.readFile(filePath, "utf8");
+  await runPsql(db, [], stripIncompatibleDumpLines(raw));
+};
+
+const reconnectDatabase = async (): Promise<void> => {
+  await prisma.$disconnect();
+  await prisma.$connect();
 };
 
 const dumpToFile = async (
@@ -375,18 +404,21 @@ export const restoreBackup = async (
 
   try {
     await resetPublicSchema(db);
-    await runPsql(db, ["-f", filePath]);
+    await applyDump(db, filePath);
   } catch (error) {
     try {
       await resetPublicSchema(db);
-      await runPsql(db, ["-f", safetyPath]);
+      await applyDump(db, safetyPath);
     } catch (rollbackError) {
       console.error("RESTORE_ROLLBACK_FAILED", rollbackError);
       throw new Error("RESTORE_FAILED_UNSAFE");
     }
     throw error instanceof Error ? error : new Error("PSQL_FAILED");
   } finally {
-    // Giữ safety file vài lần gần nhất; xóa nếu trùng tên pattern không khớp listBackups.
+    // DROP SCHEMA làm connection pool của Prisma giữ plan cũ.
+    await reconnectDatabase().catch((reconnectError) => {
+      console.error("RESTORE_RECONNECT_FAILED", reconnectError);
+    });
     // safety-* không hiện trên UI (FILE_PATTERN), vẫn nằm trên đĩa để cứu hộ thủ công.
   }
 
