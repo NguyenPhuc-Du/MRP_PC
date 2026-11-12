@@ -6,6 +6,11 @@ const router = Router();
 
 router.get("/", requirePermission("dashboard_view"), dashboardController.index);
 router.get(
+  "/stock-report",
+  requirePermission("dashboard_view"),
+  dashboardController.stockReport,
+);
+router.get(
   "/export.xlsx",
   requirePermission("dashboard_view"),
   dashboardController.exportExcel,
