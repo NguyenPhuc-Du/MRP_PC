@@ -1,0 +1,155 @@
+extends ../../layouts/admin-layout.pug
+include ../../mixins/alert.pug
+
+mixin stockTable(title, hint, rows, totals, unitHeading)
+  .dash-card.stock-card
+    .dash-card-head
+      div
+        .dash-card-title= title
+        .dash-card-sub= hint
+    if rows.length
+      .table-responsive
+        table.dash-table.stock-table
+          thead
+            tr
+              th= unitHeading === "Đơn vị" ? "Vật liệu" : "Sản phẩm"
+              th Nhóm
+              th.text-end Lưu kho
+              th.text-end Xuất kho
+              th.text-end Tồn cuối kỳ
+          tbody
+            each row in rows
+              tr
+                td
+                  .dash-name= row.name
+                  .stock-unit= row.unit
+                td= row.meta
+                td.text-end= row.storedLabel
+                td.text-end= row.exportedLabel
+                td.text-end= row.endingLabel
+            tr.stock-total
+              td(colspan="2") Tổng
+              td.text-end= totals.stored
+              td.text-end= totals.exported
+              td.text-end= totals.ending
+    else
+      .dash-empty-sm Không có phát sinh hoặc tồn trong kỳ này.
+
+block main
+  link(rel="stylesheet" href="/css/dashboard.css?v=8")
+  +alert-success(4000)
+  +alert-error(6000)
+
+  .dash-page
+    .dash-head
+      div
+        .dash-date= report.rangeLabel
+        h2.dash-title Báo cáo tồn, xuất, lưu kho
+        p.dash-desc
+          | #{report.periodLabel}. Lưu kho là hàng nhập trong kỳ. Xuất kho là phiếu xuất đã duyệt. Tồn cuối kỳ tính lùi từ tồn hiện tại, trừ nhập sau kỳ và cộng xuất sau kỳ.
+      .dash-actions
+        a.dash-btn-ghost(href=`${prefixAdmin}/dashboard`)
+          i.bi.bi-arrow-left
+          span Dashboard
+
+    form.stock-filters(method="GET" action=`${prefixAdmin}/dashboard/stock-report`)
+      label.stock-field
+        span Kỳ
+        select#stock-grain(name="grain")
+          option(value="month" selected=(report.grain === "month")) Tháng
+          option(value="quarter" selected=(report.grain === "quarter")) Quý
+          option(value="year" selected=(report.grain === "year")) Năm
+      label.stock-field
+        span Năm
+        select(name="year")
+          each item in report.years
+            option(value=item selected=(item === report.year))= item
+      label.stock-field#stock-month(hidden=(report.grain !== "month"))
+        span Tháng
+        select(name="month")
+          each item in report.months
+            option(value=item.value selected=(item.value === report.month))= item.label
+      label.stock-field#stock-quarter(hidden=(report.grain !== "quarter"))
+        span Quý
+        select(name="quarter")
+          each item in report.quarters
+            option(value=item.value selected=(item.value === report.quarter))= item.label
+      button.dash-btn-primary(type="submit") Xem báo cáo
+
+    .dash-kpis.stock-kpis
+      .dash-kpi
+        .dash-kpi-label
+          span Lưu kho vật liệu
+        .dash-kpi-value= report.materialTotals.stored
+        .dash-kpi-hint Phiếu nhập đã xác nhận
+      .dash-kpi
+        .dash-kpi-label
+          span Xuất kho vật liệu
+        .dash-kpi-value= report.materialTotals.exported
+        .dash-kpi-hint Phiếu xuất linh kiện đã duyệt
+      .dash-kpi
+        .dash-kpi-label
+          span Tồn vật liệu
+        .dash-kpi-value= report.materialTotals.ending
+        .dash-kpi-hint Cuối kỳ
+      .dash-kpi
+        .dash-kpi-label
+          span Lưu kho sản phẩm
+        .dash-kpi-value= report.productTotals.stored
+        .dash-kpi-hint Thành phẩm lắp xong
+      .dash-kpi
+        .dash-kpi-label
+          span Xuất kho sản phẩm
+        .dash-kpi-value= report.productTotals.exported
+        .dash-kpi-hint Phiếu xuất thành phẩm đã duyệt
+      .dash-kpi
+        .dash-kpi-label
+          span Tồn sản phẩm
+        .dash-kpi-value= report.productTotals.ending
+        .dash-kpi-hint Cuối kỳ
+
+    if report.buckets.length
+      .dash-card.stock-card
+        .dash-card-head
+          div
+            .dash-card-title= report.grain === "year" ? "Theo quý" : "Theo tháng"
+            .dash-card-sub Tổng số lượng từng mốc trong kỳ đang xem
+        .table-responsive
+          table.dash-table.stock-table
+            thead
+              tr
+                th Kỳ
+                th.text-end Lưu VL
+                th.text-end Xuất VL
+                th.text-end Tồn VL
+                th.text-end Lưu SP
+                th.text-end Xuất SP
+                th.text-end Tồn SP
+            tbody
+              each bucket in report.buckets
+                tr
+                  td.dash-name= bucket.label
+                  td.text-end= bucket.materialStored
+                  td.text-end= bucket.materialExported
+                  td.text-end= bucket.materialEnding
+                  td.text-end= bucket.productStored
+                  td.text-end= bucket.productExported
+                  td.text-end= bucket.productEnding
+
+    +stockTable("Vật liệu", "Linh kiện nhập, xuất và còn tồn trong kỳ", report.materials, report.materialTotals, "Đơn vị")
+    +stockTable("Sản phẩm", "Cấu hình PC lắp xong, xuất thành phẩm và còn tồn trong kỳ", report.products, report.productTotals, "Bộ")
+
+block script
+  script.
+    (function () {
+      var grain = document.getElementById("stock-grain");
+      var month = document.getElementById("stock-month");
+      var quarter = document.getElementById("stock-quarter");
+      if (!grain || !month || !quarter) return;
+      function sync() {
+        month.hidden = grain.value !== "month";
+        quarter.hidden = grain.value !== "quarter";
+      }
+      grain.addEventListener("change", sync);
+      sync();
+    })();

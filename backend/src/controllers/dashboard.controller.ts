@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getDashboardData } from "../services/dashboard.service";
+import { getStockReport } from "../services/stock-report.service";
 import {
   writeDashboardExcel,
   writeDashboardPdf,
@@ -31,6 +32,20 @@ export const exportExcel = async (
   } catch (error) {
     console.error(error);
     req.flash("error", "Xuất báo cáo Excel thất bại");
+    res.redirect("back");
+  }
+};
+
+export const stockReport = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const report = await getStockReport(req.query as Record<string, unknown>);
+    res.render("pages/dashboard/stock-report", {
+      pageTitle: "Báo cáo kho",
+      report,
+    });
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Không tải được báo cáo kho");
     res.redirect("back");
   }
 };
